@@ -1,6 +1,11 @@
 package software.amazon.redshiftserverless.namespace;
 
-import software.amazon.awssdk.core.SdkClient;
+
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
+import software.amazon.cloudformation.LambdaWrapper;
+
+import java.net.URI;
 // TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceClient
 // import software.amazon.awssdk.services.yourservice.YourServiceClient;
 // import software.amazon.cloudformation.LambdaWrapper;
@@ -18,8 +23,11 @@ public class ClientBuilder {
   }
   */
 
-  // TODO: remove this implementation once you have uncommented the above
-  public static SdkClient getClient() {
-    return null;
+  public static RedshiftArcadiaCoralClient getClient() {
+    return RedshiftArcadiaCoralClient.builder()
+            .region(Region.US_EAST_1)
+            .httpClient(LambdaWrapper.HTTP_CLIENT)
+            .endpointOverride(URI.create("https://devo.us-east-1.serverless.redshift.aws.a2z.com"))
+            .build();
   }
 }

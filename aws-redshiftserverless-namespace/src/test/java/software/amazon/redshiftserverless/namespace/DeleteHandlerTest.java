@@ -2,6 +2,10 @@ package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
 import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.DeleteNamespaceRequest;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.ResourceNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -19,6 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 public class DeleteHandlerTest extends AbstractTestBase {
@@ -27,15 +33,15 @@ public class DeleteHandlerTest extends AbstractTestBase {
     private AmazonWebServicesClientProxy proxy;
 
     @Mock
-    private ProxyClient<SdkClient> proxyClient;
+    private ProxyClient<RedshiftArcadiaCoralClient> proxyClient;
 
     @Mock
-    SdkClient sdkClient;
+    RedshiftArcadiaCoralClient sdkClient;
 
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
-        sdkClient = mock(SdkClient.class);
+        sdkClient = mock(RedshiftArcadiaCoralClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
     }
 
@@ -49,13 +55,22 @@ public class DeleteHandlerTest extends AbstractTestBase {
     public void handleRequest_SimpleSuccess() {
         final DeleteHandler handler = new DeleteHandler();
 
-        final ResourceModel model = ResourceModel.builder().build();
+        final ResourceModel requestResourceModel = getDeleteRequestResourceModel();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
+            .desiredResourceState(requestResourceModel)
             .build();
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        when(proxyClient.client().deleteNamespace(any(DeleteNamespaceRequest.class))).thenReturn(getDeleteResponseSdk());
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class)))
+                .thenThrow(ResourceNotFoundException.class);
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(30);
+
+        response = handler.handleRequest(proxy, request, response.getCallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);

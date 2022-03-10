@@ -1,40 +1,78 @@
 {
     "typeName": "AWS::RedshiftServerless::Namespace",
-    "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+    "description": "Definition of AWS::RedshiftServerless::Namespace Resource Type",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-redshiftserverless",
     "definitions": {
-        "InitechDateFormat": {
-            "$comment": "Use the `definitions` block to provide shared resource property schemas",
-            "type": "string",
-            "format": "date-time"
-        },
-        "Memo": {
+        "Namespace": {
             "type": "object",
             "properties": {
-                "Heading": {
+                "NamespaceArn": {
                     "type": "string"
                 },
-                "Body": {
+                "NamespaceId": {
+                    "type": "string"
+                },
+                "NamespaceName": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 3,
+                    "pattern": "^[a-z0-9]+$"
+                },
+                "AdminUsername": {
+                    "type": "string"
+                },
+                "DbName": {
+                    "type": "string"
+                },
+                "KmsKeyId": {
+                    "type": "string"
+                },
+                "DefaultIamRoleArn": {
+                    "type": "string"
+                },
+                "IamRoles": {
+                    "type": "array",
+                    "insertionOrder": false,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "LogExports": {
+                    "type": "array",
+                    "insertionOrder": false,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Status": {
+                    "$ref": "#/definitions/NamespaceStatus"
+                },
+                "CreationDate": {
                     "type": "string"
                 }
             },
             "additionalProperties": false
         },
+        "NamespaceStatus": {
+            "type": "string",
+            "enum": [
+                "AVAILABLE",
+                "MODIFYING",
+                "DELETING"
+            ]
+        },
         "Tag": {
-            "description": "A key-value pair to associate with a resource.",
             "type": "object",
             "properties": {
                 "Key": {
                     "type": "string",
-                    "description": "The key name of the tag. You can specify a value that is 1 to 128 Unicode characters in length and cannot be prefixed with aws:. You can use any of the following characters: the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -.",
-                    "minLength": 1,
-                    "maxLength": 128
+                    "maxLength": 128,
+                    "minLength": 1
                 },
                 "Value": {
                     "type": "string",
-                    "description": "The value for the tag. You can specify a value that is 0 to 256 Unicode characters in length and cannot be prefixed with aws:. You can use any of the following characters: the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -.",
-                    "minLength": 0,
-                    "maxLength": 256
+                    "maxLength": 256,
+                    "minLength": 0
                 }
             },
             "required": [
@@ -45,93 +83,101 @@
         }
     },
     "properties": {
-        "TPSCode": {
-            "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
-            "type": "string",
-            "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+        "AdminUserPassword": {
+            "type": "string"
         },
-        "Title": {
-            "description": "The title of the TPS report is a mandatory element.",
-            "type": "string",
-            "minLength": 20,
-            "maxLength": 250
+        "AdminUsername": {
+            "type": "string"
         },
-        "CoverSheetIncluded": {
-            "description": "Required for all TPS Reports submitted after 2/19/1999",
-            "type": "boolean"
+        "DbName": {
+            "type": "string"
         },
-        "DueDate": {
-            "$ref": "#/definitions/InitechDateFormat"
+        "DefaultIamRoleArn": {
+            "type": "string"
         },
-        "ApprovalDate": {
-            "$ref": "#/definitions/InitechDateFormat"
-        },
-        "Memo": {
-            "$ref": "#/definitions/Memo"
-        },
-        "SecondCopyOfMemo": {
-            "description": "In case you didn't get the first one.",
-            "$ref": "#/definitions/Memo"
-        },
-        "TestCode": {
-            "type": "string",
-            "enum": [
-                "NOT_STARTED",
-                "CANCELLED"
-            ]
-        },
-        "Authors": {
+        "IamRoles": {
             "type": "array",
+            "insertionOrder": false,
             "items": {
                 "type": "string"
             }
         },
-        "Tags": {
-            "description": "An array of key-value pairs to apply to this resource.",
+        "KmsKeyId": {
+            "type": "string"
+        },
+        "LogExports": {
             "type": "array",
-            "uniqueItems": true,
+            "insertionOrder": false,
+            "items": {
+                "type": "string"
+            }
+        },
+        "Namespace": {
+            "$ref": "#/definitions/Namespace"
+        },
+        "NamespaceName": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "pattern": "^[a-z0-9]+$"
+        },
+        "Tags": {
+            "type": "array",
             "insertionOrder": false,
             "items": {
                 "$ref": "#/definitions/Tag"
-            }
+            },
+            "maxItems": 200,
+            "minItems": 0
         }
     },
-    "additionalProperties": false,
+    "tagging": {
+        "taggable": false
+    },
     "required": [
-        "TestCode",
-        "Title"
+        "NamespaceName"
     ],
     "readOnlyProperties": [
-        "/properties/TPSCode"
+        "/properties/Namespace"
+    ],
+    "writeOnlyProperties": [
+        "/properties/AdminUserPassword",
+        "/properties/Tags"
+    ],
+    "createOnlyProperties": [
+        "/properties/NamespaceName",
+        "/properties/Tags"
     ],
     "primaryIdentifier": [
-        "/properties/TPSCode"
+        "/properties/NamespaceName"
     ],
     "handlers": {
         "create": {
             "permissions": [
-                "initech:CreateReport"
+                "redshift-serverless:CreateNamespace"
             ]
         },
         "read": {
             "permissions": [
-                "initech:DescribeReport"
+                "redshift-serverless:GetNamespace"
             ]
         },
         "update": {
             "permissions": [
-                "initech:UpdateReport"
+                "redshift-serverless:CreateNamespace",
+                "redshift-serverless:UpdateNamespace"
             ]
         },
         "delete": {
             "permissions": [
-                "initech:DeleteReport"
+                "redshift-serverless:DeleteNamespace"
             ]
         },
         "list": {
             "permissions": [
-                "initech:ListReports"
+                "redshift-serverless:ListNamespaces"
             ]
         }
-    }
+    },
+    "additionalProperties": false
 }

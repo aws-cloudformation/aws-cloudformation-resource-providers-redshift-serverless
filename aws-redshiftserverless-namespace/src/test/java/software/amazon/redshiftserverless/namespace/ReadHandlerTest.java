@@ -2,6 +2,8 @@ package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
 import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -27,15 +31,15 @@ public class ReadHandlerTest extends AbstractTestBase {
     private AmazonWebServicesClientProxy proxy;
 
     @Mock
-    private ProxyClient<SdkClient> proxyClient;
+    private ProxyClient<RedshiftArcadiaCoralClient> proxyClient;
 
     @Mock
-    SdkClient sdkClient;
+    RedshiftArcadiaCoralClient sdkClient;
 
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
-        sdkClient = mock(SdkClient.class);
+        sdkClient = mock(RedshiftArcadiaCoralClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
     }
 
@@ -49,18 +53,22 @@ public class ReadHandlerTest extends AbstractTestBase {
     public void handleRequest_SimpleSuccess() {
         final ReadHandler handler = new ReadHandler();
 
-        final ResourceModel model = ResourceModel.builder().build();
+        final ResourceModel requestResourceModel = getNamespaceRequestResourceModel();
+        final ResourceModel responseResourceModel = getNamespaceResponseResourceModel();
+
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
+            .desiredResourceState(requestResourceModel)
             .build();
+
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();

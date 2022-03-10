@@ -1,17 +1,22 @@
 package software.amazon.redshiftserverless.namespace;
 
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesResponse;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
-
-import java.util.ArrayList;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesRequest;
 import java.util.List;
 
 public class ListHandler extends BaseHandler<CallbackContext> {
+    private Logger logger;
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -20,24 +25,31 @@ public class ListHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
 
-        final List<ResourceModel> models = new ArrayList<>();
-
-        // STEP 1 [TODO: construct a body of a request]
-        final AwsRequest awsRequest = Translator.translateToListRequest(request.getNextToken());
-
-        // STEP 2 [TODO: make an api call]
-        AwsResponse awsResponse = null; // proxy.injectCredentialsAndInvokeV2(awsRequest, ClientBuilder.getClient()::describeLogGroups);
-
-        // STEP 3 [TODO: get a token for the next page]
-        String nextToken = null;
-
-        // STEP 4 [TODO: construct resource models]
-        // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/master/aws-logs-loggroup/src/main/java/software/amazon/logs/loggroup/ListHandler.java#L19-L21
+        this.logger = logger;
+        ListNamespacesRequest listNamespacesRequest = Translator.translateToListRequest(request.getNextToken());
+        ListNamespacesResponse listNamespacesResponse = listNamespaces(listNamespacesRequest, proxy);
+        final List<ResourceModel> models = Translator.translateFromListRequest(listNamespacesResponse);
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
             .resourceModels(models)
-            .nextToken(nextToken)
+            .nextToken(listNamespacesResponse.nextToken())
             .status(OperationStatus.SUCCESS)
             .build();
+    }
+
+    private ListNamespacesResponse listNamespaces(final ListNamespacesRequest listNamespacesRequest,
+                                                  final AmazonWebServicesClientProxy proxy) {
+        ListNamespacesResponse listNamespacesResponse;
+        try {
+            listNamespacesResponse = proxy.injectCredentialsAndInvokeV2(listNamespacesRequest, ClientBuilder.getClient()::listNamespaces);
+        } catch (final InternalServerException e) {
+            throw new CfnServiceInternalErrorException(e);
+        } catch (final ValidationException e){
+            throw new CfnInvalidRequestException(e);
+        } catch (final AwsServiceException e) {
+            throw new CfnGeneralServiceException(e);
+        }
+        logger.log(String.format("%s has successfully been listed.", ResourceModel.TYPE_NAME));
+        return listNamespacesResponse;
     }
 }
