@@ -13,6 +13,9 @@ out/
 .settings
 .project
 
+# Package Files #
+*.jar
+
 # auto-generated files
 target/
 

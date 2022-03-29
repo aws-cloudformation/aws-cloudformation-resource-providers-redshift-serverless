@@ -1,18 +1,20 @@
 package software.amazon.redshiftserverless.namespace;
 
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.ConflictException;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.InternalServerException;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.TooManyTagsException;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.ValidationException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
-
-// Placeholder for the functionality that could be shared across Create/Read/Update/Delete/List Handlers
 
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
   protected final String NAMESPACE_STATUS_AVAILABLE = "available";
@@ -59,5 +61,24 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
       return true;
     }
     return false;
+  }
+
+  protected ProgressEvent<ResourceModel, CallbackContext> errorhandler(final Exception exception) {
+    if (exception instanceof ValidationException) {
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
+    } else if (exception instanceof InternalServerException) {
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceInternalError);
+    } else if (exception instanceof ResourceNotFoundException) {
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
+    } else if (exception instanceof TooManyTagsException) {
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceLimitExceeded);
+    } else if (exception instanceof ConflictException) {
+      if (exception.getMessage().contains("already exists")) {
+        return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.AlreadyExists);
+      }
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ResourceConflict);
+    } else {
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
+    }
   }
 }
