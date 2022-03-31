@@ -48,6 +48,6 @@ public class ReadHandler extends BaseHandlerStd {
                                                                                       final ProxyClient<RedshiftArcadiaCoralClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
-        return errorhandler(exception);
+        return errorHandler(exception);
     }
 }

@@ -26,6 +26,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .then(progress ->
                     proxy.initiate("AWS-RedshiftServerless-Namespace::Update::first", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                         .translateToServiceRequest(Translator::translateToUpdateRequest)
+                        .backoffDelay(UPDATE_BACKOFF_STRATEGY)
                         .makeServiceCall(this::updateNamespace)
                         .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
                         .handleError(this::updateNamespaceErrorHandler)
@@ -49,6 +50,6 @@ public class UpdateHandler extends BaseHandlerStd {
                                                                                       final ProxyClient<RedshiftArcadiaCoralClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
-        return errorhandler(exception);
+        return errorHandler(exception);
     }
 }

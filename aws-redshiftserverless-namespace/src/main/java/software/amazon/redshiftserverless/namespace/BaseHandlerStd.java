@@ -15,10 +15,17 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.delay.Constant;
+
+import java.time.Duration;
 
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
   protected final String NAMESPACE_STATUS_AVAILABLE = "available";
-  protected final int CALLBACK_DELAY_SECONDS = 30;
+  protected static final Constant DELETE_BACKOFF_STRATEGY = Constant.of().
+          timeout(Duration.ofMinutes(5L)).delay(Duration.ofSeconds(10L)).build();
+
+  protected static final Constant UPDATE_BACKOFF_STRATEGY = Constant.of().
+          timeout(Duration.ofMinutes(20L)).delay(Duration.ofSeconds(10L)).build();
 
   @Override
   public final ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -63,7 +70,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     return false;
   }
 
-  protected ProgressEvent<ResourceModel, CallbackContext> errorhandler(final Exception exception) {
+  protected ProgressEvent<ResourceModel, CallbackContext> errorHandler(final Exception exception) {
     if (exception instanceof ValidationException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
     } else if (exception instanceof InternalServerException) {

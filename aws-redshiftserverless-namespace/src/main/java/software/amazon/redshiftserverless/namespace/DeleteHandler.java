@@ -26,22 +26,15 @@ public class DeleteHandler extends BaseHandlerStd {
                 .then(progress ->
                     proxy.initiate("AWS-RedshiftServerless-Namespace::Delete", proxyClient, model, callbackContext)
                             .translateToServiceRequest(Translator::translateToDeleteRequest)
+                            .backoffDelay(DELETE_BACKOFF_STRATEGY)
                             .makeServiceCall(this::deleteNamespace)
                             .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActiveAfterDelete(_client, _model, _context))
                             .handleError(this::deleteNamespaceErrorHandler)
-                            .done((_awsRequest, _awsResponse, _client, _model, _context) -> {
-                                if (!callbackContext.getCallBackForDelete()) {
-                                    callbackContext.setCallBackForDelete(true);
-                                    logger.log ("In Delete, Initiate a CallBack Delay of "+CALLBACK_DELAY_SECONDS+" seconds");
-                                    return ProgressEvent.defaultInProgressHandler(callbackContext, CALLBACK_DELAY_SECONDS, model);
-                                }
-                                return ProgressEvent.progress(_model, callbackContext);
+                            .done(deleteNamespaceResponse -> {
+                                logger.log(String.format("%s %s deleted.",ResourceModel.TYPE_NAME, model.getNamespaceName()));
+                                return ProgressEvent.defaultSuccessHandler(null);
                             })
-                )
-                .then(progress -> {
-                    logger.log(String.format("%s %s deleted.",ResourceModel.TYPE_NAME, model.getNamespaceName()));
-                    return ProgressEvent.defaultSuccessHandler(null);
-                });
+                );
     }
 
     private DeleteNamespaceResponse deleteNamespace(final DeleteNamespaceRequest deleteNamespaceRequest,
@@ -59,6 +52,6 @@ public class DeleteHandler extends BaseHandlerStd {
                                                                                       final ProxyClient<RedshiftArcadiaCoralClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
-        return errorhandler(exception);
+        return errorHandler(exception);
     }
 }

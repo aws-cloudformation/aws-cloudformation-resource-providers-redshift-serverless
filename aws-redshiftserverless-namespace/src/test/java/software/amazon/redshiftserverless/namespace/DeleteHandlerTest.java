@@ -67,12 +67,6 @@ public class DeleteHandlerTest extends AbstractTestBase {
         ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(30);
-
-        response = handler.handleRequest(proxy, request, response.getCallbackContext(), proxyClient, logger);
-
-        assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
         assertThat(response.getResourceModel()).isNull();
