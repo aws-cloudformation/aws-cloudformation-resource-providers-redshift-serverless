@@ -1,8 +1,6 @@
 package software.amazon.redshiftserverless.namespace;
 
-import com.google.common.collect.Lists;
 import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.CreateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.DeleteNamespaceRequest;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;

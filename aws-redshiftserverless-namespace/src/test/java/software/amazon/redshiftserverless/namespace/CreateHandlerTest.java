@@ -2,7 +2,6 @@ package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
 
-import jdk.internal.loader.Resource;
 import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.CreateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;

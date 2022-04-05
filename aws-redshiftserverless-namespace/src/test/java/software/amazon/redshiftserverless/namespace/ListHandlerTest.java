@@ -1,6 +1,5 @@
 package software.amazon.redshiftserverless.namespace;
 
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.CreateNamespaceRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.OperationStatus;

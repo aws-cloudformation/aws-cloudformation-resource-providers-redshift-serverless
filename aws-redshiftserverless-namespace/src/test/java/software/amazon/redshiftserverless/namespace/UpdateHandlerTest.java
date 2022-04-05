@@ -1,10 +1,8 @@
 package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceResponse;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
