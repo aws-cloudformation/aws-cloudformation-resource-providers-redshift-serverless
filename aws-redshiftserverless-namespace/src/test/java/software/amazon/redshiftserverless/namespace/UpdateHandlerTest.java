@@ -55,9 +55,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceModel requestResourceModel = getUpdateRequestResourceModel();
         final ResourceModel responseResourceModel = getUpdateResponseResourceModel();
-
+        ResourceModel prevModel = ResourceModel.builder()
+                .namespaceName(NAMESPACE_NAME)
+                .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .previousResourceState(prevModel)
             .desiredResourceState(requestResourceModel)
             .build();
 
@@ -65,7 +68,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
 
         ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-
+        verify(proxyClient.client()).updateNamespace(any(UpdateNamespaceRequest.class));
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);

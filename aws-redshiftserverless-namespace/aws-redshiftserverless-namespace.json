@@ -98,7 +98,8 @@
         "DbName": {
             "description": "The database name associated for the namespace that is being created. Only alphanumeric characters and underscores are allowed. It should start with an alphabet.",
             "type": "string",
-            "pattern": "[a-zA-Z][a-zA-Z_0-9+.@-]*"
+            "pattern": "[a-zA-Z][a-zA-Z_0-9+.@-]*",
+            "maxLength": 127
         },
         "DefaultIamRoleArn": {
             "description": "The default IAM role ARN for the namespace that is being created.",
@@ -169,29 +170,34 @@
     "handlers": {
         "create": {
             "permissions": [
+                "iam:PassRole",
                 "redshift-serverless:CreateNamespace",
                 "redshift-serverless:GetNamespace"
             ]
         },
         "read": {
             "permissions": [
+                "iam:PassRole",
                 "redshift-serverless:GetNamespace"
             ]
         },
         "update": {
             "permissions": [
+                "iam:PassRole",
                 "redshift-serverless:UpdateNamespace",
                 "redshift-serverless:GetNamespace"
             ]
         },
         "delete": {
             "permissions": [
+                "iam:PassRole",
                 "redshift-serverless:DeleteNamespace",
                 "redshift-serverless:GetNamespace"
             ]
         },
         "list": {
             "permissions": [
+                "iam:PassRole",
                 "redshift-serverless:ListNamespaces"
             ]
         }

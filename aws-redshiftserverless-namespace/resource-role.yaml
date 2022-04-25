@@ -30,6 +30,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                - "iam:PassRole"
                 - "redshift-serverless:CreateNamespace"
                 - "redshift-serverless:DeleteNamespace"
                 - "redshift-serverless:GetNamespace"
