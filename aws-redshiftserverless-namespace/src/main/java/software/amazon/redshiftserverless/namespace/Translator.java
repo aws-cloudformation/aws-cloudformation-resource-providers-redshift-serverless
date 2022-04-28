@@ -9,6 +9,8 @@ import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespaces
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesResponse;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -172,6 +174,7 @@ public class Translator {
 
   private static Namespace translateToModelNamespace(
           software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace namespace) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     return Namespace.builder()
             .namespaceArn(namespace.namespaceArn())
             .namespaceId(namespace.namespaceId())

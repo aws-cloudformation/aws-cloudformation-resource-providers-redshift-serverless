@@ -1,0 +1,9 @@
+{
+    "NamespaceName": "input1234",
+    "AdminUserPassword": "Test1234",
+    "AdminUsername": "testUsername123",
+    "DbName": "testDB",
+    "LogExports": [
+        "userlog"
+    ]
+}

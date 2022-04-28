@@ -24,38 +24,38 @@ public class UpdateHandler extends BaseHandlerStd {
 
         this.logger = logger;
 
-        final ResourceModel currModel = request.getDesiredResourceState();
+        final ResourceModel currentModel = request.getDesiredResourceState();
         final ResourceModel prevModel = request.getPreviousResourceState();
 
         // Generate the resourceModel for update request that only contains updated params
-        ResourceModel tempUpdateRequestModel = currModel.toBuilder()
-                .adminUserPassword(compareStringParamsEqualOrNot(prevModel.getAdminUserPassword(), currModel.getAdminUserPassword()) ? null : currModel.getAdminUserPassword())
-                .adminUsername(compareStringParamsEqualOrNot(prevModel.getAdminUsername(), currModel.getAdminUsername()) ? null : currModel.getAdminUsername())
-                .dbName(compareStringParamsEqualOrNot(prevModel.getDbName(), currModel.getDbName()) ? null : currModel.getDbName())
-                .kmsKeyId(compareStringParamsEqualOrNot(prevModel.getKmsKeyId(), currModel.getKmsKeyId()) ? null : currModel.getKmsKeyId())
-                .defaultIamRoleArn(compareStringParamsEqualOrNot(prevModel.getDefaultIamRoleArn(), currModel.getDefaultIamRoleArn()) ? null : currModel.getDefaultIamRoleArn())
-                .iamRoles(compareListParamsEqualOrNot(prevModel.getIamRoles(), currModel.getIamRoles()) ? null : currModel.getIamRoles())
-                .logExports(compareListParamsEqualOrNot(prevModel.getLogExports(), currModel.getLogExports()) ? null : currModel.getLogExports())
+        ResourceModel tempUpdateRequestModel = currentModel.toBuilder()
+                .adminUserPassword(compareStringParamsEqualOrNot(prevModel.getAdminUserPassword(), currentModel.getAdminUserPassword()) ? null : currentModel.getAdminUserPassword())
+                .adminUsername(compareStringParamsEqualOrNot(prevModel.getAdminUsername(), currentModel.getAdminUsername()) ? null : currentModel.getAdminUsername())
+                .dbName(compareStringParamsEqualOrNot(prevModel.getDbName(), currentModel.getDbName()) ? null : currentModel.getDbName())
+                .kmsKeyId(compareStringParamsEqualOrNot(prevModel.getKmsKeyId(), currentModel.getKmsKeyId()) ? null : currentModel.getKmsKeyId())
+                .defaultIamRoleArn(compareStringParamsEqualOrNot(prevModel.getDefaultIamRoleArn(), currentModel.getDefaultIamRoleArn()) ? null : currentModel.getDefaultIamRoleArn())
+                .iamRoles(compareListParamsEqualOrNot(prevModel.getIamRoles(), currentModel.getIamRoles()) ? null : currentModel.getIamRoles())
+                .logExports(compareListParamsEqualOrNot(prevModel.getLogExports(), currentModel.getLogExports()) ? null : currentModel.getLogExports())
                 .build();
 
         // To update the adminUserPassword or adminUserName, we need to specify both username and password in update request
-        if (!compareStringParamsEqualOrNot(prevModel.getAdminUserPassword(), currModel.getAdminUserPassword()) || !compareStringParamsEqualOrNot(prevModel.getAdminUsername(), currModel.getAdminUsername())) {
+        if (!compareStringParamsEqualOrNot(prevModel.getAdminUserPassword(), currentModel.getAdminUserPassword()) || !compareStringParamsEqualOrNot(prevModel.getAdminUsername(), currentModel.getAdminUsername())) {
             tempUpdateRequestModel = tempUpdateRequestModel.toBuilder()
-                    .adminUsername(currModel.getAdminUsername())
-                    .adminUserPassword(currModel.getAdminUserPassword())
+                    .adminUsername(currentModel.getAdminUsername())
+                    .adminUserPassword(currentModel.getAdminUserPassword())
                     .build();
         }
 
         // To update the defaultIamRole, need to specify the iam roles, we need to specify both defaultIamRole and iamRoles in update request
-        if (!compareStringParamsEqualOrNot(prevModel.getDefaultIamRoleArn(), currModel.getDefaultIamRoleArn())) {
+        if (!compareStringParamsEqualOrNot(prevModel.getDefaultIamRoleArn(), currentModel.getDefaultIamRoleArn())) {
             tempUpdateRequestModel = tempUpdateRequestModel.toBuilder()
-                    .defaultIamRoleArn(currModel.getDefaultIamRoleArn())
-                    .iamRoles(currModel.getIamRoles())
+                    .defaultIamRoleArn(currentModel.getDefaultIamRoleArn())
+                    .iamRoles(currentModel.getIamRoles())
                     .build();
         }
 
         final ResourceModel updateRequestModel = tempUpdateRequestModel;
-        return ProgressEvent.progress(currModel, callbackContext)
+        return ProgressEvent.progress(currentModel, callbackContext)
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Namespace::Update::first", proxyClient, updateRequestModel, progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
@@ -97,14 +97,12 @@ public class UpdateHandler extends BaseHandlerStd {
     }
 
     private boolean compareListParamsEqualOrNot(List<String> prevParam, List<String> currParam) {
-        if (prevParam == null && currParam == null) {
+        if ((prevParam == null || prevParam.isEmpty()) && (currParam == null || currParam.isEmpty())) {
             return true;
         } else if (prevParam != null && currParam != null) {
             Collections.sort(prevParam);
             Collections.sort(currParam);
             return prevParam.equals(currParam);
-        } else if ((prevParam == null || prevParam.isEmpty()) && (currParam == null || currParam.isEmpty())) {
-            return true;
         }
         return false;
     }
