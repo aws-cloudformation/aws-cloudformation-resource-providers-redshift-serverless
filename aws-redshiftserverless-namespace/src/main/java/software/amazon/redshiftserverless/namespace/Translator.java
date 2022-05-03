@@ -9,8 +9,6 @@ import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespaces
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesResponse;
 import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
