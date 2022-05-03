@@ -20,7 +20,9 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#kmskeyid" title="KmsKeyId">KmsKeyId</a>" : <i>String</i>,
         "<a href="#logexports" title="LogExports">LogExports</a>" : <i>[ String, ... ]</i>,
         "<a href="#namespacename" title="NamespaceName">NamespaceName</a>" : <i>String</i>,
-        "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>
+        "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
+        "<a href="#finalsnapshotname" title="FinalSnapshotName">FinalSnapshotName</a>" : <i>String</i>,
+        "<a href="#finalsnapshotretentionperiod" title="FinalSnapshotRetentionPeriod">FinalSnapshotRetentionPeriod</a>" : <i>Integer</i>
     }
 }
 </pre>
@@ -42,6 +44,8 @@ Properties:
     <a href="#namespacename" title="NamespaceName">NamespaceName</a>: <i>String</i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
+    <a href="#finalsnapshotname" title="FinalSnapshotName">FinalSnapshotName</a>: <i>String</i>
+    <a href="#finalsnapshotretentionperiod" title="FinalSnapshotRetentionPeriod">FinalSnapshotRetentionPeriod</a>: <i>Integer</i>
 </pre>
 
 ## Properties
@@ -138,7 +142,7 @@ _Minimum_: <code>3</code>
 
 _Maximum_: <code>64</code>
 
-_Pattern_: <code>^[a-z0-9]+$</code>
+_Pattern_: <code>^[a-z0-9-]+$</code>
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
@@ -151,6 +155,30 @@ _Required_: No
 _Type_: List of <a href="tag.md">Tag</a>
 
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
+
+#### FinalSnapshotName
+
+The name of the namespace the source snapshot was created from. Please specify the name if needed before deleting namespace
+
+_Required_: No
+
+_Type_: String
+
+_Maximum_: <code>255</code>
+
+_Pattern_: <code>[a-z][a-z0-9]*(-[a-z0-9]+)*</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### FinalSnapshotRetentionPeriod
+
+The number of days to retain automated snapshot in the destination region after they are copied from the source region. If the value is -1, the manual snapshot is retained indefinitely. The value must be either -1 or an integer between 1 and 3,653.
+
+_Required_: No
+
+_Type_: Integer
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
 ## Return Values
 
