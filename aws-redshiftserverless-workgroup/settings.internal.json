@@ -1,0 +1,7 @@
+{
+    "FasPolicyPath": {
+        "aws": "/policies/AuthRuntime/authNPolicy/cloudformation/aws-redshiftserverless-workgroup.2022-05-05-09-37-50",
+        "aws-cn": "/policies/AuthRuntime/authNPolicy/cloudformation/aws-redshiftserverless-workgroup.2022-05-05-09-37-50",
+        "aws-us-gov": "/policies/AuthRuntime/authNPolicy/cloudformation/aws-redshiftserverless-workgroup.2022-05-05-09-37-50"
+    }
+}
