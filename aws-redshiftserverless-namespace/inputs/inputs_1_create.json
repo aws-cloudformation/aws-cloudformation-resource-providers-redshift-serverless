@@ -1,0 +1,15 @@
+{
+    "NamespaceName": "input1234",
+    "AdminUserPassword": "Test5678",
+    "AdminUsername": "testUsername123",
+    "DbName": "testDB",
+    "LogExports": [
+        "userlog"
+    ],
+    "Tags": [
+        {
+            "Key": "hi",
+            "Value": "there"
+        }
+    ]
+}

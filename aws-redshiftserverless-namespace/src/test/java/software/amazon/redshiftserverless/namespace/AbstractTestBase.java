@@ -27,9 +27,9 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 public class AbstractTestBase {
   protected static final Credentials MOCK_CREDENTIALS;
   protected static final LoggerProxy logger;
-  private static final String NAMESPACE_ARN;
-  private static final String NAMESPACE_ID;
-  private static final String NAMESPACE_NAME;
+  protected static final String NAMESPACE_ARN;
+  protected static final String NAMESPACE_ID;
+  protected static final String NAMESPACE_NAME;
   private static final String ADMIN_USERNAME;
   private static final String ADMIN_USERPASSWORD;
   private static final String DB_NAME;

@@ -1,0 +1,254 @@
+{
+    "typeName": "AWS::RedshiftServerless::Workgroup",
+    "description": "Definition of AWS::RedshiftServerless::Workgroup Resource Type",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-redshiftserverless",
+    "definitions": {
+        "ConfigParameter": {
+            "type": "object",
+            "properties": {
+                "ParameterKey": {
+                    "type": "string"
+                },
+                "ParameterValue": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "Endpoint": {
+            "type": "object",
+            "properties": {
+                "Address": {
+                    "type": "string"
+                },
+                "Port": {
+                    "type": "number"
+                },
+                "VpcEndpoints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/VpcEndpoint"
+                    },
+                    "insertionOrder": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "NetworkInterface": {
+            "type": "object",
+            "properties": {
+                "NetworkInterfaceId": {
+                    "type": "string"
+                },
+                "SubnetId": {
+                    "type": "string"
+                },
+                "PrivateIpAddress": {
+                    "type": "string"
+                },
+                "AvailabilityZone": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "VpcEndpoint": {
+            "type": "object",
+            "properties": {
+                "VpcEndpointId": {
+                    "type": "string"
+                },
+                "VpcId": {
+                    "type": "string"
+                },
+                "NetworkInterfaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NetworkInterface"
+                    },
+                    "insertionOrder": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "Workgroup": {
+            "type": "object",
+            "properties": {
+                "WorkgroupId": {
+                    "type": "string"
+                },
+                "WorkgroupArn": {
+                    "type": "string"
+                },
+                "WorkgroupName": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 3,
+                    "pattern": "^[a-z0-9]*$"
+                },
+                "NamespaceName": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]*$"
+                },
+                "BaseCapacity": {
+                    "type": "integer"
+                },
+                "EnhancedVpcRouting": {
+                    "type": "boolean"
+                },
+                "ConfigParameters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConfigParameter"
+                    },
+                    "insertionOrder": false,
+                    "pattern": "^[a-z0-9]*$"
+                },
+                "SecurityGroupIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "insertionOrder": false
+                },
+                "SubnetIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "insertionOrder": false
+                },
+                "Status": {
+                    "$ref": "#/definitions/WorkgroupStatus"
+                },
+                "Endpoint": {
+                    "$ref": "#/definitions/Endpoint"
+                },
+                "PubliclyAccessible": {
+                    "type": "boolean"
+                },
+                "CreationDate": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "WorkgroupStatus": {
+            "type": "string",
+            "enum": [
+                "CREATING",
+                "AVAILABLE",
+                "MODIFYING",
+                "DELETING"
+            ]
+        }
+    },
+    "properties": {
+        "AdditionalInfo": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ConfigParameter"
+            },
+            "insertionOrder": false
+        },
+        "BaseCapacity": {
+            "type": "integer"
+        },
+        "ConfigParameters": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ConfigParameter"
+            },
+            "insertionOrder": false
+        },
+        "EnhancedVpcRouting": {
+            "type": "boolean"
+        },
+        "NamespaceName": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "pattern": "^[a-z0-9]+$"
+        },
+        "SecurityGroupIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "insertionOrder": false
+        },
+        "SubnetIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "insertionOrder": false
+        },
+        "Workgroup": {
+            "$ref": "#/definitions/Workgroup"
+        },
+        "WorkgroupName": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "pattern": "^[a-z0-9]*$"
+        },
+        "PubliclyAccessible": {
+            "type": "boolean"
+        }
+    },
+    "tagging": {
+        "taggable": true
+    },
+    "required": [
+        "NamespaceName"
+    ],
+    "readOnlyProperties": [
+        "/properties/Workgroup"
+    ],
+    "writeOnlyProperties": [
+        "/properties/AdditionalInfo",
+        "/properties/BaseCapacity",
+        "/properties/ConfigParameters",
+        "/properties/EnhancedVpcRouting",
+        "/properties/NamespaceName",
+        "/properties/PubliclyAccessible",
+        "/properties/SecurityGroupIds",
+        "/properties/SubnetIds",
+        "/properties/Tags"
+    ],
+    "createOnlyProperties": [
+        "/properties/WorkgroupName"
+    ],
+    "primaryIdentifier": [
+        "/properties/WorkgroupName"
+    ],
+    "handlers": {
+        "create": {
+            "permissions": [
+                "redshift-serverless:CreateWorkgroup"
+            ]
+        },
+        "read": {
+            "permissions": [
+                "redshift-serverless:GetWorkgroup"
+            ]
+        },
+        "update": {
+            "permissions": [
+                "redshift-serverless:UpdateWorkgroup"
+            ]
+        },
+        "delete": {
+            "permissions": [
+                "redshift-serverless:DeleteWorkgroup"
+            ]
+        },
+        "list": {
+            "permissions": [
+                "redshift-serverless:ListWorkgroups"
+            ]
+        }
+    },
+    "additionalProperties": false
+}

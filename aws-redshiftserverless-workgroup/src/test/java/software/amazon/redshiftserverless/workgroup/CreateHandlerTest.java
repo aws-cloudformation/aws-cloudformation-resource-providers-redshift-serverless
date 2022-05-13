@@ -1,9 +1,10 @@
-package software.amazon.redshiftserverless.namespace;
+package software.amazon.redshiftserverless.workgroup;
 
 import java.time.Duration;
+import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.CreateWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetWorkgroupRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -17,15 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateHandlerTest extends AbstractTestBase {
+public class CreateHandlerTest extends AbstractTestBase {
 
     @Mock
     private AmazonWebServicesClientProxy proxy;
@@ -51,24 +47,20 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final UpdateHandler handler = new UpdateHandler();
+        final CreateHandler handler = new CreateHandler();
 
-        final ResourceModel requestResourceModel = getUpdateRequestResourceModel();
-        final ResourceModel responseResourceModel = getUpdateResponseResourceModel();
-        ResourceModel prevModel = ResourceModel.builder()
-                .namespaceName(NAMESPACE_NAME)
-                .build();
+        final ResourceModel requestResourceModel = createRequestResourceModel();
+        final ResourceModel responseResourceModel = getReadResponseResourceModel();;
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .previousResourceState(prevModel)
-            .desiredResourceState(requestResourceModel)
-            .build();
+                .desiredResourceState(requestResourceModel)
+                .build();
 
-        when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
-        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+        when(proxyClient.client().createWorkgroup(any(CreateWorkgroupRequest.class))).thenReturn(createResponseSdk());
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
 
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        verify(proxyClient.client()).updateNamespace(any(UpdateNamespaceRequest.class));
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);

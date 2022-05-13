@@ -1,0 +1,24 @@
+{
+    "CREATE": {
+        "/WorkgroupName": "testworkgroup4",
+        "/NamespaceName": "testnamespace4",
+        "/BaseCapacity": 16,
+        "/ConfigParameters": [],
+        "/SubnetIds": [],
+        "/SecurityGroupIds": [],
+        "/Tags": [],
+        "/AdditionalInfo": [],
+        "/EnhancedVpcRouting": false
+    },
+    "UPDATE": {
+        "/WorkgroupName": "testworkgroup4",
+        "/NamespaceName": "testnamespace4",
+        "/BaseCapacity": 32,
+        "/ConfigParameters": [],
+        "/SubnetIds": [],
+        "/SecurityGroupIds": [],
+        "/Tags": [],
+        "/AdditionalInfo": [],
+        "/EnhancedVpcRouting": false
+    }
+}

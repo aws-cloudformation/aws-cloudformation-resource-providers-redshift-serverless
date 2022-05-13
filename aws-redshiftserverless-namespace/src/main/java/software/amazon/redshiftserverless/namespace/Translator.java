@@ -94,6 +94,8 @@ public class Translator {
 
     return DeleteNamespaceRequest.builder()
             .namespaceName(model.getNamespaceName())
+            .finalSnapshotName(model.getFinalSnapshotName())
+            .finalSnapshotRetentionPeriod(model.getFinalSnapshotRetentionPeriod())
             .build();
   }
 
@@ -172,6 +174,7 @@ public class Translator {
 
   private static Namespace translateToModelNamespace(
           software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace namespace) {
+
     return Namespace.builder()
             .namespaceArn(namespace.namespaceArn())
             .namespaceId(namespace.namespaceId())

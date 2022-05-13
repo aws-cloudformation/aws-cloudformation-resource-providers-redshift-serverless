@@ -1,4 +1,4 @@
-# AWS::RedshiftServerless::Namespace Namespace
+# AWS::RedshiftServerless::Workgroup Workgroup
 
 ## Syntax
 
@@ -8,16 +8,18 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 
 <pre>
 {
-    "<a href="#namespacearn" title="NamespaceArn">NamespaceArn</a>" : <i>String</i>,
-    "<a href="#namespaceid" title="NamespaceId">NamespaceId</a>" : <i>String</i>,
+    "<a href="#workgroupid" title="WorkgroupId">WorkgroupId</a>" : <i>String</i>,
+    "<a href="#workgrouparn" title="WorkgroupArn">WorkgroupArn</a>" : <i>String</i>,
+    "<a href="#workgroupname" title="WorkgroupName">WorkgroupName</a>" : <i>String</i>,
     "<a href="#namespacename" title="NamespaceName">NamespaceName</a>" : <i>String</i>,
-    "<a href="#adminusername" title="AdminUsername">AdminUsername</a>" : <i>String</i>,
-    "<a href="#dbname" title="DbName">DbName</a>" : <i>String</i>,
-    "<a href="#kmskeyid" title="KmsKeyId">KmsKeyId</a>" : <i>String</i>,
-    "<a href="#defaultiamrolearn" title="DefaultIamRoleArn">DefaultIamRoleArn</a>" : <i>String</i>,
-    "<a href="#iamroles" title="IamRoles">IamRoles</a>" : <i>[ String, ... ]</i>,
-    "<a href="#logexports" title="LogExports">LogExports</a>" : <i>[ String, ... ]</i>,
+    "<a href="#basecapacity" title="BaseCapacity">BaseCapacity</a>" : <i>Integer</i>,
+    "<a href="#enhancedvpcrouting" title="EnhancedVpcRouting">EnhancedVpcRouting</a>" : <i>Boolean</i>,
+    "<a href="#configparameters" title="ConfigParameters">ConfigParameters</a>" : <i>[ <a href="configparameter.md">ConfigParameter</a>, ... ]</i>,
+    "<a href="#securitygroupids" title="SecurityGroupIds">SecurityGroupIds</a>" : <i>[ String, ... ]</i>,
+    "<a href="#subnetids" title="SubnetIds">SubnetIds</a>" : <i>[ String, ... ]</i>,
     "<a href="#status" title="Status">Status</a>" : <i>String</i>,
+    "<a href="#endpoint" title="Endpoint">Endpoint</a>" : <i><a href="endpoint.md">Endpoint</a></i>,
+    "<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>" : <i>Boolean</i>,
     "<a href="#creationdate" title="CreationDate">CreationDate</a>" : <i>String</i>
 }
 </pre>
@@ -25,24 +27,27 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 ### YAML
 
 <pre>
-<a href="#namespacearn" title="NamespaceArn">NamespaceArn</a>: <i>String</i>
-<a href="#namespaceid" title="NamespaceId">NamespaceId</a>: <i>String</i>
+<a href="#workgroupid" title="WorkgroupId">WorkgroupId</a>: <i>String</i>
+<a href="#workgrouparn" title="WorkgroupArn">WorkgroupArn</a>: <i>String</i>
+<a href="#workgroupname" title="WorkgroupName">WorkgroupName</a>: <i>String</i>
 <a href="#namespacename" title="NamespaceName">NamespaceName</a>: <i>String</i>
-<a href="#adminusername" title="AdminUsername">AdminUsername</a>: <i>String</i>
-<a href="#dbname" title="DbName">DbName</a>: <i>String</i>
-<a href="#kmskeyid" title="KmsKeyId">KmsKeyId</a>: <i>String</i>
-<a href="#defaultiamrolearn" title="DefaultIamRoleArn">DefaultIamRoleArn</a>: <i>String</i>
-<a href="#iamroles" title="IamRoles">IamRoles</a>: <i>
+<a href="#basecapacity" title="BaseCapacity">BaseCapacity</a>: <i>Integer</i>
+<a href="#enhancedvpcrouting" title="EnhancedVpcRouting">EnhancedVpcRouting</a>: <i>Boolean</i>
+<a href="#configparameters" title="ConfigParameters">ConfigParameters</a>: <i>
+      - <a href="configparameter.md">ConfigParameter</a></i>
+<a href="#securitygroupids" title="SecurityGroupIds">SecurityGroupIds</a>: <i>
       - String</i>
-<a href="#logexports" title="LogExports">LogExports</a>: <i>
+<a href="#subnetids" title="SubnetIds">SubnetIds</a>: <i>
       - String</i>
 <a href="#status" title="Status">Status</a>: <i>String</i>
+<a href="#endpoint" title="Endpoint">Endpoint</a>: <i><a href="endpoint.md">Endpoint</a></i>
+<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>: <i>Boolean</i>
 <a href="#creationdate" title="CreationDate">CreationDate</a>: <i>String</i>
 </pre>
 
 ## Properties
 
-#### NamespaceArn
+#### WorkgroupId
 
 _Required_: No
 
@@ -50,7 +55,7 @@ _Type_: String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### NamespaceId
+#### WorkgroupArn
 
 _Required_: No
 
@@ -58,7 +63,7 @@ _Type_: String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### NamespaceName
+#### WorkgroupName
 
 _Required_: No
 
@@ -68,45 +73,45 @@ _Minimum_: <code>3</code>
 
 _Maximum_: <code>64</code>
 
-_Pattern_: <code>^[a-z0-9-]+$</code>
+_Pattern_: <code>^[a-z0-9]*$</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### AdminUsername
+#### NamespaceName
 
 _Required_: No
 
 _Type_: String
 
+_Pattern_: <code>^[a-z0-9]*$</code>
+
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### DbName
+#### BaseCapacity
 
 _Required_: No
 
-_Type_: String
-
-_Pattern_: <code>[a-zA-Z][a-zA-Z_0-9+.@-]*</code>
+_Type_: Integer
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### KmsKeyId
+#### EnhancedVpcRouting
 
 _Required_: No
 
-_Type_: String
+_Type_: Boolean
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### DefaultIamRoleArn
+#### ConfigParameters
 
 _Required_: No
 
-_Type_: String
+_Type_: List of <a href="configparameter.md">ConfigParameter</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### IamRoles
+#### SecurityGroupIds
 
 _Required_: No
 
@@ -114,7 +119,7 @@ _Type_: List of String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### LogExports
+#### SubnetIds
 
 _Required_: No
 
@@ -128,7 +133,23 @@ _Required_: No
 
 _Type_: String
 
-_Allowed Values_: <code>AVAILABLE</code> | <code>MODIFYING</code> | <code>DELETING</code>
+_Allowed Values_: <code>CREATING</code> | <code>AVAILABLE</code> | <code>MODIFYING</code> | <code>DELETING</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### Endpoint
+
+_Required_: No
+
+_Type_: <a href="endpoint.md">Endpoint</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### PubliclyAccessible
+
+_Required_: No
+
+_Type_: Boolean
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
