@@ -13,12 +13,12 @@ import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.CreateNamespaceResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.DeleteNamespaceResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
 import software.amazon.cloudformation.proxy.LoggerProxy;
@@ -39,7 +39,9 @@ public class AbstractTestBase {
   private static final List<String> LOG_EXPORTS;
   private static final String STATUS;
   private static final Instant CREATION_DATE;
-  private static final software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace NAMESPACE;
+  private static final software.amazon.awssdk.services.redshiftserverless.model.Namespace NAMESPACE;
+  private static final String FINAL_SNAPSHOT_NAME;
+  private static final int FINAL_SNAPSHOT_RETENTION_PERIOD;
 
   static {
     MOCK_CREDENTIALS = new Credentials("accessKey", "secretKey", "token");
@@ -57,7 +59,9 @@ public class AbstractTestBase {
     LOG_EXPORTS = Arrays.asList("DummyLogExports");
     STATUS = "available";
     CREATION_DATE = Instant.parse("9999-01-01T00:00:00Z");
-    NAMESPACE = software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace.builder()
+    FINAL_SNAPSHOT_NAME = "testFinalSnapshot";
+    FINAL_SNAPSHOT_RETENTION_PERIOD = 1;
+    NAMESPACE = software.amazon.awssdk.services.redshiftserverless.model.Namespace.builder()
             .namespaceName(NAMESPACE_NAME)
             .namespaceArn("DummyNamespaceArn")
             .namespaceId(NAMESPACE_ID)
@@ -66,15 +70,15 @@ public class AbstractTestBase {
             .kmsKeyId(KMS_KEY_ID)
             .defaultIamRoleArn(DEFAULT_IAM_ROLE_ARN)
             .iamRoles(IAM_ROLES)
-            .logExports(LOG_EXPORTS)
+            .logExportsWithStrings(LOG_EXPORTS)
             .status(STATUS)
             .creationDate(CREATION_DATE)
             .build();
   }
-  static ProxyClient<RedshiftArcadiaCoralClient> MOCK_PROXY(
+  static ProxyClient<RedshiftServerlessClient> MOCK_PROXY(
     final AmazonWebServicesClientProxy proxy,
-    final RedshiftArcadiaCoralClient sdkClient) {
-    return new ProxyClient<RedshiftArcadiaCoralClient>() {
+    final RedshiftServerlessClient sdkClient) {
+    return new ProxyClient<RedshiftServerlessClient>() {
       @Override
       public <RequestT extends AwsRequest, ResponseT extends AwsResponse> ResponseT
       injectCredentialsAndInvokeV2(RequestT request, Function<RequestT, ResponseT> requestFunction) {
@@ -108,7 +112,7 @@ public class AbstractTestBase {
       }
 
       @Override
-      public RedshiftArcadiaCoralClient client() {
+      public RedshiftServerlessClient client() {
         return sdkClient;
       }
     };
@@ -142,7 +146,7 @@ public class AbstractTestBase {
   }
 
   private static Namespace translateToModelNamespace(
-          software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace namespace) {
+          software.amazon.awssdk.services.redshiftserverless.model.Namespace namespace) {
     return Namespace.builder()
             .namespaceArn(namespace.namespaceArn())
             .namespaceId(namespace.namespaceId())
@@ -152,7 +156,7 @@ public class AbstractTestBase {
             .kmsKeyId(namespace.kmsKeyId())
             .defaultIamRoleArn(namespace.defaultIamRoleArn())
             .iamRoles(namespace.iamRoles())
-            .logExports(namespace.logExports())
+            .logExports(namespace.logExportsAsStrings())
             .status(namespace.statusAsString())
             .creationDate(namespace.creationDate().toString())
             .build();
@@ -173,6 +177,8 @@ public class AbstractTestBase {
   public static ResourceModel getDeleteRequestResourceModel() {
     return ResourceModel.builder()
             .namespaceName(NAMESPACE_NAME)
+            .finalSnapshotName(FINAL_SNAPSHOT_NAME)
+            .finalSnapshotRetentionPeriod(FINAL_SNAPSHOT_RETENTION_PERIOD)
             .build();
   }
 

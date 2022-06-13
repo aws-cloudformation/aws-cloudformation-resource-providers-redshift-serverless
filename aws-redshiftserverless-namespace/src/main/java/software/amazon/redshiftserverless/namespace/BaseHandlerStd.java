@@ -1,14 +1,14 @@
 package software.amazon.redshiftserverless.namespace;
 
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ConflictException;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.InternalServerException;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ResourceNotFoundException;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.TooManyTagsException;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ValidationException;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.ConflictException;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
+import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
+import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
@@ -46,10 +46,10 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     final AmazonWebServicesClientProxy proxy,
     final ResourceHandlerRequest<ResourceModel> request,
     final CallbackContext callbackContext,
-    final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+    final ProxyClient<RedshiftServerlessClient> proxyClient,
     final Logger logger);
 
-  protected boolean isNamespaceActive (final ProxyClient<RedshiftArcadiaCoralClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {
+  protected boolean isNamespaceActive (final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {
     GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder().namespaceName(resourceModel.getNamespaceName()).build();
     GetNamespaceResponse getNamespaceResponse = proxyClient.injectCredentialsAndInvokeV2(getNamespaceRequest, proxyClient.client()::getNamespace);
     Namespace namespace = getNamespaceResponse.namespace();
@@ -60,7 +60,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     return NAMESPACE_STATUS_AVAILABLE.equalsIgnoreCase(getNamespaceResponse.namespace().statusAsString());
   }
 
-  protected boolean isNamespaceActiveAfterDelete (final ProxyClient<RedshiftArcadiaCoralClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {
+  protected boolean isNamespaceActiveAfterDelete (final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {
     GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder().namespaceName(resourceModel.getNamespaceName()).build();
     try {
       proxyClient.injectCredentialsAndInvokeV2(getNamespaceRequest, proxyClient.client()::getNamespace);

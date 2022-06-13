@@ -60,6 +60,8 @@ _Type_: String
 
 _Minimum_: <code>8</code>
 
+_Maximum_: <code>64</code>
+
 _Pattern_: <code>^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\x00-\x20\x22\x27\x2f\x40\x5c\x7f-\uffff]+</code>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
@@ -192,12 +194,6 @@ The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
 
-<<<<<<< Updated upstream
 #### Namespace
 
 Returns the <code>Namespace</code> value.
-=======
-#### TPSCode
-
-A TPS Code is automatically generated on creation and assigned as the unique identifier.
->>>>>>> Stashed changes

@@ -112,7 +112,7 @@
                             <goal>install-file</goal>
                         </goals>
                         <configuration>
-                            <file>${basedir}/AwsJavaSdk-RedshiftArcadiaCoral-2.0.jar</file>
+                            <file>${basedir}/AwsJavaSdk-RedshiftServerless-2.0.jar</file>
                             <groupId>software.amazon.awssdk</groupId>
                             <artifactId>redshiftserverless</artifactId>
                             <version>1.0</version>

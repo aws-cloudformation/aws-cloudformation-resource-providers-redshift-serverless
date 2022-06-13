@@ -1,13 +1,13 @@
 package software.amazon.redshiftserverless.namespace;
 
 import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.CreateNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.DeleteNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -41,15 +41,15 @@ public class Translator {
             .kmsKeyId(model.getKmsKeyId())
             .defaultIamRoleArn(model.getDefaultIamRoleArn())
             .iamRoles(model.getIamRoles())
-            .logExports(model.getLogExports())
+            .logExportsWithStrings(model.getLogExports())
             .tags(translateTagsToSdk(model.getTags()))
             .build();
   }
 
-  static List<software.amazon.awssdk.services.redshiftarcadiacoral.model.Tag> translateTagsToSdk(final List<software.amazon.redshiftserverless.namespace.Tag> tags) {
+  static List<software.amazon.awssdk.services.redshiftserverless.model.Tag> translateTagsToSdk(final List<software.amazon.redshiftserverless.namespace.Tag> tags) {
     return Optional.ofNullable(tags).orElse(Collections.emptyList())
             .stream()
-            .map(tag -> software.amazon.awssdk.services.redshiftarcadiacoral.model.Tag.builder()
+            .map(tag -> software.amazon.awssdk.services.redshiftserverless.model.Tag.builder()
             .key(tag.getKey())
             .value(tag.getValue()).build())
             .collect(Collectors.toList());
@@ -79,7 +79,7 @@ public class Translator {
             .defaultIamRoleArn(awsResponse.namespace().defaultIamRoleArn())
             .iamRoles(awsResponse.namespace().iamRoles())
             .kmsKeyId(awsResponse.namespace().kmsKeyId())
-            .logExports(awsResponse.namespace().logExports())
+            .logExports(awsResponse.namespace().logExportsAsStrings())
             .namespaceName(awsResponse.namespace().namespaceName())
             .namespace(translateToModelNamespace(awsResponse.namespace()))
             .build();
@@ -110,9 +110,10 @@ public class Translator {
             .adminUserPassword(model.getAdminUserPassword())
             .kmsKeyId(model.getKmsKeyId())
             .iamRoles(model.getIamRoles())
-            .logExports(model.getLogExports())
+            .logExportsWithStrings(model.getLogExports())
             .adminUsername(model.getAdminUsername())
-            .dbName(model.getDbName())
+            //TODO: we only support updating db-name after GA
+//            .dbName(model.getDbName())
             .defaultIamRoleArn(model.getDefaultIamRoleArn())
             .build();
   }
@@ -173,7 +174,7 @@ public class Translator {
   }
 
   private static Namespace translateToModelNamespace(
-          software.amazon.awssdk.services.redshiftarcadiacoral.model.Namespace namespace) {
+          software.amazon.awssdk.services.redshiftserverless.model.Namespace namespace) {
 
     return Namespace.builder()
             .namespaceArn(namespace.namespaceArn())
@@ -184,7 +185,7 @@ public class Translator {
             .kmsKeyId(namespace.kmsKeyId())
             .defaultIamRoleArn(namespace.defaultIamRoleArn())
             .iamRoles(namespace.iamRoles())
-            .logExports(namespace.logExports())
+            .logExports(namespace.logExportsAsStrings())
             .status(namespace.statusAsString())
             .creationDate(namespace.creationDate() == null ? null : namespace.creationDate().toString())
             .build();

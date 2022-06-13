@@ -1,9 +1,9 @@
 package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -31,15 +31,15 @@ public class UpdateHandlerTest extends AbstractTestBase {
     private AmazonWebServicesClientProxy proxy;
 
     @Mock
-    private ProxyClient<RedshiftArcadiaCoralClient> proxyClient;
+    private ProxyClient<RedshiftServerlessClient> proxyClient;
 
     @Mock
-    RedshiftArcadiaCoralClient sdkClient;
+    RedshiftServerlessClient sdkClient;
 
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
-        sdkClient = mock(RedshiftArcadiaCoralClient.class);
+        sdkClient = mock(RedshiftServerlessClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
     }
 

@@ -1,8 +1,8 @@
 package software.amazon.redshiftserverless.namespace;
 
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.DeleteNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.DeleteNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -16,7 +16,7 @@ public class DeleteHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -38,7 +38,7 @@ public class DeleteHandler extends BaseHandlerStd {
     }
 
     private DeleteNamespaceResponse deleteNamespace(final DeleteNamespaceRequest deleteNamespaceRequest,
-                                                    final ProxyClient<RedshiftArcadiaCoralClient> proxyClient) {
+                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
         DeleteNamespaceResponse deleteNamespaceResponse = null;
 
         logger.log(String.format("%s %s deleteNamespace", ResourceModel.TYPE_NAME, deleteNamespaceRequest.namespaceName()));
@@ -49,7 +49,7 @@ public class DeleteHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> deleteNamespaceErrorHandler(final DeleteNamespaceRequest deleteNamespaceRequest,
                                                                                       final Exception exception,
-                                                                                      final ProxyClient<RedshiftArcadiaCoralClient> client,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
         return errorHandler(exception);

@@ -2,9 +2,9 @@ package software.amazon.redshiftserverless.namespace;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.UpdateNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -20,7 +20,7 @@ public class UpdateHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -32,7 +32,8 @@ public class UpdateHandler extends BaseHandlerStd {
         ResourceModel tempUpdateRequestModel = currentModel.toBuilder()
                 .adminUserPassword(StringUtils.equals(prevModel.getAdminUserPassword(), currentModel.getAdminUserPassword()) ? null : currentModel.getAdminUserPassword())
                 .adminUsername(StringUtils.equals(prevModel.getAdminUsername(), currentModel.getAdminUsername()) ? null : currentModel.getAdminUsername())
-                .dbName(StringUtils.equals(prevModel.getDbName(), currentModel.getDbName()) ? null : currentModel.getDbName())
+                //TODO: we only support updating db-name after GA
+//                .dbName(StringUtils.equals(prevModel.getDbName(), currentModel.getDbName()) ? null : currentModel.getDbName())
                 .kmsKeyId(StringUtils.equals(prevModel.getKmsKeyId(), currentModel.getKmsKeyId()) ? null : currentModel.getKmsKeyId())
                 .defaultIamRoleArn(StringUtils.equals(prevModel.getDefaultIamRoleArn(), currentModel.getDefaultIamRoleArn()) ? null : currentModel.getDefaultIamRoleArn())
                 .iamRoles(compareListParamsEqualOrNot(prevModel.getIamRoles(), currentModel.getIamRoles()) ? null : currentModel.getIamRoles())
@@ -69,7 +70,7 @@ public class UpdateHandler extends BaseHandlerStd {
     }
 
     private UpdateNamespaceResponse updateNamespace(final UpdateNamespaceRequest updateNamespaceRequest,
-                                                    final ProxyClient<RedshiftArcadiaCoralClient> proxyClient) {
+                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
         UpdateNamespaceResponse updateNamespaceResponse = null;
 
         logger.log(String.format("%s %s updateNamespace.", ResourceModel.TYPE_NAME, updateNamespaceRequest.namespaceName()));
@@ -81,7 +82,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> updateNamespaceErrorHandler(final UpdateNamespaceRequest updateNamespaceRequest,
                                                                                       final Exception exception,
-                                                                                      final ProxyClient<RedshiftArcadiaCoralClient> client,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
         return errorHandler(exception);

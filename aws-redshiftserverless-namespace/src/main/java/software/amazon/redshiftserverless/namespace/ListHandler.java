@@ -1,9 +1,9 @@
 package software.amazon.redshiftserverless.namespace;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.InternalServerException;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ValidationException;
+import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
@@ -12,7 +12,7 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListNamespacesRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesRequest;
 import java.util.List;
 
 public class ListHandler extends BaseHandler<CallbackContext> {
