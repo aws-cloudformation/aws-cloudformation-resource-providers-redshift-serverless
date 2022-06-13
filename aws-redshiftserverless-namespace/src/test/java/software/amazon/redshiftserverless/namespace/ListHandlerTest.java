@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static software.amazon.redshiftserverless.namespace.AbstractTestBase.AWS_REGION;
 import static software.amazon.redshiftserverless.namespace.AbstractTestBase.getListRequestResourceModel;
 import static software.amazon.redshiftserverless.namespace.AbstractTestBase.getListResponsesResourceModel;
 import static software.amazon.redshiftserverless.namespace.AbstractTestBase.getListResponsesSdk;
@@ -35,6 +36,7 @@ public class ListHandlerTest {
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
         logger = mock(Logger.class);
+        System.setProperty("aws.region", AWS_REGION);
     }
 
     @Test

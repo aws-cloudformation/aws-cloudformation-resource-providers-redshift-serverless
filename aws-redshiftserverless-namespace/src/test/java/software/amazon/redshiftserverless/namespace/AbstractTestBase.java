@@ -42,6 +42,7 @@ public class AbstractTestBase {
   private static final software.amazon.awssdk.services.redshiftserverless.model.Namespace NAMESPACE;
   private static final String FINAL_SNAPSHOT_NAME;
   private static final int FINAL_SNAPSHOT_RETENTION_PERIOD;
+  protected static final String AWS_REGION = "us-east-1";
 
   static {
     MOCK_CREDENTIALS = new Credentials("accessKey", "secretKey", "token");
