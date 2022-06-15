@@ -1,8 +1,8 @@
 {
     "CREATE": {
-        "/WorkgroupName": "testworkgroup4",
-        "/NamespaceName": "testnamespace4",
-        "/BaseCapacity": 16,
+        "/WorkgroupName": "testworkgroup221",
+        "/NamespaceName": "testnamespace221",
+        "/BaseCapacity": 32,
         "/ConfigParameters": [],
         "/SubnetIds": [],
         "/SecurityGroupIds": [],
@@ -11,14 +11,8 @@
         "/EnhancedVpcRouting": false
     },
     "UPDATE": {
-        "/WorkgroupName": "testworkgroup4",
-        "/NamespaceName": "testnamespace4",
-        "/BaseCapacity": 32,
-        "/ConfigParameters": [],
-        "/SubnetIds": [],
-        "/SecurityGroupIds": [],
-        "/Tags": [],
-        "/AdditionalInfo": [],
-        "/EnhancedVpcRouting": false
+        "/WorkgroupName": "testworkgroup221",
+        "/NamespaceName": "testnamespace221",
+        "/BaseCapacity": 40
     }
 }

@@ -10,9 +10,9 @@ import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.Workgroup;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
+import software.amazon.awssdk.services.redshiftserverless.model.Workgroup;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
 import software.amazon.cloudformation.proxy.LoggerProxy;
@@ -32,7 +32,7 @@ public class AbstractTestBase {
   private static final List<String> SUBNET_IDS;
   private static final List<String> SECURITY_GROUP_IDS;
   private static final List<ConfigParameter> CONFIG_PARAMETERS;
-  private static final Collection<software.amazon.awssdk.services.redshiftarcadiacoral.model.ConfigParameter> RESPONSE_CONFIG_PARAMS;
+  private static final Collection<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> RESPONSE_CONFIG_PARAMS;
 
   static {
     MOCK_CREDENTIALS = new Credentials("accessKey", "secretKey", "token");
@@ -49,10 +49,10 @@ public class AbstractTestBase {
     RESPONSE_CONFIG_PARAMS = Collections.emptyList();
 
   }
-  static ProxyClient<RedshiftArcadiaCoralClient> MOCK_PROXY(
+  static ProxyClient<RedshiftServerlessClient> MOCK_PROXY(
     final AmazonWebServicesClientProxy proxy,
-    final RedshiftArcadiaCoralClient sdkClient) {
-    return new ProxyClient<RedshiftArcadiaCoralClient>() {
+    final RedshiftServerlessClient sdkClient) {
+    return new ProxyClient<RedshiftServerlessClient>() {
       @Override
       public <RequestT extends AwsRequest, ResponseT extends AwsResponse> ResponseT
       injectCredentialsAndInvokeV2(RequestT request, Function<RequestT, ResponseT> requestFunction) {
@@ -86,7 +86,7 @@ public class AbstractTestBase {
       }
 
       @Override
-      public RedshiftArcadiaCoralClient client() {
+      public RedshiftServerlessClient client() {
         return sdkClient;
       }
     };

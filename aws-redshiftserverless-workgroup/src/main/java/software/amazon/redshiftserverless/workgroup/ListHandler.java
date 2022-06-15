@@ -2,9 +2,10 @@ package software.amazon.redshiftserverless.workgroup;
 
 import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListWorkgroupsRequest;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ListWorkgroupsResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.ValidationException;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;

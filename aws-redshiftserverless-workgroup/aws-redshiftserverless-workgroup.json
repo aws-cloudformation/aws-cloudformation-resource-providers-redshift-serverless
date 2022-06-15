@@ -101,8 +101,7 @@
                     "items": {
                         "$ref": "#/definitions/ConfigParameter"
                     },
-                    "insertionOrder": false,
-                    "pattern": "^[a-z0-9]*$"
+                    "insertionOrder": false
                 },
                 "SecurityGroupIds": {
                     "type": "array",
@@ -131,6 +130,26 @@
                     "type": "string"
                 }
             },
+            "additionalProperties": false
+        },
+        "Tag": {
+            "type": "object",
+            "properties": {
+                "Key": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 1
+                },
+                "Value": {
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 0
+                }
+            },
+            "required": [
+                "Key",
+                "Value"
+            ],
             "additionalProperties": false
         },
         "WorkgroupStatus": {
@@ -169,6 +188,15 @@
             "maxLength": 64,
             "minLength": 3,
             "pattern": "^[a-z0-9]+$"
+        },
+        "Tags": {
+            "type": "array",
+            "insertionOrder": false,
+            "items": {
+                "$ref": "#/definitions/Tag"
+            },
+            "maxItems": 200,
+            "minItems": 0
         },
         "SecurityGroupIds": {
             "type": "array",

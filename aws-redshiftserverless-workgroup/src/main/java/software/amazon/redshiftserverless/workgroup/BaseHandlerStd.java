@@ -2,9 +2,9 @@ package software.amazon.redshiftserverless.workgroup;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.util.CollectionUtils;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.Workgroup;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
+import software.amazon.awssdk.services.redshiftserverless.model.Workgroup;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -46,11 +46,11 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     final AmazonWebServicesClientProxy proxy,
     final ResourceHandlerRequest<ResourceModel> request,
     final CallbackContext callbackContext,
-    final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+    final ProxyClient<RedshiftServerlessClient> proxyClient,
     final Logger logger);
 
   private Logger logger;
-  public boolean isWorkgroupActive(final ProxyClient<RedshiftArcadiaCoralClient> proxyClient, ResourceModel model, CallbackContext cxt) {
+  public boolean isWorkgroupActive(final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel model, CallbackContext cxt) {
     GetWorkgroupRequest awsRequest =
             GetWorkgroupRequest.builder().workgroupName(model.getWorkgroupName()).build();
     GetWorkgroupResponse awsResponse =
@@ -60,7 +60,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     return awsResponse.workgroup().statusAsString().equalsIgnoreCase(WorkgroupStatus.AVAILABLE.toString());
   }
 
-  protected boolean isWorkgroupActiveAfterDelete (final ProxyClient<RedshiftArcadiaCoralClient> proxyClient, ResourceModel model, CallbackContext cxt) {
+  protected boolean isWorkgroupActiveAfterDelete (final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel model, CallbackContext cxt) {
     GetWorkgroupRequest awsRequest =
             GetWorkgroupRequest.builder().workgroupName(model.getWorkgroupName()).build();
     try {

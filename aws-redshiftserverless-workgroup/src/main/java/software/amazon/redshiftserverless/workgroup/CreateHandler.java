@@ -1,10 +1,10 @@
 package software.amazon.redshiftserverless.workgroup;
 
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
 
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
@@ -22,7 +22,7 @@ public class CreateHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -41,7 +41,7 @@ public class CreateHandler extends BaseHandlerStd {
     }
 
     private CreateWorkgroupResponse createWorkgroup(final CreateWorkgroupRequest awsRequest,
-                                                          final ProxyClient<RedshiftArcadiaCoralClient> proxyClient) {
+                                                          final ProxyClient<RedshiftServerlessClient> proxyClient) {
 
         CreateWorkgroupResponse awsResponse;
         awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::createWorkgroup);
@@ -52,7 +52,7 @@ public class CreateHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> createWorkgroupErrorHandler(final CreateWorkgroupRequest awsRequest,
                                                                                              final Exception exception,
-                                                                                             final ProxyClient<RedshiftArcadiaCoralClient> client,
+                                                                                             final ProxyClient<RedshiftServerlessClient> client,
                                                                                              final ResourceModel model,
                                                                                              final CallbackContext context) {
         if (exception instanceof ValidationException) {
@@ -62,9 +62,10 @@ public class CreateHandler extends BaseHandlerStd {
         } else if (exception instanceof InternalServerException || exception instanceof TooManyTagsException) {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InternalFailure);
         } else if (exception instanceof ConflictException) {
+            if (exception.getMessage().contains("already exists")) {
+                return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.AlreadyExists);
+            }
             return ProgressEvent.defaultFailureHandler(exception,HandlerErrorCode.ResourceConflict);
-        } else if (exception.getMessage().contains("already exists")) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.AlreadyExists);
         } else {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
         }

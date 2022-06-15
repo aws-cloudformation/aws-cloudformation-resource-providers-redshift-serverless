@@ -3,8 +3,8 @@ package software.amazon.redshiftserverless.workgroup;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -20,7 +20,7 @@ public class UpdateHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -38,7 +38,7 @@ public class UpdateHandler extends BaseHandlerStd {
     }
 
     private UpdateWorkgroupResponse updateWorkgroup(final UpdateWorkgroupRequest awsRequest,
-                                                          final ProxyClient<RedshiftArcadiaCoralClient> proxyClient) {
+                                                          final ProxyClient<RedshiftServerlessClient> proxyClient) {
         UpdateWorkgroupResponse awsResponse;
         awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::updateWorkgroup);
 
@@ -48,7 +48,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> updateWorkflowErrorHandler(final UpdateWorkgroupRequest awsRequest,
                                                                                              final Exception exception,
-                                                                                             final ProxyClient<RedshiftArcadiaCoralClient> client,
+                                                                                             final ProxyClient<RedshiftServerlessClient> client,
                                                                                              final ResourceModel model,
                                                                                              final CallbackContext context) {
         if (exception instanceof ResourceNotFoundException) {

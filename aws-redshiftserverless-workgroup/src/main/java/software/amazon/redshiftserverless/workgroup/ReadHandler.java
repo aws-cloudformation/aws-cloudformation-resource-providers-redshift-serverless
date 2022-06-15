@@ -3,9 +3,9 @@ package software.amazon.redshiftserverless.workgroup;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.Workgroup;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
+import software.amazon.awssdk.services.redshiftserverless.model.Workgroup;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -21,7 +21,7 @@ public class ReadHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -33,7 +33,7 @@ public class ReadHandler extends BaseHandlerStd {
     }
 
     private GetWorkgroupResponse getWorkgroup(final GetWorkgroupRequest awsRequest,
-                                              final ProxyClient<RedshiftArcadiaCoralClient> proxyClient) {
+                                              final ProxyClient<RedshiftServerlessClient> proxyClient) {
         GetWorkgroupResponse awsResponse;
         awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::getWorkgroup);
         logger.log(String.format("%s has successfully been read. status: " + awsResponse.workgroup().statusAsString(), ResourceModel.TYPE_NAME));
@@ -42,7 +42,7 @@ public class ReadHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> getWorkgroupErrorHandler(final GetWorkgroupRequest awsRequest,
                                                                                                final Exception exception,
-                                                                                               final ProxyClient<RedshiftArcadiaCoralClient> client,
+                                                                                               final ProxyClient<RedshiftServerlessClient> client,
                                                                                                final ResourceModel model,
                                                                                                final CallbackContext context) {
         if (exception instanceof ResourceNotFoundException) {

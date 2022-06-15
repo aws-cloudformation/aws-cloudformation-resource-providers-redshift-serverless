@@ -3,7 +3,7 @@ package software.amazon.redshiftserverless.workgroup;
 import com.google.common.collect.Lists;
 import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
 import software.amazon.cloudformation.proxy.Logger;
 
 import java.util.*;
@@ -37,10 +37,19 @@ public class Translator {
             .subnetIds(model.getSubnetIds())
             .configParameters(convertConfigParametersToRequest(model.getConfigParameters()))
             .publiclyAccessible(model.getPubliclyAccessible())
+            .tags(translateTagsToSdk(model.getTags()))
             .build();
 
   }
 
+  static List<software.amazon.awssdk.services.redshiftserverless.model.Tag> translateTagsToSdk(final List<software.amazon.redshiftserverless.workgroup.Tag> tags) {
+    return Optional.ofNullable(tags).orElse(Collections.emptyList())
+            .stream()
+            .map(tag -> software.amazon.awssdk.services.redshiftserverless.model.Tag.builder()
+                    .key(tag.getKey())
+                    .value(tag.getValue()).build())
+            .collect(Collectors.toList());
+  }
   /**
    * Request to read a resource
    * @param model resource model
@@ -130,11 +139,11 @@ public class Translator {
         .orElseGet(Stream::empty);
   }
 
-  private static Collection<software.amazon.awssdk.services.redshiftarcadiacoral.model.ConfigParameter> convertConfigParametersToRequest(List<software.amazon.redshiftserverless.workgroup.ConfigParameter> configParameters) {
-    Collection<software.amazon.awssdk.services.redshiftarcadiacoral.model.ConfigParameter> newConfigParameters = new ArrayList<>();
+  private static Collection<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> convertConfigParametersToRequest(List<software.amazon.redshiftserverless.workgroup.ConfigParameter> configParameters) {
+    Collection<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> newConfigParameters = new ArrayList<>();
     if (configParameters!=null) {
       for (software.amazon.redshiftserverless.workgroup.ConfigParameter configParameter : configParameters) {
-        newConfigParameters.add(software.amazon.awssdk.services.redshiftarcadiacoral.model.ConfigParameter.builder()
+        newConfigParameters.add(software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter.builder()
                 .parameterKey(configParameter.getParameterKey())
                 .parameterValue(configParameter.getParameterValue())
                 .build());
@@ -143,9 +152,9 @@ public class Translator {
     return newConfigParameters;
   }
 
-  private static List<software.amazon.redshiftserverless.workgroup.ConfigParameter> convertConfigParametersFromResponse(Collection<software.amazon.awssdk.services.redshiftarcadiacoral.model.ConfigParameter> configParameters) {
+  private static List<software.amazon.redshiftserverless.workgroup.ConfigParameter> convertConfigParametersFromResponse(Collection<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> configParameters) {
     ArrayList<ConfigParameter> newConfigParameters = new ArrayList<>();
-    for(software.amazon.awssdk.services.redshiftarcadiacoral.model.ConfigParameter cp: configParameters) {
+    for(software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter cp: configParameters) {
       newConfigParameters.add(ConfigParameter.builder()
               .parameterKey(cp.parameterKey())
               .parameterValue(cp.parameterValue())

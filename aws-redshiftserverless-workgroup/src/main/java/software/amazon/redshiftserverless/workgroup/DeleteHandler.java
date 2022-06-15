@@ -1,7 +1,7 @@
 package software.amazon.redshiftserverless.workgroup;
 
-import software.amazon.awssdk.services.redshiftarcadiacoral.RedshiftArcadiaCoralClient;
-import software.amazon.awssdk.services.redshiftarcadiacoral.model.*;
+import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.*;
 
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -17,7 +17,7 @@ public class DeleteHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<RedshiftArcadiaCoralClient> proxyClient,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -36,7 +36,7 @@ public class DeleteHandler extends BaseHandlerStd {
     }
 
     private DeleteWorkgroupResponse deleteWorkgroup(final DeleteWorkgroupRequest awsRequest,
-                                                    final ProxyClient<RedshiftArcadiaCoralClient> proxyClient) {
+                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
         DeleteWorkgroupResponse awsResponse;
         awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::deleteWorkgroup);
 
@@ -46,7 +46,7 @@ public class DeleteHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> deleteWorkgroupErrorHandler(final DeleteWorkgroupRequest awsRequest,
                                                                                             final Exception exception,
-                                                                                            final ProxyClient<RedshiftArcadiaCoralClient> client,
+                                                                                            final ProxyClient<RedshiftServerlessClient> client,
                                                                                             final ResourceModel model,
                                                                                             final CallbackContext context) {
         if (exception instanceof ResourceNotFoundException) {
