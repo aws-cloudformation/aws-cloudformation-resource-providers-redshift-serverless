@@ -124,7 +124,7 @@
             "insertionOrder": false,
             "items": {
                 "type": "string",
-                "maxLength": 1024,
+                "maxLength": 512,
                 "minLength": 0
             }
         },
