@@ -1,7 +1,11 @@
 package software.amazon.redshiftserverless.workgroup;
 
-import java.time.Duration;
-import software.amazon.awssdk.core.SdkClient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
@@ -10,27 +14,26 @@ import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateHandlerTest extends AbstractTestBase {
 
     @Mock
+    RedshiftServerlessClient sdkClient;
+    @Mock
     private AmazonWebServicesClientProxy proxy;
-
     @Mock
     private ProxyClient<RedshiftServerlessClient> proxyClient;
-
-    @Mock
-    RedshiftServerlessClient sdkClient;
 
     @BeforeEach
     public void setup() {
@@ -50,7 +53,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         final CreateHandler handler = new CreateHandler();
 
         final ResourceModel requestResourceModel = createRequestResourceModel();
-        final ResourceModel responseResourceModel = getReadResponseResourceModel();;
+        final ResourceModel responseResourceModel = getReadResponseResourceModel();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(requestResourceModel)

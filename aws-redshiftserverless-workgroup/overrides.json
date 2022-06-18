@@ -1,18 +1,31 @@
 {
     "CREATE": {
-        "/WorkgroupName": "testworkgroup221",
-        "/NamespaceName": "testnamespace221",
-        "/BaseCapacity": 32,
-        "/ConfigParameters": [],
-        "/SubnetIds": [],
-        "/SecurityGroupIds": [],
-        "/Tags": [],
-        "/AdditionalInfo": [],
-        "/EnhancedVpcRouting": false
+        "/NamespaceName": "{{RedshiftServerlessWorkgroupContractNamespace}}",
+        "/BaseCapacity": null,
+        "/ConfigParameters": null,
+        "/SubnetIds": null,
+        "/SecurityGroupIds": null,
+        "/EnhancedVpcRouting": null,
+        "/PubliclyAccessible": false,
+        "/Tags": [
+            {
+                "Key": "CreateKey",
+                "Value": "CreateVal"
+            }
+        ]
     },
     "UPDATE": {
-        "/WorkgroupName": "testworkgroup221",
-        "/NamespaceName": "testnamespace221",
-        "/BaseCapacity": 40
+        "/BaseCapacity": null,
+        "/ConfigParameters": null,
+        "/SubnetIds": null,
+        "/SecurityGroupIds": null,
+        "/EnhancedVpcRouting": null,
+        "/PubliclyAccessible": true,
+        "/Tags": [
+            {
+                "Key": "UpdateKey",
+                "Value": "UpdateVal"
+            }
+        ]
     }
 }

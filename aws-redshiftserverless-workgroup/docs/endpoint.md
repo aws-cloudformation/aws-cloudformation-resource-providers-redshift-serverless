@@ -9,7 +9,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <pre>
 {
     "<a href="#address" title="Address">Address</a>" : <i>String</i>,
-    "<a href="#port" title="Port">Port</a>" : <i>Double</i>,
+    "<a href="#port" title="Port">Port</a>" : <i>Integer</i>,
     "<a href="#vpcendpoints" title="VpcEndpoints">VpcEndpoints</a>" : <i>[ <a href="vpcendpoint.md">VpcEndpoint</a>, ... ]</i>
 }
 </pre>
@@ -18,7 +18,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 
 <pre>
 <a href="#address" title="Address">Address</a>: <i>String</i>
-<a href="#port" title="Port">Port</a>: <i>Double</i>
+<a href="#port" title="Port">Port</a>: <i>Integer</i>
 <a href="#vpcendpoints" title="VpcEndpoints">VpcEndpoints</a>: <i>
       - <a href="vpcendpoint.md">VpcEndpoint</a></i>
 </pre>
@@ -37,7 +37,7 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 _Required_: No
 
-_Type_: Double
+_Type_: Integer
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
@@ -48,4 +48,3 @@ _Required_: No
 _Type_: List of <a href="vpcendpoint.md">VpcEndpoint</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-

@@ -30,10 +30,20 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                - "ec2:DescribeAccountAttributes"
+                - "ec2:DescribeAddresses"
+                - "ec2:DescribeAvailabilityZones"
+                - "ec2:DescribeInternetGateways"
+                - "ec2:DescribeSecurityGroups"
+                - "ec2:DescribeSubnets"
+                - "ec2:DescribeVpcAttribute"
                 - "redshift-serverless:CreateWorkgroup"
                 - "redshift-serverless:DeleteWorkgroup"
                 - "redshift-serverless:GetWorkgroup"
+                - "redshift-serverless:ListTagsForResource"
                 - "redshift-serverless:ListWorkgroups"
+                - "redshift-serverless:TagResource"
+                - "redshift-serverless:UntagResource"
                 - "redshift-serverless:UpdateWorkgroup"
                 Resource: "*"
 Outputs:

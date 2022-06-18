@@ -20,22 +20,17 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>redshiftserverless</artifactId>
-            <version>1.0</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/software.amazon.cloudformation/aws-cloudformation-rpdk-java-plugin -->
         <dependency>
             <groupId>software.amazon.cloudformation</groupId>
             <artifactId>aws-cloudformation-rpdk-java-plugin</artifactId>
             <version>[2.0.0,3.0.0)</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/redshift -->
+        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/redshiftserverless -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
-            <artifactId>redshift</artifactId>
-            <version>2.17.12</version>
+            <artifactId>redshiftserverless</artifactId>
+            <version>2.17.213</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
@@ -91,6 +86,12 @@
             <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -117,26 +118,6 @@
                         <arg>-Werror</arg>
                     </compilerArgs>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <file>/Volumes/workplace/aws-cloudformation-resource-providers-redshiftserverless/aws-redshiftserverless-workgroup/AwsJavaSdk-RedshiftServerless-2.0.jar</file>
-                            <groupId>software.amazon.awssdk</groupId>
-                            <artifactId>redshiftserverless</artifactId>
-                            <version>1.0</version>
-                            <packaging>jar</packaging>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

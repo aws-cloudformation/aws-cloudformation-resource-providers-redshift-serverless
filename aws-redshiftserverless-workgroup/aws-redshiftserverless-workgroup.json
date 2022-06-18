@@ -7,10 +7,14 @@
             "type": "object",
             "properties": {
                 "ParameterKey": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 0
                 },
                 "ParameterValue": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 15000,
+                    "minLength": 0
                 }
             },
             "additionalProperties": false
@@ -22,7 +26,7 @@
                     "type": "string"
                 },
                 "Port": {
-                    "type": "number"
+                    "type": "integer"
                 },
                 "VpcEndpoints": {
                     "type": "array",
@@ -82,13 +86,15 @@
                 },
                 "WorkgroupName": {
                     "type": "string",
+                    "pattern": "^[a-z0-9-]*$",
                     "maxLength": 64,
-                    "minLength": 3,
-                    "pattern": "^[a-z0-9]*$"
+                    "minLength": 3
                 },
                 "NamespaceName": {
                     "type": "string",
-                    "pattern": "^[a-z0-9]*$"
+                    "pattern": "^[a-z0-9-]+$",
+                    "maxLength": 64,
+                    "minLength": 3
                 },
                 "BaseCapacity": {
                     "type": "integer"
@@ -101,19 +107,26 @@
                     "items": {
                         "$ref": "#/definitions/ConfigParameter"
                     },
+                    "uniqueItems": true,
                     "insertionOrder": false
                 },
                 "SecurityGroupIds": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^sg-[0-9a-fA-F]{8,}$",
+                        "maxLength": 255,
+                        "minLength": 0
                     },
                     "insertionOrder": false
                 },
                 "SubnetIds": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^subnet-[0-9a-fA-F]{8,}$",
+                        "maxLength": 255,
+                        "minLength": 0
                     },
                     "insertionOrder": false
                 },
@@ -163,31 +176,59 @@
         }
     },
     "properties": {
-        "AdditionalInfo": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ConfigParameter"
-            },
-            "insertionOrder": false
+        "WorkgroupName": {
+            "type": "string",
+            "pattern": "^(?=^[a-z0-9-]+$).{3,64}$",
+            "maxLength": 64,
+            "minLength": 3
+        },
+        "NamespaceName": {
+            "type": "string",
+            "pattern": "^(?=^[a-z0-9-]+$).{3,64}$",
+            "maxLength": 64,
+            "minLength": 3
         },
         "BaseCapacity": {
             "type": "integer"
         },
-        "ConfigParameters": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ConfigParameter"
-            },
-            "insertionOrder": false
-        },
         "EnhancedVpcRouting": {
             "type": "boolean"
         },
-        "NamespaceName": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 3,
-            "pattern": "^[a-z0-9]+$"
+        "ConfigParameters": {
+            "type": "array",
+            "uniqueItems": true,
+            "insertionOrder": false,
+            "items": {
+                "$ref": "#/definitions/ConfigParameter"
+            },
+            "minItems": 1
+        },
+        "SecurityGroupIds": {
+            "type": "array",
+            "insertionOrder": false,
+            "items": {
+                "type": "string",
+                "pattern": "^sg-[0-9a-fA-F]{8,}$",
+                "maxLength": 255,
+                "minLength": 0
+            },
+            "maxItems": 32,
+            "minItems": 1
+        },
+        "SubnetIds": {
+            "type": "array",
+            "insertionOrder": false,
+            "items": {
+                "type": "string",
+                "pattern": "^subnet-[0-9a-fA-F]{8,}$",
+                "maxLength": 255,
+                "minLength": 0
+            },
+            "maxItems": 32,
+            "minItems": 1
+        },
+        "PubliclyAccessible": {
+            "type": "boolean"
         },
         "Tags": {
             "type": "array",
@@ -198,55 +239,32 @@
             "maxItems": 200,
             "minItems": 0
         },
-        "SecurityGroupIds": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "insertionOrder": false
-        },
-        "SubnetIds": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "insertionOrder": false
-        },
         "Workgroup": {
             "$ref": "#/definitions/Workgroup"
-        },
-        "WorkgroupName": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 3,
-            "pattern": "^[a-z0-9]*$"
-        },
-        "PubliclyAccessible": {
-            "type": "boolean"
         }
     },
     "tagging": {
         "taggable": true
     },
+    "additionalProperties": false,
     "required": [
-        "NamespaceName"
+        "WorkgroupName"
+    ],
+    "createOnlyProperties": [
+        "/properties/WorkgroupName",
+        "/properties/NamespaceName"
     ],
     "readOnlyProperties": [
         "/properties/Workgroup"
     ],
     "writeOnlyProperties": [
-        "/properties/AdditionalInfo",
         "/properties/BaseCapacity",
         "/properties/ConfigParameters",
         "/properties/EnhancedVpcRouting",
-        "/properties/NamespaceName",
         "/properties/PubliclyAccessible",
         "/properties/SecurityGroupIds",
         "/properties/SubnetIds",
         "/properties/Tags"
-    ],
-    "createOnlyProperties": [
-        "/properties/WorkgroupName"
     ],
     "primaryIdentifier": [
         "/properties/WorkgroupName"
@@ -254,29 +272,67 @@
     "handlers": {
         "create": {
             "permissions": [
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeAccountAttributes",
+                "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:CreateWorkgroup"
             ]
         },
         "read": {
             "permissions": [
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeAccountAttributes",
+                "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:GetWorkgroup"
             ]
         },
         "update": {
             "permissions": [
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeAccountAttributes",
+                "ec2:DescribeAvailabilityZones",
+                "redshift-serverless:ListTagsForResource",
+                "redshift-serverless:TagResource",
+                "redshift-serverless:UntagResource",
+                "redshift-serverless:GetWorkgroup",
                 "redshift-serverless:UpdateWorkgroup"
             ]
         },
         "delete": {
             "permissions": [
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeAccountAttributes",
+                "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:DeleteWorkgroup"
             ]
         },
         "list": {
             "permissions": [
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeAccountAttributes",
+                "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:ListWorkgroups"
             ]
         }
-    },
-    "additionalProperties": false
+    }
 }
