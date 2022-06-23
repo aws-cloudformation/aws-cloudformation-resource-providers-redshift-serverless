@@ -30,7 +30,7 @@ public class DeleteHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Delete", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
-                                .backoffDelay(DELETE_BACKOFF_STRATEGY)
+                                .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::deleteWorkgroup)
                                 .stabilize(this::isWorkgroupStable)
                                 .handleError(this::deleteWorkgroupErrorHandler)

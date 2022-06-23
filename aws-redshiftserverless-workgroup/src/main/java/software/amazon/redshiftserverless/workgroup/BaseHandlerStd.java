@@ -3,7 +3,6 @@ package software.amazon.redshiftserverless.workgroup;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
@@ -20,13 +19,8 @@ import java.time.Duration;
 
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
 
-    protected static final Constant DELETE_BACKOFF_STRATEGY = Constant.of()
-            .timeout(Duration.ofMinutes(5L))
-            .delay(Duration.ofSeconds(5L))
-            .build();
-
-    protected static final Constant UPDATE_BACKOFF_STRATEGY = Constant.of()
-            .timeout(Duration.ofMinutes(20L))
+    protected static final Constant BACKOFF_STRATEGY = Constant.of()
+            .timeout(Duration.ofMinutes(30L))
             .delay(Duration.ofSeconds(5L))
             .build();
 
@@ -62,11 +56,11 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
                 .build();
 
         try {
-            String workgroupStatus = proxyClient.injectCredentialsAndInvokeV2(getStatusRequest, proxyClient.client()::getWorkgroup)
+            WorkgroupStatus workgroupStatus = proxyClient.injectCredentialsAndInvokeV2(getStatusRequest, proxyClient.client()::getWorkgroup)
                     .workgroup()
-                    .statusAsString();
+                    .status();
 
-            return workgroupStatus.equalsIgnoreCase(WorkgroupStatus.AVAILABLE.toString());
+            return workgroupStatus.equals(WorkgroupStatus.AVAILABLE);
 
         } catch (ResourceNotFoundException e) {
             return awsRequest instanceof DeleteWorkgroupRequest;

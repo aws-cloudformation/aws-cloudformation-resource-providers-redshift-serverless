@@ -11,7 +11,7 @@ public class ClientBuilder {
     // TODO: change the endpoint when it goes to prod
     public static RedshiftServerlessClient getClient() {
         return RedshiftServerlessClient.builder()
-                .endpointOverride(URI.create("https://devo.us-east-1.serverless.redshift.aws.a2z.com"))
+                .endpointOverride(URI.create("https://qa.us-east-1.serverless.redshift.aws.a2z.com"))
                 .region(Region.US_EAST_1)
                 .httpClient(LambdaWrapper.HTTP_CLIENT)
                 .build();

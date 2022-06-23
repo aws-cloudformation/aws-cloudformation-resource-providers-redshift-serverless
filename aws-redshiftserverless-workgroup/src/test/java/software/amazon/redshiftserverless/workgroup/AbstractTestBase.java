@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.DeleteWorkgroupR
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
 import software.amazon.cloudformation.proxy.LoggerProxy;
@@ -31,7 +32,7 @@ public class AbstractTestBase {
     private static final String WORKGROUP_ARN;
     private static final int BASE_CAPACITY;
     private static final int UPDATED_BASE_CAPACITY;
-    private static final String STATUS;
+    private static final WorkgroupStatus STATUS;
     private static final List<String> SUBNET_IDS;
     private static final List<String> SECURITY_GROUP_IDS;
     private static final Set<ConfigParameter> CONFIG_PARAMETERS;
@@ -47,7 +48,7 @@ public class AbstractTestBase {
         WORKGROUP_ARN = "DUMMY_WORKGROUP_ARN";
         BASE_CAPACITY = 0;
         UPDATED_BASE_CAPACITY = 0;
-        STATUS = "available";
+        STATUS = WorkgroupStatus.AVAILABLE;
         SUBNET_IDS = Collections.emptyList();
         SECURITY_GROUP_IDS = Collections.emptyList();
         CONFIG_PARAMETERS = Collections.emptySet();
@@ -115,7 +116,7 @@ public class AbstractTestBase {
                         .workgroupName(WORKGROUP_NAME)
                         .namespaceName(NAMESPACE_NAME)
                         .workgroupArn(WORKGROUP_ARN)
-                        .status(STATUS)
+                        .status(STATUS.toString())
                         .baseCapacity(BASE_CAPACITY)
                         .securityGroupIds(SECURITY_GROUP_IDS)
                         .subnetIds(SUBNET_IDS)
@@ -184,6 +185,7 @@ public class AbstractTestBase {
         return CreateWorkgroupResponse.builder()
                 .workgroup(software.amazon.awssdk.services.redshiftserverless.model.Workgroup.builder()
                         .workgroupName(WORKGROUP_NAME)
+                        .status(STATUS)
                         .build())
                 .build();
     }
@@ -196,6 +198,7 @@ public class AbstractTestBase {
         return UpdateWorkgroupResponse.builder()
                 .workgroup(software.amazon.awssdk.services.redshiftserverless.model.Workgroup.builder()
                         .workgroupName(WORKGROUP_NAME)
+                        .status(STATUS)
                         .build())
                 .build();
     }

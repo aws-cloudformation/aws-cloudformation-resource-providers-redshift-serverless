@@ -70,6 +70,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
+                                .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isWorkgroupStable)
                                 .handleError(this::operateTagsErrorHandler)
@@ -78,7 +79,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateInstance", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
-                                .backoffDelay(UPDATE_BACKOFF_STRATEGY)
+                                .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateWorkgroup)
                                 .stabilize(this::isWorkgroupStable)
                                 .handleError(this::updateWorkgroupErrorHandler)
