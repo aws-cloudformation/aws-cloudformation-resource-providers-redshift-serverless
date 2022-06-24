@@ -26,7 +26,7 @@ public class DeleteHandler extends BaseHandlerStd {
                 .then(progress ->
                     proxy.initiate("AWS-RedshiftServerless-Namespace::Delete", proxyClient, model, callbackContext)
                             .translateToServiceRequest(Translator::translateToDeleteRequest)
-                            .backoffDelay(DELETE_BACKOFF_STRATEGY)
+                            .backoffDelay(BACKOFF_STRATEGY)
                             .makeServiceCall(this::deleteNamespace)
                             .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActiveAfterDelete(_client, _model, _context))
                             .handleError(this::deleteNamespaceErrorHandler)

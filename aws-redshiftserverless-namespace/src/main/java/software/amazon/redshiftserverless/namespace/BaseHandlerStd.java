@@ -21,11 +21,8 @@ import java.time.Duration;
 
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
   protected final String NAMESPACE_STATUS_AVAILABLE = "available";
-  protected static final Constant DELETE_BACKOFF_STRATEGY = Constant.of().
-          timeout(Duration.ofMinutes(5L)).delay(Duration.ofSeconds(10L)).build();
-
-  protected static final Constant UPDATE_BACKOFF_STRATEGY = Constant.of().
-          timeout(Duration.ofMinutes(20L)).delay(Duration.ofSeconds(10L)).build();
+  protected static final Constant BACKOFF_STRATEGY = Constant.of().
+          timeout(Duration.ofMinutes(30L)).delay(Duration.ofSeconds(10L)).build();
 
   @Override
   public final ProgressEvent<ResourceModel, CallbackContext> handleRequest(

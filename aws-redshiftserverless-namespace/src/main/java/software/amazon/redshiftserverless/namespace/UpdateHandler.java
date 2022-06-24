@@ -61,7 +61,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Namespace::Update::first", proxyClient, updateRequestModel, progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
-                                .backoffDelay(UPDATE_BACKOFF_STRATEGY)
+                                .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateNamespace)
                                 .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
                                 .handleError(this::updateNamespaceErrorHandler)
