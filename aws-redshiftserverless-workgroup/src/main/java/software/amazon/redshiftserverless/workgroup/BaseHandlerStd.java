@@ -60,10 +60,14 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
                     .workgroup()
                     .status();
 
-            return workgroupStatus.equals(WorkgroupStatus.AVAILABLE);
+            return workgroupStatus.equals(WorkgroupStatus.AVAILABLE) && !(awsRequest instanceof DeleteWorkgroupRequest);
 
         } catch (ResourceNotFoundException e) {
-            return awsRequest instanceof DeleteWorkgroupRequest;
+            if (awsRequest instanceof DeleteWorkgroupRequest) {
+                return true;
+            } else {
+                throw e;
+            }
         }
     }
 }
