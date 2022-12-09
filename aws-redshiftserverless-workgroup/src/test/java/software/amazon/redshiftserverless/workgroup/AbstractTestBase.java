@@ -121,6 +121,7 @@ public class AbstractTestBase {
                         .securityGroupIds(SECURITY_GROUP_IDS)
                         .subnetIds(SUBNET_IDS)
                         .configParameters(CONFIG_PARAMETERS)
+                        .creationDate("null")
                         .build())
                 .build();
     }
@@ -136,6 +137,7 @@ public class AbstractTestBase {
                         .securityGroupIds(SECURITY_GROUP_IDS)
                         .subnetIds(SUBNET_IDS)
                         .configParameters(RESPONSE_CONFIG_PARAMS)
+                        .creationDate(null)
                         .build())
                 .build();
     }

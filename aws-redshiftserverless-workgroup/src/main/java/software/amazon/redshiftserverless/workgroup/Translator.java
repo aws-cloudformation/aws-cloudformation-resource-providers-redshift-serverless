@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupR
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,7 @@ public class Translator {
                         .status(awsResponse.workgroup().statusAsString())
                         .endpoint(translateToModelEndpoint(awsResponse.workgroup().endpoint()))
                         .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
+                        .creationDate(Objects.toString(awsResponse.workgroup().creationDate()))
                         .build())
                 .build();
     }
