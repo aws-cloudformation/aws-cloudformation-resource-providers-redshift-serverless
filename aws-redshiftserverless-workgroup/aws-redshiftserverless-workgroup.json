@@ -139,6 +139,9 @@
                 "PubliclyAccessible": {
                     "type": "boolean"
                 },
+                "Port": {
+                    "type": "integer"
+                },
                 "CreationDate": {
                     "type": "string"
                 }
@@ -232,6 +235,9 @@
             "type": "boolean",
             "default": false
         },
+        "Port": {
+            "type": "integer"
+        },
         "Tags": {
             "type": "array",
             "insertionOrder": false,
@@ -286,7 +292,8 @@
         "/properties/SubnetIds",
         "/properties/Tags",
         "/properties/Tags/*/Key",
-        "/properties/Tags/*/Value"
+        "/properties/Tags/*/Value",
+        "/properties/Port"
     ],
     "primaryIdentifier": [
         "/properties/WorkgroupName"

@@ -107,6 +107,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .publiclyAccessible((Boolean) getDelta.apply(desiredModel.getPubliclyAccessible(), previousModel.getPubliclyAccessible()))
                 .subnetIds((List<String>) getDelta.apply(desiredModel.getSubnetIds(), previousModel.getSubnetIds()))
                 .securityGroupIds((List<String>) getDelta.apply(desiredModel.getSecurityGroupIds(), previousModel.getSecurityGroupIds()))
+                .port((Integer) getDelta.apply(desiredModel.getPort(), previousModel.getPort()))
                 .workgroup(previousModel.getWorkgroup())
                 .build();
     }

@@ -36,6 +36,7 @@ public class AbstractTestBase {
     private static final List<String> SUBNET_IDS;
     private static final List<String> SECURITY_GROUP_IDS;
     private static final Set<ConfigParameter> CONFIG_PARAMETERS;
+    private static final int DEFAULT_PORT;
     private static final List<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> RESPONSE_CONFIG_PARAMS;
 
     static {
@@ -53,6 +54,7 @@ public class AbstractTestBase {
         SECURITY_GROUP_IDS = Collections.emptyList();
         CONFIG_PARAMETERS = Collections.emptySet();
         RESPONSE_CONFIG_PARAMS = Collections.emptyList();
+        DEFAULT_PORT = 5439;
     }
 
     static ProxyClient<RedshiftServerlessClient> MOCK_PROXY(
@@ -122,6 +124,7 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(CONFIG_PARAMETERS)
                         .creationDate("null")
+                        .port(DEFAULT_PORT)
                         .build())
                 .build();
     }
@@ -138,6 +141,7 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(RESPONSE_CONFIG_PARAMS)
                         .creationDate(null)
+                        .port(DEFAULT_PORT)
                         .build())
                 .build();
     }
@@ -179,6 +183,7 @@ public class AbstractTestBase {
                 .subnetIds(SUBNET_IDS)
                 .configParameters(CONFIG_PARAMETERS)
                 .publiclyAccessible(true)
+                .port(DEFAULT_PORT)
                 .build();
 
     }
