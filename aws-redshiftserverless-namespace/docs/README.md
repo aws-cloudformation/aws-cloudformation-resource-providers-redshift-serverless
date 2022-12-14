@@ -58,9 +58,9 @@ _Required_: No
 
 _Type_: String
 
-_Minimum_: <code>8</code>
+_Minimum Length_: <code>8</code>
 
-_Maximum_: <code>64</code>
+_Maximum Length_: <code>64</code>
 
 _Pattern_: <code>^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\x00-\x20\x22\x27\x2f\x40\x5c\x7f-\uffff]+</code>
 
@@ -86,7 +86,7 @@ _Required_: No
 
 _Type_: String
 
-_Maximum_: <code>127</code>
+_Maximum Length_: <code>127</code>
 
 _Pattern_: <code>[a-zA-Z][a-zA-Z_0-9+.@-]*</code>
 
@@ -140,9 +140,9 @@ _Required_: Yes
 
 _Type_: String
 
-_Minimum_: <code>3</code>
+_Minimum Length_: <code>3</code>
 
-_Maximum_: <code>64</code>
+_Maximum Length_: <code>64</code>
 
 _Pattern_: <code>^[a-z0-9-]+$</code>
 
@@ -166,7 +166,7 @@ _Required_: No
 
 _Type_: String
 
-_Maximum_: <code>255</code>
+_Maximum Length_: <code>255</code>
 
 _Pattern_: <code>[a-z][a-z0-9]*(-[a-z0-9]+)*</code>
 
@@ -197,3 +197,47 @@ For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::G
 #### Namespace
 
 Returns the <code>Namespace</code> value.
+
+#### NamespaceArn
+
+Returns the <code>NamespaceArn</code> value.
+
+#### NamespaceId
+
+Returns the <code>NamespaceId</code> value.
+
+#### NamespaceName
+
+Returns the <code>NamespaceName</code> value.
+
+#### AdminUsername
+
+Returns the <code>AdminUsername</code> value.
+
+#### DbName
+
+Returns the <code>DbName</code> value.
+
+#### KmsKeyId
+
+Returns the <code>KmsKeyId</code> value.
+
+#### DefaultIamRoleArn
+
+Returns the <code>DefaultIamRoleArn</code> value.
+
+#### IamRoles
+
+Returns the <code>IamRoles</code> value.
+
+#### LogExports
+
+Returns the <code>LogExports</code> value.
+
+#### Status
+
+Returns the <code>Status</code> value.
+
+#### CreationDate
+
+Returns the <code>CreationDate</code> value.

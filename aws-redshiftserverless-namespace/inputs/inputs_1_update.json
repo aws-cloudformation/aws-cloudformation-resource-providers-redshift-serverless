@@ -1,8 +1,0 @@
-{
-    "NamespaceName": "input1234",
-    "AdminUserPassword": "Test1234",
-    "AdminUsername": "testUsername123",
-    "LogExports": [
-        "userlog"
-    ]
-}
