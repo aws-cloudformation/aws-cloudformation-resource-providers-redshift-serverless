@@ -180,7 +180,6 @@
         "NamespaceName"
     ],
     "readOnlyProperties": [
-        "/properties/Namespace",
         "/properties/Namespace/NamespaceArn",
         "/properties/Namespace/NamespaceId",
         "/properties/Namespace/NamespaceName",

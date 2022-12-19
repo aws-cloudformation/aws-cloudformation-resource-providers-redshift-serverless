@@ -19,6 +19,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#iamroles" title="IamRoles">IamRoles</a>" : <i>[ String, ... ]</i>,
         "<a href="#kmskeyid" title="KmsKeyId">KmsKeyId</a>" : <i>String</i>,
         "<a href="#logexports" title="LogExports">LogExports</a>" : <i>[ String, ... ]</i>,
+        "<a href="#namespace" title="Namespace">Namespace</a>" : <i><a href="namespace.md">Namespace</a></i>,
         "<a href="#namespacename" title="NamespaceName">NamespaceName</a>" : <i>String</i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
         "<a href="#finalsnapshotname" title="FinalSnapshotName">FinalSnapshotName</a>" : <i>String</i>,
@@ -41,6 +42,7 @@ Properties:
     <a href="#kmskeyid" title="KmsKeyId">KmsKeyId</a>: <i>String</i>
     <a href="#logexports" title="LogExports">LogExports</a>: <i>
       - String</i>
+    <a href="#namespace" title="Namespace">Namespace</a>: <i><a href="namespace.md">Namespace</a></i>
     <a href="#namespacename" title="NamespaceName">NamespaceName</a>: <i>String</i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
@@ -132,6 +134,14 @@ _Type_: List of String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
+#### Namespace
+
+_Required_: No
+
+_Type_: <a href="namespace.md">Namespace</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
 #### NamespaceName
 
 A unique identifier for the namespace. You use this identifier to refer to the namespace for any subsequent namespace operations such as deleting or modifying. All alphabetical characters must be lower case. Namespace name should be unique for all namespaces within an AWS account.
@@ -193,10 +203,6 @@ When you pass the logical ID of this resource to the intrinsic `Ref` function, R
 The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of this type. The following are the available attributes and sample return values.
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
-
-#### Namespace
-
-Returns the <code>Namespace</code> value.
 
 #### NamespaceArn
 
