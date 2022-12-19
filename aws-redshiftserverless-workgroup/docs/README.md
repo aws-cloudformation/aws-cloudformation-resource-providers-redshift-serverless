@@ -21,6 +21,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#subnetids" title="SubnetIds">SubnetIds</a>" : <i>[ String, ... ]</i>,
         "<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>" : <i>Boolean</i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
+        "<a href="#workgroup" title="Workgroup">Workgroup</a>" : <i><a href="workgroup.md">Workgroup</a></i>
     }
 }
 </pre>
@@ -43,6 +44,7 @@ Properties:
     <a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>: <i>Boolean</i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
+    <a href="#workgroup" title="Workgroup">Workgroup</a>: <i><a href="workgroup.md">Workgroup</a></i>
 </pre>
 
 ## Properties
@@ -131,6 +133,14 @@ _Type_: List of <a href="tag.md">Tag</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
+#### Workgroup
+
+_Required_: No
+
+_Type_: <a href="workgroup.md">Workgroup</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
 ## Return Values
 
 ### Ref
@@ -142,10 +152,6 @@ When you pass the logical ID of this resource to the intrinsic `Ref` function, R
 The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of this type. The following are the available attributes and sample return values.
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
-
-#### Workgroup
-
-Returns the <code>Workgroup</code> value.
 
 #### WorkgroupId
 
@@ -171,10 +177,6 @@ Returns the <code>BaseCapacity</code> value.
 
 Returns the <code>EnhancedVpcRouting</code> value.
 
-#### ConfigParameters
-
-Returns the <code>ConfigParameters</code> value.
-
 #### ParameterKey
 
 Returns the <code>ParameterKey</code> value.
@@ -195,10 +197,6 @@ Returns the <code>SubnetIds</code> value.
 
 Returns the <code>Status</code> value.
 
-#### Endpoint
-
-Returns the <code>Endpoint</code> value.
-
 #### Address
 
 Returns the <code>Address</code> value.
@@ -207,10 +205,6 @@ Returns the <code>Address</code> value.
 
 Returns the <code>Port</code> value.
 
-#### VpcEndpoints
-
-Returns the <code>VpcEndpoints</code> value.
-
 #### VpcEndpointId
 
 Returns the <code>VpcEndpointId</code> value.
@@ -218,10 +212,6 @@ Returns the <code>VpcEndpointId</code> value.
 #### VpcId
 
 Returns the <code>VpcId</code> value.
-
-#### NetworkInterfaces
-
-Returns the <code>NetworkInterfaces</code> value.
 
 #### NetworkInterfaceId
 
