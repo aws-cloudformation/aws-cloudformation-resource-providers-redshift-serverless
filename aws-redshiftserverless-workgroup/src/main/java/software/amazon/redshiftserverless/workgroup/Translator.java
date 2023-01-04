@@ -94,7 +94,6 @@ public class Translator {
                         .endpoint(translateToModelEndpoint(awsResponse.workgroup().endpoint()))
                         .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
                         .creationDate(Objects.toString(awsResponse.workgroup().creationDate()))
-                        .port(awsResponse.workgroup().port())
                         .build())
                 .build();
     }

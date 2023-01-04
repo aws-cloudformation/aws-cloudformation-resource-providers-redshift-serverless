@@ -124,7 +124,6 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(CONFIG_PARAMETERS)
                         .creationDate("null")
-                        .port(DEFAULT_PORT)
                         .build())
                 .build();
     }
