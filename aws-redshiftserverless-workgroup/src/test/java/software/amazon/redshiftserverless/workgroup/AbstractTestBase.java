@@ -114,6 +114,8 @@ public class AbstractTestBase {
                 .securityGroupIds(SECURITY_GROUP_IDS)
                 .subnetIds(SUBNET_IDS)
                 .configParameters(CONFIG_PARAMETERS)
+                .port(DEFAULT_PORT)
+                .publiclyAccessible(true)
                 .workgroup(Workgroup.builder()
                         .workgroupName(WORKGROUP_NAME)
                         .namespaceName(NAMESPACE_NAME)
@@ -124,6 +126,8 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(CONFIG_PARAMETERS)
                         .creationDate("null")
+                        .publiclyAccessible(true)
+                        .endpoint(Endpoint.builder().port(DEFAULT_PORT).vpcEndpoints(Collections.emptyList()).build())
                         .build())
                 .build();
     }
@@ -140,7 +144,11 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(RESPONSE_CONFIG_PARAMS)
                         .creationDate(null)
-                        .port(DEFAULT_PORT)
+                        .publiclyAccessible(true)
+                        .endpoint(software.amazon.awssdk.services.redshiftserverless.model.Endpoint.builder()
+                                .port(DEFAULT_PORT)
+                                .vpcEndpoints(Collections.emptyList())
+                                .build())
                         .build())
                 .build();
     }

@@ -80,6 +80,7 @@ public class Translator {
                 .securityGroupIds(awsResponse.workgroup().securityGroupIds())
                 .subnetIds(awsResponse.workgroup().subnetIds())
                 .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
+                .port(awsResponse.workgroup().endpoint().port())
                 .workgroup(Workgroup.builder()
                         .workgroupId(awsResponse.workgroup().workgroupId())
                         .workgroupArn(awsResponse.workgroup().workgroupArn())
