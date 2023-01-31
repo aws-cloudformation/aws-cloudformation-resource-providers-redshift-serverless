@@ -22,7 +22,6 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>" : <i>Boolean</i>,
         "<a href="#port" title="Port">Port</a>" : <i>Integer</i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
-        "<a href="#workgroup" title="Workgroup">Workgroup</a>" : <i><a href="workgroup.md">Workgroup</a></i>
     }
 }
 </pre>
@@ -46,7 +45,6 @@ Properties:
     <a href="#port" title="Port">Port</a>: <i>Integer</i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
-    <a href="#workgroup" title="Workgroup">Workgroup</a>: <i><a href="workgroup.md">Workgroup</a></i>
 </pre>
 
 ## Properties
@@ -57,9 +55,9 @@ _Required_: Yes
 
 _Type_: String
 
-_Minimum_: <code>3</code>
+_Minimum Length_: <code>3</code>
 
-_Maximum_: <code>64</code>
+_Maximum Length_: <code>64</code>
 
 _Pattern_: <code>^(?=^[a-z0-9-]+$).{3,64}$</code>
 
@@ -71,9 +69,9 @@ _Required_: No
 
 _Type_: String
 
-_Minimum_: <code>3</code>
+_Minimum Length_: <code>3</code>
 
-_Maximum_: <code>64</code>
+_Maximum Length_: <code>64</code>
 
 _Pattern_: <code>^(?=^[a-z0-9-]+$).{3,64}$</code>
 
@@ -143,14 +141,6 @@ _Type_: List of <a href="tag.md">Tag</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### Workgroup
-
-_Required_: No
-
-_Type_: <a href="workgroup.md">Workgroup</a>
-
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-
 ## Return Values
 
 ### Ref
@@ -163,87 +153,6 @@ The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
 
-#### WorkgroupId
+#### Workgroup
 
-Returns the <code>WorkgroupId</code> value.
-
-#### WorkgroupArn
-
-Returns the <code>WorkgroupArn</code> value.
-
-#### WorkgroupName
-
-Returns the <code>WorkgroupName</code> value.
-
-#### NamespaceName
-
-Returns the <code>NamespaceName</code> value.
-
-#### BaseCapacity
-
-Returns the <code>BaseCapacity</code> value.
-
-#### EnhancedVpcRouting
-
-Returns the <code>EnhancedVpcRouting</code> value.
-
-#### ParameterKey
-
-Returns the <code>ParameterKey</code> value.
-
-#### ParameterValue
-
-Returns the <code>ParameterValue</code> value.
-
-#### SecurityGroupIds
-
-Returns the <code>SecurityGroupIds</code> value.
-
-#### SubnetIds
-
-Returns the <code>SubnetIds</code> value.
-
-#### Status
-
-Returns the <code>Status</code> value.
-
-#### Address
-
-Returns the <code>Address</code> value.
-
-#### Port
-
-Returns the <code>Port</code> value.
-
-#### VpcEndpointId
-
-Returns the <code>VpcEndpointId</code> value.
-
-#### VpcId
-
-Returns the <code>VpcId</code> value.
-
-#### NetworkInterfaceId
-
-Returns the <code>NetworkInterfaceId</code> value.
-
-#### SubnetId
-
-Returns the <code>SubnetId</code> value.
-
-#### PrivateIpAddress
-
-Returns the <code>PrivateIpAddress</code> value.
-
-#### AvailabilityZone
-
-Returns the <code>AvailabilityZone</code> value.
-
-#### PubliclyAccessible
-
-Returns the <code>PubliclyAccessible</code> value.
-
-#### CreationDate
-
-Returns the <code>CreationDate</code> value.
-
+Returns the <code>Workgroup</code> value.
