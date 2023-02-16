@@ -156,3 +156,87 @@ For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::G
 #### Workgroup
 
 Returns the <code>Workgroup</code> value.
+
+#### WorkgroupId
+
+Returns the <code>WorkgroupId</code> value.
+
+#### WorkgroupArn
+
+Returns the <code>WorkgroupArn</code> value.
+
+#### WorkgroupName
+
+Returns the <code>WorkgroupName</code> value.
+
+#### NamespaceName
+
+Returns the <code>NamespaceName</code> value.
+
+#### BaseCapacity
+
+Returns the <code>BaseCapacity</code> value.
+
+#### EnhancedVpcRouting
+
+Returns the <code>EnhancedVpcRouting</code> value.
+
+#### ParameterKey
+
+Returns the <code>ParameterKey</code> value.
+
+#### ParameterValue
+
+Returns the <code>ParameterValue</code> value.
+
+#### SecurityGroupIds
+
+Returns the <code>SecurityGroupIds</code> value.
+
+#### SubnetIds
+
+Returns the <code>SubnetIds</code> value.
+
+#### Status
+
+Returns the <code>Status</code> value.
+
+#### Address
+
+Returns the <code>Address</code> value.
+
+#### Port
+
+Returns the <code>Port</code> value.
+
+#### VpcEndpointId
+
+Returns the <code>VpcEndpointId</code> value.
+
+#### VpcId
+
+Returns the <code>VpcId</code> value.
+
+#### NetworkInterfaceId
+
+Returns the <code>NetworkInterfaceId</code> value.
+
+#### SubnetId
+
+Returns the <code>SubnetId</code> value.
+
+#### PrivateIpAddress
+
+Returns the <code>PrivateIpAddress</code> value.
+
+#### AvailabilityZone
+
+Returns the <code>AvailabilityZone</code> value.
+
+#### PubliclyAccessible
+
+Returns the <code>PubliclyAccessible</code> value.
+
+#### CreationDate
+
+Returns the <code>CreationDate</code> value.

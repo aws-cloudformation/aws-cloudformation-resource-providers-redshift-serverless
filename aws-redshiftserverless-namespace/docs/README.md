@@ -197,3 +197,47 @@ For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::G
 #### Namespace
 
 Returns the <code>Namespace</code> value.
+
+#### NamespaceArn
+
+Returns the <code>NamespaceArn</code> value.
+
+#### NamespaceId
+
+Returns the <code>NamespaceId</code> value.
+
+#### NamespaceName
+
+Returns the <code>NamespaceName</code> value.
+
+#### AdminUsername
+
+Returns the <code>AdminUsername</code> value.
+
+#### DbName
+
+Returns the <code>DbName</code> value.
+
+#### KmsKeyId
+
+Returns the <code>KmsKeyId</code> value.
+
+#### DefaultIamRoleArn
+
+Returns the <code>DefaultIamRoleArn</code> value.
+
+#### IamRoles
+
+Returns the <code>IamRoles</code> value.
+
+#### LogExports
+
+Returns the <code>LogExports</code> value.
+
+#### Status
+
+Returns the <code>Status</code> value.
+
+#### CreationDate
+
+Returns the <code>CreationDate</code> value.
