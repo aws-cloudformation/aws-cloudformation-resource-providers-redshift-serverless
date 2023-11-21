@@ -99,6 +99,9 @@
                 "BaseCapacity": {
                     "type": "integer"
                 },
+                "MaxCapacity": {
+                    "type": "integer"
+                },
                 "EnhancedVpcRouting": {
                     "type": "boolean"
                 },
@@ -191,6 +194,9 @@
         "BaseCapacity": {
             "type": "integer"
         },
+        "MaxCapacity": {
+            "type": "integer"
+        },
         "EnhancedVpcRouting": {
             "type": "boolean",
             "default": false
@@ -266,6 +272,7 @@
         "/properties/Workgroup/WorkgroupName",
         "/properties/Workgroup/NamespaceName",
         "/properties/Workgroup/BaseCapacity",
+        "/properties/Workgroup/MaxCapacity",
         "/properties/Workgroup/EnhancedVpcRouting",
         "/properties/Workgroup/ConfigParameters/*/ParameterKey",
         "/properties/Workgroup/ConfigParameters/*/ParameterValue",
@@ -285,6 +292,7 @@
     ],
     "writeOnlyProperties": [
         "/properties/BaseCapacity",
+        "/properties/MaxCapacity",
         "/properties/ConfigParameters",
         "/properties/SecurityGroupIds",
         "/properties/SubnetIds",

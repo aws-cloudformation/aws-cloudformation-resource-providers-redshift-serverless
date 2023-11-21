@@ -31,7 +31,9 @@ public class AbstractTestBase {
     private static final String NAMESPACE_NAME;
     private static final String WORKGROUP_ARN;
     private static final int BASE_CAPACITY;
+    private static final int MAX_CAPACITY;
     private static final int UPDATED_BASE_CAPACITY;
+    private static final int UPDATED_MAX_CAPACITY;
     private static final WorkgroupStatus STATUS;
     private static final List<String> SUBNET_IDS;
     private static final List<String> SECURITY_GROUP_IDS;
@@ -49,6 +51,8 @@ public class AbstractTestBase {
         WORKGROUP_ARN = "DUMMY_WORKGROUP_ARN";
         BASE_CAPACITY = 0;
         UPDATED_BASE_CAPACITY = 0;
+        MAX_CAPACITY = 512;
+        UPDATED_MAX_CAPACITY = 1024;
         STATUS = WorkgroupStatus.AVAILABLE;
         SUBNET_IDS = Collections.emptyList();
         SECURITY_GROUP_IDS = Collections.emptyList();
@@ -111,6 +115,7 @@ public class AbstractTestBase {
                 .workgroupName(WORKGROUP_NAME)
                 .namespaceName(NAMESPACE_NAME)
                 .baseCapacity(BASE_CAPACITY)
+                .maxCapacity(MAX_CAPACITY)
                 .securityGroupIds(SECURITY_GROUP_IDS)
                 .subnetIds(SUBNET_IDS)
                 .configParameters(CONFIG_PARAMETERS)
@@ -122,6 +127,7 @@ public class AbstractTestBase {
                         .workgroupArn(WORKGROUP_ARN)
                         .status(STATUS.toString())
                         .baseCapacity(BASE_CAPACITY)
+                        .maxCapacity(MAX_CAPACITY)
                         .securityGroupIds(SECURITY_GROUP_IDS)
                         .subnetIds(SUBNET_IDS)
                         .configParameters(CONFIG_PARAMETERS)
@@ -140,6 +146,7 @@ public class AbstractTestBase {
                         .workgroupArn(WORKGROUP_ARN)
                         .status(STATUS)
                         .baseCapacity(BASE_CAPACITY)
+                        .maxCapacity(MAX_CAPACITY)
                         .securityGroupIds(SECURITY_GROUP_IDS)
                         .subnetIds(SUBNET_IDS)
                         .configParameters(RESPONSE_CONFIG_PARAMS)
@@ -186,6 +193,7 @@ public class AbstractTestBase {
                 .workgroupName(WORKGROUP_NAME)
                 .namespaceName(NAMESPACE_NAME)
                 .baseCapacity(BASE_CAPACITY)
+                .maxCapacity(MAX_CAPACITY)
                 .securityGroupIds(SECURITY_GROUP_IDS)
                 .subnetIds(SUBNET_IDS)
                 .configParameters(CONFIG_PARAMETERS)

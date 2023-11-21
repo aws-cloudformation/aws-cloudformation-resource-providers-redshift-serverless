@@ -15,6 +15,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#workgroupname" title="WorkgroupName">WorkgroupName</a>" : <i>String</i>,
         "<a href="#namespacename" title="NamespaceName">NamespaceName</a>" : <i>String</i>,
         "<a href="#basecapacity" title="BaseCapacity">BaseCapacity</a>" : <i>Integer</i>,
+        "<a href="#maxcapacity" title="MaxCapacity">MaxCapacity</a>" : <i>Integer</i>,
         "<a href="#enhancedvpcrouting" title="EnhancedVpcRouting">EnhancedVpcRouting</a>" : <i>Boolean</i>,
         "<a href="#configparameters" title="ConfigParameters">ConfigParameters</a>" : <i>[ <a href="configparameter.md">ConfigParameter</a>, ... ]</i>,
         "<a href="#securitygroupids" title="SecurityGroupIds">SecurityGroupIds</a>" : <i>[ String, ... ]</i>,
@@ -34,6 +35,7 @@ Properties:
     <a href="#workgroupname" title="WorkgroupName">WorkgroupName</a>: <i>String</i>
     <a href="#namespacename" title="NamespaceName">NamespaceName</a>: <i>String</i>
     <a href="#basecapacity" title="BaseCapacity">BaseCapacity</a>: <i>Integer</i>
+    <a href="#maxcapacity" title="MaxCapacity">MaxCapacity</a>: <i>Integer</i>
     <a href="#enhancedvpcrouting" title="EnhancedVpcRouting">EnhancedVpcRouting</a>: <i>Boolean</i>
     <a href="#configparameters" title="ConfigParameters">ConfigParameters</a>: <i>
       - <a href="configparameter.md">ConfigParameter</a></i>
@@ -78,6 +80,14 @@ _Pattern_: <code>^(?=^[a-z0-9-]+$).{3,64}$</code>
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### BaseCapacity
+
+_Required_: No
+
+_Type_: Integer
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### MaxCapacity
 
 _Required_: No
 
@@ -176,6 +186,10 @@ Returns the <code>NamespaceName</code> value.
 #### BaseCapacity
 
 Returns the <code>BaseCapacity</code> value.
+
+#### MaxCapacity
+
+Returns the <code>MaxCapacity</code> value.
 
 #### EnhancedVpcRouting
 

@@ -102,6 +102,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
         return desiredModel.toBuilder()
                 .baseCapacity((Integer) getDelta.apply(desiredModel.getBaseCapacity(), previousModel.getBaseCapacity()))
+                .maxCapacity((Integer) getDelta.apply(desiredModel.getMaxCapacity(), previousModel.getMaxCapacity()))
                 .enhancedVpcRouting((Boolean) getDelta.apply(desiredModel.getEnhancedVpcRouting(), previousModel.getEnhancedVpcRouting()))
                 .configParameters((Set<ConfigParameter>) getDelta.apply(desiredModel.getConfigParameters(), previousModel.getConfigParameters()))
                 .publiclyAccessible((Boolean) getDelta.apply(desiredModel.getPubliclyAccessible(), previousModel.getPubliclyAccessible()))
