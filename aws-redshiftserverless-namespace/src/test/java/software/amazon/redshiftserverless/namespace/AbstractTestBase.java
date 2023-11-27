@@ -13,6 +13,9 @@ import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.services.redshift.model.GetResourcePolicyResponse;
+import software.amazon.awssdk.services.redshift.model.PutResourcePolicyResponse;
+import software.amazon.awssdk.services.redshift.model.ResourcePolicy;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceResponse;
@@ -43,6 +46,10 @@ public class AbstractTestBase {
   private static final String FINAL_SNAPSHOT_NAME;
   private static final int FINAL_SNAPSHOT_RETENTION_PERIOD;
   protected static final String AWS_REGION = "us-east-1";
+  protected static final String NAMESPACE_RESOURCE_POLICY_DOCUMENT;
+  protected static final String NAMESPACE_RESOURCE_POLICY_DOCUMENT_EMPTY;
+  protected static final ResourcePolicy NAMESPACE_RESOURCE_POLICY;
+  protected static final ResourcePolicy NAMESPACE_RESOURCE_POLICY_EMPTY;
 
   static {
     MOCK_CREDENTIALS = new Credentials("accessKey", "secretKey", "token");
@@ -62,6 +69,9 @@ public class AbstractTestBase {
     CREATION_DATE = Instant.parse("9999-01-01T00:00:00Z");
     FINAL_SNAPSHOT_NAME = "testFinalSnapshot";
     FINAL_SNAPSHOT_RETENTION_PERIOD = 1;
+    NAMESPACE_RESOURCE_POLICY_DOCUMENT = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Resource\": \"*\",\"Action\":\"test:test\"}]}";
+    NAMESPACE_RESOURCE_POLICY_DOCUMENT_EMPTY = "{}";
+
     NAMESPACE = software.amazon.awssdk.services.redshiftserverless.model.Namespace.builder()
             .namespaceName(NAMESPACE_NAME)
             .namespaceArn("DummyNamespaceArn")
@@ -75,11 +85,21 @@ public class AbstractTestBase {
             .status(STATUS)
             .creationDate(CREATION_DATE)
             .build();
+
+    NAMESPACE_RESOURCE_POLICY = ResourcePolicy.builder()
+            .resourceArn(NAMESPACE.namespaceArn())
+            .policy(NAMESPACE_RESOURCE_POLICY_DOCUMENT)
+            .build();
+
+    NAMESPACE_RESOURCE_POLICY_EMPTY = ResourcePolicy.builder()
+            .resourceArn(NAMESPACE.namespaceArn())
+            .policy(null)
+            .build();
   }
-  static ProxyClient<RedshiftServerlessClient> MOCK_PROXY(
+  static <T> ProxyClient<T> MOCK_PROXY(
     final AmazonWebServicesClientProxy proxy,
-    final RedshiftServerlessClient sdkClient) {
-    return new ProxyClient<RedshiftServerlessClient>() {
+    final T sdkClient) {
+    return new ProxyClient<T>() {
       @Override
       public <RequestT extends AwsRequest, ResponseT extends AwsResponse> ResponseT
       injectCredentialsAndInvokeV2(RequestT request, Function<RequestT, ResponseT> requestFunction) {
@@ -113,7 +133,7 @@ public class AbstractTestBase {
       }
 
       @Override
-      public RedshiftServerlessClient client() {
+      public T client() {
         return sdkClient;
       }
     };
@@ -242,6 +262,24 @@ public class AbstractTestBase {
   public static UpdateNamespaceResponse getUpdateResponseSdk() {
     return UpdateNamespaceResponse.builder()
             .namespace(NAMESPACE)
+            .build();
+  }
+
+  public static PutResourcePolicyResponse putResourcePolicyResponseSdk() {
+    return PutResourcePolicyResponse.builder()
+            .resourcePolicy(NAMESPACE_RESOURCE_POLICY)
+            .build();
+  }
+
+  public static GetResourcePolicyResponse getResourcePolicyResponseSdk() {
+    return GetResourcePolicyResponse.builder()
+            .resourcePolicy(NAMESPACE_RESOURCE_POLICY)
+            .build();
+  }
+
+  public static GetResourcePolicyResponse getEmptyResourcePolicyResponseSdk() {
+    return GetResourcePolicyResponse.builder()
+            .resourcePolicy(NAMESPACE_RESOURCE_POLICY_EMPTY)
             .build();
   }
 }

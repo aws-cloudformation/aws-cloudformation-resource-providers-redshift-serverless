@@ -1,8 +1,12 @@
 package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
+
+import software.amazon.awssdk.services.redshift.RedshiftClient;
+import software.amazon.awssdk.services.redshift.model.*;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -36,11 +40,21 @@ public class UpdateHandlerTest extends AbstractTestBase {
     @Mock
     RedshiftServerlessClient sdkClient;
 
+    @Mock
+    private ProxyClient<RedshiftClient> redshiftProxyClient;
+
+    @Mock
+    RedshiftClient redshiftSdkClient;
+
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
         sdkClient = mock(RedshiftServerlessClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
+
+        redshiftSdkClient = mock(RedshiftClient.class);
+        redshiftProxyClient = MOCK_PROXY(proxy, redshiftSdkClient);
     }
 
     @AfterEach
@@ -66,9 +80,88 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
         verify(proxyClient.client()).updateNamespace(any(UpdateNamespaceRequest.class));
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void testDeleteNamespaceResourcePolicy() {
+        final UpdateHandler handler = new UpdateHandler();
+
+        final ResourceModel requestResourceModel = getUpdateRequestResourceModel();
+        final ResourceModel responseResourceModel = getUpdateResponseResourceModel();
+        requestResourceModel.setNamespaceResourcePolicy(Translator.convertStringToJson(NAMESPACE_RESOURCE_POLICY_DOCUMENT_EMPTY, logger));
+        ResourceModel prevModel = ResourceModel.builder()
+                .namespaceName(NAMESPACE_NAME)
+                .namespaceResourcePolicy(Translator.convertStringToJson(NAMESPACE_RESOURCE_POLICY_DOCUMENT, logger))
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(requestResourceModel)
+                .previousResourceState(prevModel)
+                .build();
+
+        when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
+        when(redshiftProxyClient.client().deleteResourcePolicy(any(DeleteResourcePolicyRequest.class))).thenReturn(null);
+
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void testModifyNamespaceResourcePolicy() {
+        final UpdateHandler handler = new UpdateHandler();
+        final String NEW_NAMESPACE_RESOURCE_POLICY = "{\"Version\":\"2012-10-17\"}";
+
+        final ResourceModel requestResourceModel = getUpdateRequestResourceModel();
+        final ResourceModel responseResourceModel = getUpdateResponseResourceModel();
+        ResourceModel prevModel = ResourceModel.builder()
+                .namespaceName(NAMESPACE_NAME)
+                .namespaceResourcePolicy(Translator.convertStringToJson(NAMESPACE_RESOURCE_POLICY_DOCUMENT, logger))
+                .build();
+
+        requestResourceModel.setNamespaceResourcePolicy(Translator.convertStringToJson(NEW_NAMESPACE_RESOURCE_POLICY, logger));
+        responseResourceModel.setNamespaceResourcePolicy(Translator.convertStringToJson(NEW_NAMESPACE_RESOURCE_POLICY, logger));
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(requestResourceModel)
+                .previousResourceState(prevModel)
+                .build();
+
+        ResourcePolicy newResourcePolicy = ResourcePolicy.builder()
+                .resourceArn("DummyNamespaceArn")
+                .policy(NEW_NAMESPACE_RESOURCE_POLICY)
+                .build();
+
+        when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+        when(redshiftProxyClient.client().putResourcePolicy(any(PutResourcePolicyRequest.class))).thenReturn(PutResourcePolicyResponse.builder()
+                .resourcePolicy(newResourcePolicy)
+                .build());
+        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(GetResourcePolicyResponse.builder()
+                .resourcePolicy(newResourcePolicy)
+                .build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);

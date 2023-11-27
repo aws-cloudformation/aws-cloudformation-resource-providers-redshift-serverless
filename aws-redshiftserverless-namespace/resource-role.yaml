@@ -46,6 +46,9 @@ Resources:
                 - "redshift-serverless:GetNamespace"
                 - "redshift-serverless:ListNamespaces"
                 - "redshift-serverless:UpdateNamespace"
+                - "redshift:DeleteResourcePolicy"
+                - "redshift:GetResourcePolicy"
+                - "redshift:PutResourcePolicy"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

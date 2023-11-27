@@ -1,6 +1,13 @@
 package software.amazon.redshiftserverless.namespace;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import software.amazon.awssdk.awscore.AwsRequest;
+import software.amazon.awssdk.services.redshift.model.DeleteResourcePolicyRequest;
+import software.amazon.awssdk.services.redshift.model.GetResourcePolicyRequest;
+import software.amazon.awssdk.services.redshift.model.PutResourcePolicyRequest;
+import software.amazon.awssdk.services.redshift.model.GetResourcePolicyResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
@@ -8,13 +15,12 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResp
 import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
+import software.amazon.cloudformation.proxy.Logger;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -189,5 +195,67 @@ public class Translator {
             .status(namespace.statusAsString())
             .creationDate(namespace.creationDate() == null ? null : namespace.creationDate().toString())
             .build();
+  }
+
+  /**
+   * Request to put a policy on resource
+   * @param model resource model
+   * @return putResourcePolicyRequest the service request to put a policy on resource
+   */
+  static PutResourcePolicyRequest translateToPutResourcePolicy(final ResourceModel model, final String namespaceArn, Logger logger) {
+    return PutResourcePolicyRequest.builder()
+            .resourceArn(namespaceArn)
+            .policy(convertJsonToString(model.getNamespaceResourcePolicy(), logger))
+            .build();
+  }
+
+  static GetResourcePolicyRequest translateToGetResourcePolicy(final ResourceModel model, final String namespaceArn) {
+    return GetResourcePolicyRequest.builder()
+            .resourceArn(namespaceArn)
+            .build();
+  }
+
+  static DeleteResourcePolicyRequest translateToDeleteResourcePolicyRequest(final ResourceModel model, final String namespaceArn) {
+    return DeleteResourcePolicyRequest.builder()
+            .resourceArn(namespaceArn)
+            .build();
+  }
+
+  /**
+   * Json to String converter
+   * @param policy Policy Document Map
+   * @param logger Logger to log Json processing error
+   * @return Json converted String
+   */
+  static String convertJsonToString(Map<String, Object> policy, Logger logger) {
+    ObjectMapper mapper = new ObjectMapper();
+    String json = "";
+    try {
+      json = mapper.writeValueAsString(policy);
+    } catch (JsonProcessingException e) {
+      logger.log("Error parsing Policy Json to String");
+    }
+    return json;
+  }
+
+  /**
+   *
+   * @param policy Policy Document String
+   * @param logger Logger to log Json processing error
+   * @return Json object Map
+   */
+  static Map<String, Object> convertStringToJson(String policy, Logger logger) {
+    ObjectMapper mapper = new ObjectMapper();
+    Map<String, Object> json = null;
+    TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
+    };
+    try {
+      if (policy != null) {
+        json = mapper.readValue(URLDecoder.decode(policy, StandardCharsets.UTF_8.toString()), typeRef);
+      }
+    } catch (IOException e) {
+      logger.log("Error parsing Policy String to Json");
+    }
+    return json;
   }
 }

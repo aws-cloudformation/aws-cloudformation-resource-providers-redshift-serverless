@@ -1,6 +1,8 @@
 package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
+
+import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
@@ -37,11 +39,20 @@ public class DeleteHandlerTest extends AbstractTestBase {
     @Mock
     RedshiftServerlessClient sdkClient;
 
+    @Mock
+    private ProxyClient<RedshiftClient> redshiftProxyClient;
+
+    @Mock
+    RedshiftClient redshiftSdkClient;
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
         sdkClient = mock(RedshiftServerlessClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
+
+        redshiftSdkClient = mock(RedshiftClient.class);
+        redshiftProxyClient = MOCK_PROXY(proxy, redshiftSdkClient);
     }
 
     @AfterEach
@@ -63,7 +74,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
         when(proxyClient.client().deleteNamespace(any(DeleteNamespaceRequest.class))).thenReturn(getDeleteResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class)))
                 .thenThrow(ResourceNotFoundException.class);
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);

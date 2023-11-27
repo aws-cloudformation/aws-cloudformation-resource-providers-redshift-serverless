@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
+import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
@@ -35,6 +36,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
       request,
       callbackContext != null ? callbackContext : new CallbackContext(),
       proxy.newProxy(ClientBuilder::getClient),
+      proxy.newProxy(ClientBuilder::redshiftClient),
       logger
     );
   }
@@ -44,6 +46,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     final ResourceHandlerRequest<ResourceModel> request,
     final CallbackContext callbackContext,
     final ProxyClient<RedshiftServerlessClient> proxyClient,
+    final ProxyClient<RedshiftClient> redshiftProxyClient,
     final Logger logger);
 
   protected boolean isNamespaceActive (final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {

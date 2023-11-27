@@ -1,5 +1,6 @@
 package software.amazon.redshiftserverless.namespace;
 
+import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
@@ -17,6 +18,7 @@ public class DeleteHandler extends BaseHandlerStd {
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final ProxyClient<RedshiftServerlessClient> proxyClient,
+        final ProxyClient<RedshiftClient> redshiftProxyClient,
         final Logger logger) {
 
         this.logger = logger;
