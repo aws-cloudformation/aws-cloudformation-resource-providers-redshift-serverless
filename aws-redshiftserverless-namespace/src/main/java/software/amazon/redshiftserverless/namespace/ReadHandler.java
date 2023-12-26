@@ -18,6 +18,9 @@ import java.lang.UnsupportedOperationException;
 
 public class ReadHandler extends BaseHandlerStd {
     private Logger logger;
+    private final String GET_RESOURCE_POLICY_ERROR = "not authorized to perform: redshift:GetResourcePolicy";
+    private final Integer GET_RESOURCE_POLICY_ERR_STATUS_CODE = 403;
+    private boolean containsResourcePolicy = false;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -30,6 +33,13 @@ public class ReadHandler extends BaseHandlerStd {
         this.logger = logger;
 
         final ResourceModel model = request.getDesiredResourceState();
+
+        /*
+        containsResourcePolicy will be true if NamespaceResourcePolicy property is included in the template.
+        This attribute will be used to decide if "not authorized to perform: redshift:GetResourcePolicy" errors
+        in Read handler should be suppressed or not.
+         */
+        containsResourcePolicy = model.getNamespaceResourcePolicy() != null;
 
         return ProgressEvent.progress(model, callbackContext)
                 .then(progress -> {
@@ -82,14 +92,21 @@ public class ReadHandler extends BaseHandlerStd {
                     awsRequest, proxyClient.client()::getResourcePolicy);
         } catch (ResourceNotFoundException e){
             logger.log(String.format("NamespaceResourcePolicy not found for namespace %s", awsRequest.resourceArn()));
-            ResourcePolicy resourcePolicy = ResourcePolicy.builder()
-                    .resourceArn(awsRequest.resourceArn())
-                    .policy("")
-                    .build();
-            return GetResourcePolicyResponse.builder().resourcePolicy(resourcePolicy).build();
+            return noOpNamespaceResourcePoliy(awsRequest);
         } catch (InvalidPolicyException | UnsupportedOperationException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
-        } catch (SdkClientException | RedshiftException e) {
+        } catch ( RedshiftException e) {
+            /* This error handling is required for backward compatibility. Without this exception handling, existing customers creating
+            or updating their namespace will see an error with permission issues - "is not authorized to perform: redshift:GetResourcePolicy",
+            as Read handler is trying to hit getResourcePolicy APIs to get namespaceResourcePolicy details.*/
+            if(!containsResourcePolicy && e.statusCode() == GET_RESOURCE_POLICY_ERR_STATUS_CODE &&
+                    e.awsErrorDetails().errorMessage().contains(GET_RESOURCE_POLICY_ERROR)) {
+                logger.log(String.format("RedshiftException:  %s", e.getMessage()));
+                return noOpNamespaceResourcePoliy(awsRequest);
+            } else {
+                throw new CfnGeneralServiceException(e);
+            }
+        } catch (SdkClientException e) {
             throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
         }
         logger.log(String.format("%s  resource policy has successfully been read.", ResourceModel.TYPE_NAME));
@@ -107,5 +124,18 @@ public class ReadHandler extends BaseHandlerStd {
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
         return errorHandler(exception);
+    }
+
+    /**
+     * No Op method for assigning empty resource policy for Namespace create response.
+     * @param awsRequest the aws service request to describe a resource
+     * @return GetResourcePolicyResponse
+     */
+    private GetResourcePolicyResponse noOpNamespaceResourcePoliy(final GetResourcePolicyRequest awsRequest) {
+        ResourcePolicy resourcePolicy = ResourcePolicy.builder()
+                .resourceArn(awsRequest.resourceArn())
+                .policy("")
+                .build();
+        return GetResourcePolicyResponse.builder().resourcePolicy(resourcePolicy).build();
     }
 }

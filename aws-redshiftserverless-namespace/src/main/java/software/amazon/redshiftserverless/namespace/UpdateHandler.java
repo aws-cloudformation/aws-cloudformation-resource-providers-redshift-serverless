@@ -90,7 +90,7 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .handleError(this::updateNamespaceErrorHandler)
                                 .progress())
                 .then(progress -> {
-                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Read", proxyClient, updateRequestModel, callbackContext)
+                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::ReadOnly", proxyClient, updateRequestModel, callbackContext)
                             .translateToServiceRequest(Translator::translateToReadRequest)
                             .makeServiceCall(this::getNamespace)
                             .handleError(this::getNamespaceErrorHandler)
