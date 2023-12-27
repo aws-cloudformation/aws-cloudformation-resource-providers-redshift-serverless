@@ -271,6 +271,7 @@
                 "kms:RevokeGrant",
                 "redshift-serverless:UpdateNamespace",
                 "redshift-serverless:GetNamespace",
+                "redshift:GetResourcePolicy",
                 "redshift:PutResourcePolicy",
                 "redshift:DeleteResourcePolicy"
             ]
