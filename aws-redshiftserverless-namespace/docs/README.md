@@ -25,7 +25,8 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
         "<a href="#finalsnapshotname" title="FinalSnapshotName">FinalSnapshotName</a>" : <i>String</i>,
         "<a href="#finalsnapshotretentionperiod" title="FinalSnapshotRetentionPeriod">FinalSnapshotRetentionPeriod</a>" : <i>Integer</i>,
-        "<a href="#namespaceresourcepolicy" title="NamespaceResourcePolicy">NamespaceResourcePolicy</a>" : <i>Map</i>
+        "<a href="#namespaceresourcepolicy" title="NamespaceResourcePolicy">NamespaceResourcePolicy</a>" : <i>Map</i>,
+        "<a href="#redshiftidcapplicationarn" title="RedshiftIdcApplicationArn">RedshiftIdcApplicationArn</a>" : <i>String</i>
     }
 }
 </pre>
@@ -52,6 +53,7 @@ Properties:
     <a href="#finalsnapshotname" title="FinalSnapshotName">FinalSnapshotName</a>: <i>String</i>
     <a href="#finalsnapshotretentionperiod" title="FinalSnapshotRetentionPeriod">FinalSnapshotRetentionPeriod</a>: <i>Integer</i>
     <a href="#namespaceresourcepolicy" title="NamespaceResourcePolicy">NamespaceResourcePolicy</a>: <i>Map</i>
+    <a href="#redshiftidcapplicationarn" title="RedshiftIdcApplicationArn">RedshiftIdcApplicationArn</a>: <i>String</i>
 </pre>
 
 ## Properties
@@ -215,6 +217,16 @@ The resource policy document that will be attached to the namespace.
 _Required_: No
 
 _Type_: Map
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### RedshiftIdcApplicationArn
+
+The ARN for the Redshift application that integrates with IAM Identity Center.
+
+_Required_: No
+
+_Type_: String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 

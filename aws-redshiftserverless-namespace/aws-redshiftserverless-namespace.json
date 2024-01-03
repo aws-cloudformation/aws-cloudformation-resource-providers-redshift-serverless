@@ -189,6 +189,10 @@
         "NamespaceResourcePolicy": {
             "description": "The resource policy document that will be attached to the namespace.",
             "type": "object"
+        },
+        "RedshiftIdcApplicationArn": {
+            "description": "The ARN for the Redshift application that integrates with IAM Identity Center.",
+            "type": "string"
         }
     },
     "tagging": {
@@ -220,7 +224,8 @@
         "/properties/Tags",
         "/properties/Tags/*/Key",
         "/properties/Tags/*/Value",
-        "/properties/ManageAdminPassword"
+        "/properties/ManageAdminPassword",
+        "/properties/RedshiftIdcApplicationArn"
     ],
     "createOnlyProperties": [
         "/properties/NamespaceName",

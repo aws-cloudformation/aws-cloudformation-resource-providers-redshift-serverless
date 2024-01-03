@@ -51,6 +51,7 @@ public class Translator {
             .tags(translateTagsToSdk(model.getTags()))
             .manageAdminPassword(model.getManageAdminPassword())
             .adminPasswordSecretKmsKeyId(model.getAdminPasswordSecretKmsKeyId())
+            .redshiftIdcApplicationArn(model.getRedshiftIdcApplicationArn())
             .build();
   }
 

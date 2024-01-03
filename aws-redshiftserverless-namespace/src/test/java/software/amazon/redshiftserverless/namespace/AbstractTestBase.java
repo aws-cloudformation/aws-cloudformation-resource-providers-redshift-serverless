@@ -53,6 +53,7 @@ public class AbstractTestBase {
   protected static final ResourcePolicy NAMESPACE_RESOURCE_POLICY_EMPTY;
   protected static final String SECRET_ARN;
   protected static final String SECRET_KMS_KEY_ID;
+  protected static final String REDSHIFT_IDC_APPLICATION_ARN;
 
   static {
     MOCK_CREDENTIALS = new Credentials("accessKey", "secretKey", "token");
@@ -76,6 +77,7 @@ public class AbstractTestBase {
     NAMESPACE_RESOURCE_POLICY_DOCUMENT_EMPTY = "{}";
     SECRET_ARN = "DummyClusterSecretArn";
     SECRET_KMS_KEY_ID = "DummySecretKmsKeyId";
+    REDSHIFT_IDC_APPLICATION_ARN = "DummyRedshiftIdcApplicationArn";
 
     NAMESPACE = software.amazon.awssdk.services.redshiftserverless.model.Namespace.builder()
             .namespaceName(NAMESPACE_NAME)
@@ -160,6 +162,7 @@ public class AbstractTestBase {
               .iamRoles(IAM_ROLES)
               .logExports(LOG_EXPORTS)
               .tags(new ArrayList<software.amazon.redshiftserverless.namespace.Tag>())
+              .redshiftIdcApplicationArn(REDSHIFT_IDC_APPLICATION_ARN)
               .build();
   }
 
