@@ -3,6 +3,7 @@ package software.amazon.redshiftserverless.namespace;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshift.model.*;
+import software.amazon.awssdk.services.redshift.model.UnsupportedOperationException;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
@@ -14,12 +15,12 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
-import java.lang.UnsupportedOperationException;
-
 public class ReadHandler extends BaseHandlerStd {
     private Logger logger;
     private final String GET_RESOURCE_POLICY_ERROR = "not authorized to perform: redshift:GetResourcePolicy";
     private final Integer GET_RESOURCE_POLICY_ERR_STATUS_CODE = 403;
+    private final String RESOURCE_POLICY_UNSUPPORTED_ERROR = "The resource policy feature isn't supported";
+    private final Integer RESOURCE_POLICY_UNSUPPORTED_ERR_STATUS_CODE = 400;
     private boolean containsResourcePolicy = false;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -94,7 +95,13 @@ public class ReadHandler extends BaseHandlerStd {
             logger.log(String.format("NamespaceResourcePolicy not found for namespace %s", awsRequest.resourceArn()));
             return noOpNamespaceResourcePoliy(awsRequest);
         } catch (InvalidPolicyException | UnsupportedOperationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+          if(!containsResourcePolicy && e.statusCode() == RESOURCE_POLICY_UNSUPPORTED_ERR_STATUS_CODE &&
+                  e.awsErrorDetails().errorMessage().contains(RESOURCE_POLICY_UNSUPPORTED_ERROR)) {
+              logger.log(e.getMessage());
+              return noOpNamespaceResourcePoliy(awsRequest);
+          } else {
+              throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+          }
         } catch ( RedshiftException e) {
             /* This error handling is required for backward compatibility. Without this exception handling, existing customers creating
             or updating their namespace will see an error with permission issues - "is not authorized to perform: redshift:GetResourcePolicy",
