@@ -157,7 +157,8 @@
             "type": "boolean"
         },
         "Namespace": {
-            "$ref": "#/definitions/Namespace"
+            "$ref": "#/definitions/Namespace",
+            "description": "Definition of Namespace resource."
         },
         "NamespaceName": {
             "description": "A unique identifier for the namespace. You use this identifier to refer to the namespace for any subsequent namespace operations such as deleting or modifying. All alphabetical characters must be lower case. Namespace name should be unique for all namespaces within an AWS account.",
