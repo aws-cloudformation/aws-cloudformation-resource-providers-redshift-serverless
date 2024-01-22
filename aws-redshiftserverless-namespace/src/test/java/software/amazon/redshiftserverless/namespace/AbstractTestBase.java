@@ -67,7 +67,7 @@ public class AbstractTestBase {
     DB_NAME = "DummyDBName";
     KMS_KEY_ID = "DummyKmsKeyId";
     DEFAULT_IAM_ROLE_ARN = "DummyDefaultIAMRoleArn";
-    IAM_ROLES = Arrays.asList("DummyIAMRole");
+    IAM_ROLES = Arrays.asList("arn:aws-abc:iam::123456789012:role/12345678-newrole");
     LOG_EXPORTS = Arrays.asList("DummyLogExports");
     STATUS = "available";
     CREATION_DATE = Instant.parse("9999-01-01T00:00:00Z");

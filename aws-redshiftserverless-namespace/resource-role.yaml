@@ -36,7 +36,10 @@ Resources:
                 - "kms:Decrypt"
                 - "kms:DescribeKey"
                 - "kms:Encrypt"
+                - "kms:GenerateDataKey"
+                - "kms:GenerateDataKeyPair"
                 - "kms:ListGrants"
+                - "kms:RetireGrant"
                 - "kms:RevokeGrant"
                 - "kms:ScheduleKeyDeletion"
                 - "kms:TagResource"
@@ -49,6 +52,12 @@ Resources:
                 - "redshift:DeleteResourcePolicy"
                 - "redshift:GetResourcePolicy"
                 - "redshift:PutResourcePolicy"
+                - "secretsmanager:CreateSecret"
+                - "secretsmanager:DeleteSecret"
+                - "secretsmanager:DescribeSecret"
+                - "secretsmanager:RotateSecret"
+                - "secretsmanager:TagResource"
+                - "secretsmanager:UpdateSecret"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

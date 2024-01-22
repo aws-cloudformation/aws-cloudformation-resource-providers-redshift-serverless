@@ -214,9 +214,7 @@
         "/properties/Namespace/IamRoles",
         "/properties/Namespace/LogExports",
         "/properties/Namespace/Status",
-        "/properties/Namespace/CreationDate",
-        "/properties/Namespace/AdminPasswordSecretArn",
-        "/properties/Namespace/AdminPasswordSecretKmsKeyId"
+        "/properties/Namespace/CreationDate"
     ],
     "writeOnlyProperties": [
         "/properties/AdminUserPassword",
@@ -246,13 +244,20 @@
                 "kms:Encrypt",
                 "kms:Decrypt",
                 "kms:DescribeKey",
+                "kms:GenerateDataKeyPair",
+                "kms:GenerateDataKey",
                 "kms:CreateGrant",
                 "kms:ListGrants",
                 "kms:RevokeGrant",
+                "kms:RetireGrant",
                 "redshift-serverless:CreateNamespace",
                 "redshift-serverless:GetNamespace",
                 "redshift:GetResourcePolicy",
-                "redshift:PutResourcePolicy"
+                "redshift:PutResourcePolicy",
+                "secretsmanager:CreateSecret",
+                "secretsmanager:TagResource",
+                "secretsmanager:RotateSecret",
+                "secretsmanager:DescribeSecret"
             ]
         },
         "read": {
@@ -275,18 +280,31 @@
                 "kms:CreateGrant",
                 "kms:ListGrants",
                 "kms:RevokeGrant",
+                "kms:RetireGrant",
+                "kms:GenerateDataKeyPair",
+                "kms:GenerateDataKey",
                 "redshift-serverless:UpdateNamespace",
                 "redshift-serverless:GetNamespace",
                 "redshift:GetResourcePolicy",
                 "redshift:PutResourcePolicy",
-                "redshift:DeleteResourcePolicy"
+                "redshift:DeleteResourcePolicy",
+                "secretsmanager:CreateSecret",
+                "secretsmanager:TagResource",
+                "secretsmanager:RotateSecret",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:UpdateSecret",
+                "secretsmanager:DeleteSecret"
             ]
         },
         "delete": {
             "permissions": [
                 "iam:PassRole",
                 "redshift-serverless:DeleteNamespace",
-                "redshift-serverless:GetNamespace"
+                "redshift-serverless:GetNamespace",
+                "kms:RetireGrant",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:DeleteSecret",
+                "redshift:DeleteResourcePolicy"
             ]
         },
         "list": {

@@ -290,10 +290,3 @@ Returns the <code>Status</code> value.
 
 Returns the <code>CreationDate</code> value.
 
-#### AdminPasswordSecretArn
-
-Returns the <code>AdminPasswordSecretArn</code> value.
-
-#### AdminPasswordSecretKmsKeyId
-
-Returns the <code>AdminPasswordSecretKmsKeyId</code> value.
