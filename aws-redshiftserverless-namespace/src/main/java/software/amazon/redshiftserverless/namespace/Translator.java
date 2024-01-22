@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,6 +66,26 @@ public class Translator {
             .collect(Collectors.toList());
   }
 
+  /*
+    This function is to return the iam role in the same format as input iam roles.
+    Instead of modifying the schema for backward compatibitlity we use regex to extract the iam role.
+    'IamRole(applyStatus=null, iamRoleArn=arn:aws:iam::254260483320:role/contracttest9nfdg-redshif-RedshiftServerlessNamespa-nAxEywsQousB)'
+   */
+  static List<String> translateIamRoles(final List<String> iamRoles) {
+    return Optional.ofNullable(iamRoles).orElse(Collections.emptyList())
+            .stream()
+            .map(iamRole -> {
+              Pattern iamPattern = Pattern.compile("arn:aws(-cn|-us-gov)?:iam::([0-9]{12})?:role/.+$");
+              Matcher matcher = iamPattern.matcher(iamRole);
+              if (matcher.find()){
+                // Split by space or )
+                return matcher.group(0).split("[\\s\\)]+")[0];
+              }
+              return iamRole;
+            })
+            .collect(Collectors.toList());
+  }
+
   /**
    * Request to read a resource
    * @param model resource model
@@ -86,7 +108,7 @@ public class Translator {
             .adminUsername(awsResponse.namespace().adminUsername())
             .dbName(awsResponse.namespace().dbName())
             .defaultIamRoleArn(awsResponse.namespace().defaultIamRoleArn())
-            .iamRoles(awsResponse.namespace().iamRoles())
+            .iamRoles(translateIamRoles(awsResponse.namespace().iamRoles()))
             .kmsKeyId(awsResponse.namespace().kmsKeyId())
             .logExports(awsResponse.namespace().logExportsAsStrings())
             .namespaceName(awsResponse.namespace().namespaceName())
@@ -197,7 +219,7 @@ public class Translator {
             .dbName(namespace.dbName())
             .kmsKeyId(namespace.kmsKeyId())
             .defaultIamRoleArn(namespace.defaultIamRoleArn())
-            .iamRoles(namespace.iamRoles())
+            .iamRoles(translateIamRoles(namespace.iamRoles()))
             .logExports(namespace.logExportsAsStrings())
             .status(namespace.statusAsString())
             .creationDate(namespace.creationDate() == null ? null : namespace.creationDate().toString())
