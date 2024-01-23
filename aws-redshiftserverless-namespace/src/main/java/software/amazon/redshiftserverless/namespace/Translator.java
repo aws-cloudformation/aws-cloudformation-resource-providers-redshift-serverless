@@ -75,14 +75,15 @@ public class Translator {
     return Optional.ofNullable(iamRoles).orElse(Collections.emptyList())
             .stream()
             .map(iamRole -> {
-              Pattern iamPattern = Pattern.compile("arn:aws(-cn|-us-gov)?:iam::([0-9]{12})?:role/.+$");
+              Pattern iamPattern = Pattern.compile("arn:aws.*?:iam::([0-9]{12})?:role/[a-zA-Z0-9_+=,.@-]{1,64}$");
               Matcher matcher = iamPattern.matcher(iamRole);
               if (matcher.find()){
-                // Split by space or )
-                return matcher.group(0).split("[\\s\\)]+")[0];
+                return matcher.group(0);
               }
-              return iamRole;
-            })
+              // Case for invalid arn format provided. This is added as a precaution
+              // Service API call to RACS will throw error in case user provides invalid ARN and this wouldnt be reachable.
+              return null;
+            }).filter (iamRole->iamRole!=null)
             .collect(Collectors.toList());
   }
 
