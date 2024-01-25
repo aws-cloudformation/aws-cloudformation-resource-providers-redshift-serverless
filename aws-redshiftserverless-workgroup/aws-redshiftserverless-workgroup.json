@@ -325,6 +325,7 @@
                 "ec2:DescribeSubnets",
                 "ec2:DescribeAccountAttributes",
                 "ec2:DescribeAvailabilityZones",
+                "redshift-serverless:CreateNamespace",
                 "redshift-serverless:CreateWorkgroup",
                 "redshift-serverless:GetWorkgroup"
             ]

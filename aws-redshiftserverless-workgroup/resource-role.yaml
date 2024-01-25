@@ -37,6 +37,7 @@ Resources:
                 - "ec2:DescribeSecurityGroups"
                 - "ec2:DescribeSubnets"
                 - "ec2:DescribeVpcAttribute"
+                - "redshift-serverless:CreateNamespace"
                 - "redshift-serverless:CreateWorkgroup"
                 - "redshift-serverless:DeleteWorkgroup"
                 - "redshift-serverless:GetWorkgroup"

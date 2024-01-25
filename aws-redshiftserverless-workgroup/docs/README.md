@@ -53,6 +53,8 @@ Properties:
 
 #### WorkgroupName
 
+The name of the workgroup.
+
 _Required_: Yes
 
 _Type_: String
@@ -66,6 +68,8 @@ _Pattern_: <code>^(?=^[a-z0-9-]+$).{3,64}$</code>
 _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-replacement)
 
 #### NamespaceName
+
+The namespace the workgroup is associated with.
 
 _Required_: No
 
@@ -81,6 +85,8 @@ _Update requires_: [Replacement](https://docs.aws.amazon.com/AWSCloudFormation/l
 
 #### BaseCapacity
 
+The base compute capacity of the workgroup in Redshift Processing Units (RPUs).
+
 _Required_: No
 
 _Type_: Integer
@@ -88,6 +94,8 @@ _Type_: Integer
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
 #### MaxCapacity
+
+The max compute capacity of the workgroup in Redshift Processing Units (RPUs).
 
 _Required_: No
 
@@ -97,6 +105,8 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### EnhancedVpcRouting
 
+The value that specifies whether to enable enhanced virtual private cloud (VPC) routing, which forces Amazon Redshift Serverless to route traffic through your VPC.
+
 _Required_: No
 
 _Type_: Boolean
@@ -104,6 +114,8 @@ _Type_: Boolean
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
 #### ConfigParameters
+
+A list of parameters to set for finer control over a database. Available options are datestyle, enable_user_activity_logging, query_group, search_path, max_query_execution_time, and require_ssl.
 
 _Required_: No
 
@@ -113,6 +125,8 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### SecurityGroupIds
 
+A list of security group IDs to associate with the workgroup.
+
 _Required_: No
 
 _Type_: List of String
@@ -120,6 +134,8 @@ _Type_: List of String
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
 #### SubnetIds
+
+A list of subnet IDs the workgroup is associated with.
 
 _Required_: No
 
@@ -129,6 +145,8 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### PubliclyAccessible
 
+A value that specifies whether the workgroup can be accessible from a public network.
+
 _Required_: No
 
 _Type_: Boolean
@@ -137,6 +155,8 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 
 #### Port
 
+The custom port to use when connecting to a workgroup. Valid port ranges are 5431-5455 and 8191-8215. The default is 5439.
+
 _Required_: No
 
 _Type_: Integer
@@ -144,6 +164,8 @@ _Type_: Integer
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
 #### Tags
+
+The map of the key-value pairs used to tag the workgroup.
 
 _Required_: No
 
@@ -254,3 +276,4 @@ Returns the <code>PubliclyAccessible</code> value.
 #### CreationDate
 
 Returns the <code>CreationDate</code> value.
+
