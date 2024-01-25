@@ -45,24 +45,23 @@ public class ReadHandler extends BaseHandlerStd {
         return ProgressEvent.progress(model, callbackContext)
                 .then(progress -> {
                     progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Read", proxyClient, model, callbackContext)
-                            .translateToServiceRequest(Translator::translateToReadRequest)
-                            .makeServiceCall(this::getNamespace)
-                            .handleError(this::getNamespaceErrorHandler)
-                            .done(awsResponse -> {
-                                callbackContext.setNamespaceArn(awsResponse.namespace().namespaceArn());
-                                return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
-                            });
+                        .translateToServiceRequest(Translator::translateToReadRequest)
+                        .makeServiceCall(this::getNamespace)
+                        .handleError(this::getNamespaceErrorHandler)
+                        .done(awsResponse -> {
+                            callbackContext.setNamespaceArn(awsResponse.namespace().namespaceArn());
+                            return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
+                        });
                     return progress;
                 })
                 .then(progress -> {
-                    progress = proxy.initiate("AWS-Redshift-ResourcePolicy::Get", redshiftProxyClient, progress.getResourceModel(), callbackContext)
-                            .translateToServiceRequest(resourceModelRequest -> Translator.translateToGetResourcePolicy(resourceModelRequest, callbackContext.getNamespaceArn()))
-                            .makeServiceCall(this::getNamespaceResourcePolicy)
-                            .done((_request, _response, _client, _model, _context) -> {
-                                _model.setNamespaceResourcePolicy(Translator.convertStringToJson(_response.resourcePolicy().policy(), logger));
-                                return ProgressEvent.defaultSuccessHandler(_model);
-                            });
-                    return progress;
+                    return proxy.initiate("AWS-Redshift-ResourcePolicy::Get", redshiftProxyClient, progress.getResourceModel(), callbackContext)
+                        .translateToServiceRequest(resourceModelRequest -> Translator.translateToGetResourcePolicy(resourceModelRequest, callbackContext.getNamespaceArn()))
+                        .makeServiceCall(this::getNamespaceResourcePolicy)
+                        .done((_request, _response, _client, _model, _context) -> {
+                            _model.setNamespaceResourcePolicy(Translator.convertStringToJson(_response.resourcePolicy().policy(), logger));
+                            return ProgressEvent.defaultSuccessHandler(_model);
+                        });
                 });
     }
 

@@ -26,40 +26,39 @@ public class CreateHandler extends BaseHandlerStd {
     private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-            final AmazonWebServicesClientProxy proxy,
-            final ResourceHandlerRequest<ResourceModel> request,
-            final CallbackContext callbackContext,
-            final ProxyClient<RedshiftServerlessClient> proxyClient,
-            final ProxyClient<RedshiftClient> redshiftProxyClient,
-            final Logger logger) {
+        final AmazonWebServicesClientProxy proxy,
+        final ResourceHandlerRequest<ResourceModel> request,
+        final CallbackContext callbackContext,
+        final ProxyClient<RedshiftServerlessClient> proxyClient,
+        final ProxyClient<RedshiftClient> redshiftProxyClient,
+        final Logger logger) {
 
         this.logger = logger;
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
-                .then(progress -> {
-                    proxy.initiate("AWS-RedshiftServerless-Namespace::Create", proxyClient, progress.getResourceModel(), callbackContext)
-                            .translateToServiceRequest(Translator::translateToCreateRequest)
-                            .makeServiceCall(this::createNamespace)
-                            .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
-                            .handleError(this::createNamespaceErrorHandler)
-                            .done((_request, _response, _client, _model, _context) -> {
-                                callbackContext.setNamespaceArn(_response.namespace().namespaceArn());
-                                return ProgressEvent.progress(_model, callbackContext);
-                            });
-                    return progress;
-                })
-                .then(progress -> {
-                    if (progress.getResourceModel().getNamespaceResourcePolicy() != null) {
-                        return proxy.initiate("AWS-Redshift-ResourcePolicy::Put", redshiftProxyClient, progress.getResourceModel(), callbackContext)
-                                .translateToServiceRequest(resourceModelRequest -> Translator.translateToPutResourcePolicy(resourceModelRequest, callbackContext.getNamespaceArn(), logger))
-                                .makeServiceCall(this::putNamespaceResourcePolicy)
-                                .progress();
-                    }
-                    return progress;
-                })
-                .then(progress ->
-                        new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, logger)
-                );
+            .then(progress -> {
+                return proxy.initiate("AWS-RedshiftServerless-Namespace::Create", proxyClient, progress.getResourceModel(), callbackContext)
+                    .translateToServiceRequest(Translator::translateToCreateRequest)
+                    .makeServiceCall(this::createNamespace)
+                    .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
+                    .handleError(this::createNamespaceErrorHandler)
+                    .done((_request, _response, _client, _model, _context) -> {
+                        callbackContext.setNamespaceArn(_response.namespace().namespaceArn());
+                        return ProgressEvent.progress(_model, callbackContext);
+                    });
+            })
+            .then(progress -> {
+                if (progress.getResourceModel().getNamespaceResourcePolicy() != null) {
+                    return proxy.initiate("AWS-Redshift-ResourcePolicy::Put", redshiftProxyClient, progress.getResourceModel(), callbackContext)
+                        .translateToServiceRequest(resourceModelRequest -> Translator.translateToPutResourcePolicy(resourceModelRequest, callbackContext.getNamespaceArn(), logger))
+                        .makeServiceCall(this::putNamespaceResourcePolicy)
+                        .progress();
+                }
+                return progress;
+            })
+            .then(progress ->
+                new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, logger)
+            );
     }
 
     private CreateNamespaceResponse createNamespace(final CreateNamespaceRequest createNamespaceRequest,
