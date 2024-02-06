@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::RedshiftServerless::Namespace",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java17",
     "entrypoint": "software.amazon.redshiftserverless.namespace.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.redshiftserverless.namespace.HandlerWrapper::testEntrypoint",
     "settings": {
@@ -20,5 +20,6 @@
         ],
         "codegen_template_path": "guided_aws",
         "protocolVersion": "2.0.0"
-    }
+    },
+    "executableEntrypoint": "software.amazon.redshiftserverless.namespace.HandlerWrapperExecutable"
 }
