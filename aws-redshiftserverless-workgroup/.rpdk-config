@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::RedshiftServerless::Workgroup",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java17",
     "entrypoint": "software.amazon.redshiftserverless.workgroup.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.redshiftserverless.workgroup.HandlerWrapper::testEntrypoint",
     "settings": {
