@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.redshift.model.PutResourcePolicyResponse;
 import software.amazon.awssdk.services.redshift.model.RedshiftException;
 import software.amazon.awssdk.services.redshift.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshift.model.UnsupportedOperationException;
+import software.amazon.awssdk.services.redshift.model.ResourcePolicy;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
@@ -82,7 +83,10 @@ public class CreateHandler extends BaseHandlerStd {
             putResponse = proxyClient.injectCredentialsAndInvokeV2(putRequest, proxyClient.client()::putResourcePolicy);
         } catch (ResourceNotFoundException e){
             throw new CfnNotFoundException(e);
-        } catch (InvalidPolicyException | UnsupportedOperationException | InvalidParameterValueException e) {
+        } catch (UnsupportedOperationException e) {
+            logger.log(e);
+            return noOpNamespaceResourcePoliy(putRequest);
+        } catch (InvalidPolicyException | InvalidParameterValueException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
         } catch (SdkClientException | RedshiftException e) {
             throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
@@ -90,6 +94,20 @@ public class CreateHandler extends BaseHandlerStd {
 
         logger.log(String.format("%s successfully put resource policy.", putRequest.resourceArn()));
         return putResponse;
+    }
+
+    /**
+     * No Op method for assigning empty resource policy for Namespace create response.
+     * @param awsRequest the aws service request to describe a resource
+     * @return GetResourcePolicyResponse
+     */
+    private PutResourcePolicyResponse noOpNamespaceResourcePoliy(final PutResourcePolicyRequest awsRequest) {
+        ResourcePolicy resourcePolicy = ResourcePolicy.builder()
+                .resourceArn(awsRequest.resourceArn())
+                .policy(null)
+                .build();
+
+        return PutResourcePolicyResponse.builder().resourcePolicy(resourcePolicy).build();
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> createNamespaceErrorHandler(final CreateNamespaceRequest createNamespaceRequest,

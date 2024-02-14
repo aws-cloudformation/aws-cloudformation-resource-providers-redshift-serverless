@@ -96,7 +96,7 @@ public class ReadHandler extends BaseHandlerStd {
         } catch (InvalidPolicyException | UnsupportedOperationException e) {
           /* ResourcePolicy is not enabled in all regions, we should handle unsupported operation exception
           if NamespaceResourcePolicy is not added as a property while creating Namespace resource. */
-          if(!containsResourcePolicy && e.statusCode() == RESOURCE_POLICY_UNSUPPORTED_ERR_STATUS_CODE &&
+          if(e.statusCode() == RESOURCE_POLICY_UNSUPPORTED_ERR_STATUS_CODE &&
                   e.awsErrorDetails().errorMessage().contains(RESOURCE_POLICY_UNSUPPORTED_ERROR)) {
               logger.log(e.getMessage());
               return noOpNamespaceResourcePoliy(awsRequest);
@@ -107,7 +107,7 @@ public class ReadHandler extends BaseHandlerStd {
             /* This error handling is required for backward compatibility. Without this exception handling, existing customers creating
             or updating their namespace will see an error with permission issues - "is not authorized to perform: redshift:GetResourcePolicy",
             as Read handler is trying to hit getResourcePolicy APIs to get namespaceResourcePolicy details.*/
-            if(!containsResourcePolicy && e.statusCode() == GET_RESOURCE_POLICY_ERR_STATUS_CODE &&
+            if(e.statusCode() == GET_RESOURCE_POLICY_ERR_STATUS_CODE &&
                     e.awsErrorDetails().errorMessage().contains(GET_RESOURCE_POLICY_ERROR)) {
                 logger.log(String.format("RedshiftException:  %s", e.getMessage()));
                 return noOpNamespaceResourcePoliy(awsRequest);
