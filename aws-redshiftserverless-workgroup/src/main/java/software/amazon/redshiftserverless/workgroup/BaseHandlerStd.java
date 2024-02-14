@@ -70,4 +70,12 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
             }
         }
     }
+
+    public boolean isEndpointAccessRequest(final Object awsRequest,
+                                     final RedshiftServerlessResponse awsResponse,
+                                     final ProxyClient<RedshiftServerlessClient> proxyClient,
+                                     final ResourceModel model,
+                                     final CallbackContext context) {
+        return model.getEndpointName() != null;
+    }
 }

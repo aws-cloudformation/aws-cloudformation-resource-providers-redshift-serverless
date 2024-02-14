@@ -75,6 +75,66 @@
             },
             "additionalProperties": false
         },
+        "VpcSecurityGroupMembership": {
+            "type": "object",
+            "properties": {
+                "VpcSecurityGroupId": {
+                    "type": "string"
+                },
+                "Status": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "VpcEndpointAccess": {
+            "type": "object",
+            "properties": {
+                "EndpointName": {
+                    "type": "string"
+                },
+                "EndpointStatus": {
+                    "type": "string"
+                },
+                "WorkgroupName": {
+                    "type": "string"
+                },
+                "EndpointCreateTime": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Port": {
+                    "type": "integer"
+                },
+                "Address": {
+                    "type": "string"
+                },
+                "SubnetIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^sg-[0-9a-fA-F]{8,}$",
+                        "maxLength": 255,
+                        "minLength": 0
+                    },
+                    "insertionOrder": false
+                },
+                "VpcSecurityGroups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/VpcSecurityGroupMembership"
+                    },
+                    "insertionOrder": false
+                },
+                "VpcEndpoint": {
+                    "$ref": "#/definitions/VpcEndpoint"
+                },
+                "EndpointArn": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
         "Workgroup": {
             "type": "object",
             "properties": {
@@ -264,6 +324,31 @@
         "Workgroup": {
             "description": "Definition for workgroup resource",
             "$ref": "#/definitions/Workgroup"
+        },
+        "EndpointName": {
+            "description": "The name of the VPC endpoint",
+            "type": "string"
+        },
+        "OwnerAccount": {
+            "description": "Account Id of the resource owner",
+            "type": "string"
+        },
+        "VpcSecurityGroupIds": {
+            "description": "A list of VPC security group IDs to associate with the workgroup.",
+            "type": "array",
+            "insertionOrder": false,
+            "items": {
+                "type": "string",
+                "pattern": "^sg-[0-9a-fA-F]{8,}$",
+                "maxLength": 255,
+                "minLength": 0
+            },
+            "maxItems": 32,
+            "minItems": 1
+        },
+        "VpcEndpointAccess": {
+            "description": "Definition for Vpc EndpointAccess resource",
+            "$ref": "#/definitions/VpcEndpointAccess"
         }
     },
     "tagging": {
@@ -299,6 +384,22 @@
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/SubnetId",
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/PrivateIpAddress",
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/AvailabilityZone",
+        "/properties/Workgroup/EndpointAccess/EndpointName",
+        "/properties/Workgroup/EndpointAccess/EndpointStatus",
+        "/properties/Workgroup/EndpointAccess/WorkgroupName",
+        "/properties/Workgroup/EndpointAccess/EndpointCreationTime",
+        "/properties/Workgroup/EndpointAccess/Port",
+        "/properties/Workgroup/EndpointAccess/Address",
+        "/properties/Workgroup/EndpointAccess/SubnetIds",
+        "/properties/Workgroup/EndpointAccess/VpcSecurityGroups/*/VpcSecurityGroupMembership/*/VpcSecurityGroupId",
+        "/properties/Workgroup/EndpointAccess/VpcSecurityGroups/*/VpcSecurityGroupMembership/*/Status",
+        "/properties/Workgroup/EndpointAccess/VpcEndpoint/*/VpcEndpointId",
+        "/properties/Workgroup/EndpointAccess/VpcEndpoint/*/VpcId",
+        "/properties/Workgroup/EndpointAccess/VpcEndpoint/*/NetworkInterfaces/*/NetworkInterfaceId",
+        "/properties/Workgroup/EndpointAccess/VpcEndpoint/*/NetworkInterfaces/*/SubnetId",
+        "/properties/Workgroup/EndpointAccess/VpcEndpoint/*/NetworkInterfaces/*/PrivateIpAddress",
+        "/properties/Workgroup/EndpointAccess/VpcEndpoint/*/NetworkInterfaces/*/AvailabilityZone",
+        "/properties/Workgroup/EndpointAccess/EndpointArn",
         "/properties/Workgroup/PubliclyAccessible",
         "/properties/Workgroup/CreationDate"
     ],
@@ -327,7 +428,9 @@
                 "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:CreateNamespace",
                 "redshift-serverless:CreateWorkgroup",
-                "redshift-serverless:GetWorkgroup"
+                "redshift-serverless:GetWorkgroup",
+                "redshift-serverless:CreateEndpointAccess",
+                "redshift-serverless:GetEndpointAccess"
             ]
         },
         "read": {
@@ -339,7 +442,8 @@
                 "ec2:DescribeSubnets",
                 "ec2:DescribeAccountAttributes",
                 "ec2:DescribeAvailabilityZones",
-                "redshift-serverless:GetWorkgroup"
+                "redshift-serverless:GetWorkgroup",
+                "redshift-serverless:GetEndpointAccess"
             ]
         },
         "update": {
@@ -355,7 +459,9 @@
                 "redshift-serverless:TagResource",
                 "redshift-serverless:UntagResource",
                 "redshift-serverless:GetWorkgroup",
-                "redshift-serverless:UpdateWorkgroup"
+                "redshift-serverless:UpdateWorkgroup",
+                "redshift-serverless:GetEndpointAccess",
+                "redshift-serverless:UpdateEndpointAccess"
             ]
         },
         "delete": {
@@ -368,7 +474,9 @@
                 "ec2:DescribeAccountAttributes",
                 "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:GetWorkgroup",
-                "redshift-serverless:DeleteWorkgroup"
+                "redshift-serverless:DeleteWorkgroup",
+                "redshift-serverless:GetEndpointAccess",
+                "redshift-serverless:DeleteEndpointAccess"
             ]
         },
         "list": {

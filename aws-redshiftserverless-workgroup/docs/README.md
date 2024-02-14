@@ -23,6 +23,10 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>" : <i>Boolean</i>,
         "<a href="#port" title="Port">Port</a>" : <i>Integer</i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
+        "<a href="#endpointname" title="EndpointName">EndpointName</a>" : <i>String</i>,
+        "<a href="#owneraccount" title="OwnerAccount">OwnerAccount</a>" : <i>String</i>,
+        "<a href="#vpcsecuritygroupids" title="VpcSecurityGroupIds">VpcSecurityGroupIds</a>" : <i>[ String, ... ]</i>,
+        "<a href="#vpcendpointaccess" title="VpcEndpointAccess">VpcEndpointAccess</a>" : <i><a href="vpcendpointaccess.md">VpcEndpointAccess</a></i>
     }
 }
 </pre>
@@ -47,6 +51,11 @@ Properties:
     <a href="#port" title="Port">Port</a>: <i>Integer</i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
+    <a href="#endpointname" title="EndpointName">EndpointName</a>: <i>String</i>
+    <a href="#owneraccount" title="OwnerAccount">OwnerAccount</a>: <i>String</i>
+    <a href="#vpcsecuritygroupids" title="VpcSecurityGroupIds">VpcSecurityGroupIds</a>: <i>
+      - String</i>
+    <a href="#vpcendpointaccess" title="VpcEndpointAccess">VpcEndpointAccess</a>: <i><a href="vpcendpointaccess.md">VpcEndpointAccess</a></i>
 </pre>
 
 ## Properties
@@ -173,6 +182,44 @@ _Type_: List of <a href="tag.md">Tag</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
+#### EndpointName
+
+The name of the VPC endpoint
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### OwnerAccount
+
+Account Id of the resource owner
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### VpcSecurityGroupIds
+
+A list of VPC security group IDs to associate with the workgroup.
+
+_Required_: No
+
+_Type_: List of String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### VpcEndpointAccess
+
+_Required_: No
+
+_Type_: <a href="vpcendpointaccess.md">VpcEndpointAccess</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
 ## Return Values
 
 ### Ref
@@ -269,6 +316,70 @@ Returns the <code>PrivateIpAddress</code> value.
 
 Returns the <code>AvailabilityZone</code> value.
 
+#### EndpointName
+
+Returns the <code>EndpointName</code> value.
+
+#### EndpointStatus
+
+Returns the <code>EndpointStatus</code> value.
+
+#### WorkgroupName
+
+Returns the <code>WorkgroupName</code> value.
+
+#### EndpointCreationTime
+
+Returns the <code>EndpointCreationTime</code> value.
+
+#### Port
+
+Returns the <code>Port</code> value.
+
+#### Address
+
+Returns the <code>Address</code> value.
+
+#### SubnetIds
+
+Returns the <code>SubnetIds</code> value.
+
+#### VpcSecurityGroupId
+
+Returns the <code>VpcSecurityGroupId</code> value.
+
+#### Status
+
+Returns the <code>Status</code> value.
+
+#### VpcEndpointId
+
+Returns the <code>VpcEndpointId</code> value.
+
+#### VpcId
+
+Returns the <code>VpcId</code> value.
+
+#### NetworkInterfaceId
+
+Returns the <code>NetworkInterfaceId</code> value.
+
+#### SubnetId
+
+Returns the <code>SubnetId</code> value.
+
+#### PrivateIpAddress
+
+Returns the <code>PrivateIpAddress</code> value.
+
+#### AvailabilityZone
+
+Returns the <code>AvailabilityZone</code> value.
+
+#### EndpointArn
+
+Returns the <code>EndpointArn</code> value.
+
 #### PubliclyAccessible
 
 Returns the <code>PubliclyAccessible</code> value.
@@ -276,4 +387,3 @@ Returns the <code>PubliclyAccessible</code> value.
 #### CreationDate
 
 Returns the <code>CreationDate</code> value.
-

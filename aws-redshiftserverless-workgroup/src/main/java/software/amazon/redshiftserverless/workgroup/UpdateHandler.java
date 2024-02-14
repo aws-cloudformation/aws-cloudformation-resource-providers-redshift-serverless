@@ -1,7 +1,9 @@
 package software.amazon.redshiftserverless.workgroup;
 
+import com.amazonaws.util.StringUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
+import software.amazon.awssdk.services.redshiftserverless.model.AccessDeniedException;
 import software.amazon.awssdk.services.redshiftserverless.model.ConflictException;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
@@ -13,6 +15,8 @@ import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFound
 import software.amazon.awssdk.services.redshiftserverless.model.TagResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ThrottlingException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateEndpointAccessRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateEndpointAccessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
@@ -41,8 +45,21 @@ public class UpdateHandler extends BaseHandlerStd {
             final Logger logger) {
 
         this.logger = logger;
+        final ResourceModel resourceModel = request.getDesiredResourceState();
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
+                .then(progress -> {
+                    if (!StringUtils.isNullOrEmpty(resourceModel.getEndpointName())) {
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::UpdateEndpointAccess", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToUpdateEndpointAccessRequest)
+                                .makeServiceCall(this::updateEndpointAccess)
+                                .stabilize(this::isEndpointAccessRequest)
+                                .handleError(this::updateEndpointAccessErrorHandler)
+                                .done(awsResponse -> ProgressEvent.defaultSuccessHandler(Translator.translateFromEndpointAccessResponse(awsResponse.endpoint())));
+                    }
+                    return progress;
+                })
+
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::ReadInstance", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadRequest)
@@ -69,7 +86,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                                .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
+                                .translateToServiceRequest(model -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), model))
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isWorkgroupStable)
@@ -195,6 +212,39 @@ public class UpdateHandler extends BaseHandlerStd {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
 
         } else if (exception instanceof ValidationException) {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
+
+        } else if (exception instanceof InternalServerException) {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InternalFailure);
+
+        } else if (exception instanceof ConflictException ||
+                exception instanceof InsufficientCapacityException) {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ResourceConflict);
+
+        } else {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
+        }
+    }
+
+    private UpdateEndpointAccessResponse updateEndpointAccess(final UpdateEndpointAccessRequest awsRequest,
+                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
+        UpdateEndpointAccessResponse awsResponse;
+        awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::updateEndpointAccess);
+
+        logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
+        return awsResponse;
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> updateEndpointAccessErrorHandler(final UpdateEndpointAccessRequest awsRequest,
+                                                                                      final Exception exception,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
+                                                                                      final ResourceModel model,
+                                                                                      final CallbackContext context) {
+        if (exception instanceof ResourceNotFoundException) {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
+
+        } else if (exception instanceof ValidationException ||
+                exception instanceof AccessDeniedException) {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
 
         } else if (exception instanceof InternalServerException) {

@@ -2,8 +2,12 @@ package software.amazon.redshiftserverless.workgroup;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import software.amazon.awssdk.services.redshiftserverless.model.CreateEndpointAccessRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.DeleteEndpointAccessRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.EndpointAccess;
+import software.amazon.awssdk.services.redshiftserverless.model.GetEndpointAccessRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
@@ -12,6 +16,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsRe
 import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.TagResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UntagResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.UpdateEndpointAccessRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
 
 import java.util.Collection;
@@ -50,6 +55,22 @@ public class Translator {
                 .publiclyAccessible(model.getPubliclyAccessible())
                 .tags(translateToSdkTags(model.getTags()))
                 .port(model.getPort())
+                .build();
+    }
+
+    /**
+     * Request to create endpoint access
+     *
+     * @param model resource model
+     * @return awsRequest the aws service request to create endpoint access
+     */
+    static CreateEndpointAccessRequest translateToCreateEndpointAccessRequest(final ResourceModel model) {
+        return CreateEndpointAccessRequest.builder()
+                .endpointName(model.getEndpointName())
+                .ownerAccount(model.getOwnerAccount())
+                .vpcSecurityGroupIds(model.getVpcSecurityGroupIds())
+                .subnetIds(model.getSubnetIds())
+                .workgroupName(model.getWorkgroupName())
                 .build();
     }
 
@@ -103,6 +124,29 @@ public class Translator {
     }
 
     /**
+     * Translates EndpointAccess resource object from sdk into a resource model
+     *
+     * @param endpointAccess the aws services resource response
+     * @return model resource model
+     */
+    static ResourceModel translateFromEndpointAccessResponse(final EndpointAccess endpointAccess) {
+        return ResourceModel.builder()
+                .vpcEndpointAccess(VpcEndpointAccess.builder()
+                        .endpointName(endpointAccess.endpointName())
+                        .endpointStatus(endpointAccess.endpointStatus())
+                        .workgroupName(endpointAccess.workgroupName())
+                        .endpointCreateTime(endpointAccess.endpointCreateTime().toString())
+                        .port(endpointAccess.port())
+                        .address(endpointAccess.address())
+                        .subnetIds(endpointAccess.subnetIds())
+                        .vpcSecurityGroups(translateToModelVpcSecurityGroupMemberships(endpointAccess.vpcSecurityGroups()))
+                        .vpcEndpoint(translateToModelVpcEndpoint(endpointAccess.vpcEndpoint()))
+                        .endpointArn(endpointAccess.endpointArn())
+                        .build())
+                .build();
+    }
+
+    /**
      * Request to delete a resource
      *
      * @param model resource model
@@ -111,6 +155,30 @@ public class Translator {
     static DeleteWorkgroupRequest translateToDeleteRequest(final ResourceModel model) {
         return DeleteWorkgroupRequest.builder()
                 .workgroupName(model.getWorkgroupName())
+                .build();
+    }
+
+    /**
+     * Request to delete endpoint access
+     *
+     * @param model resource model
+     * @return awsRequest the aws service request to delete a resource
+     */
+    static DeleteEndpointAccessRequest translateToDeleteEndpointAccessRequest(final ResourceModel model) {
+        return DeleteEndpointAccessRequest.builder()
+                .endpointName(model.getEndpointName())
+                .build();
+    }
+
+    /**
+     * Request to get endpoint access
+     *
+     * @param model resource model
+     * @return awsRequest the aws service request to delete a resource
+     */
+    static GetEndpointAccessRequest translateToGetEndpointAccessRequest(final ResourceModel model) {
+        return GetEndpointAccessRequest.builder()
+                .endpointName(model.getEndpointName())
                 .build();
     }
 
@@ -131,6 +199,19 @@ public class Translator {
                 .subnetIds(model.getSubnetIds())
                 .securityGroupIds(model.getSecurityGroupIds())
                 .port(model.getPort())
+                .build();
+    }
+
+    /**
+     * Request to update properties of a previously created endpoint access
+     *
+     * @param model resource model
+     * @return awsRequest the aws service request to modify a resource
+     */
+    static UpdateEndpointAccessRequest translateToUpdateEndpointAccessRequest(final ResourceModel model) {
+        return UpdateEndpointAccessRequest.builder()
+                .endpointName(model.getEndpointName())
+                .vpcSecurityGroupIds(model.getVpcSecurityGroupIds())
                 .build();
     }
 
@@ -269,5 +350,20 @@ public class Translator {
 
     private static Endpoint translateToModelEndpoint(software.amazon.awssdk.services.redshiftserverless.model.Endpoint endpoint) {
         return GSON.fromJson(GSON.toJson(endpoint), Endpoint.class);
+    }
+
+    private static VpcEndpoint translateToModelVpcEndpoint(software.amazon.awssdk.services.redshiftserverless.model.VpcEndpoint vpcEndpoint) {
+        return GSON.fromJson(GSON.toJson(vpcEndpoint), VpcEndpoint.class);
+    }
+
+    private static VpcSecurityGroupMembership translateToModelVpcSecurityGroupMembership(software.amazon.awssdk.services.redshiftserverless.model.VpcSecurityGroupMembership vpcSecurityGroupMembership) {
+        return GSON.fromJson(GSON.toJson(vpcSecurityGroupMembership), VpcSecurityGroupMembership.class);
+    }
+
+    private static List<VpcSecurityGroupMembership> translateToModelVpcSecurityGroupMemberships(Collection<software.amazon.awssdk.services.redshiftserverless.model.VpcSecurityGroupMembership> vpcSecurityGroupMemberships) {
+        return vpcSecurityGroupMemberships == null ? null : vpcSecurityGroupMemberships
+                .stream()
+                .map(Translator::translateToModelVpcSecurityGroupMembership)
+                .collect(Collectors.toList());
     }
 }
