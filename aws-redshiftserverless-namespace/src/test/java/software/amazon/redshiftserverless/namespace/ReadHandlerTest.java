@@ -1,15 +1,27 @@
 package software.amazon.redshiftserverless.namespace;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshift.model.GetResourcePolicyRequest;
+import software.amazon.awssdk.services.redshift.model.InvalidPolicyException;
+import software.amazon.awssdk.services.redshift.model.RedshiftException;
+import software.amazon.awssdk.services.redshift.model.UnsupportedOperationException;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -22,6 +34,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,10 +88,9 @@ public class ReadHandlerTest extends AbstractTestBase {
         final ResourceModel requestResourceModel = getNamespaceRequestResourceModel();
         final ResourceModel responseResourceModel = getNamespaceResponseResourceModel();
 
-
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(requestResourceModel)
-            .build();
+                .desiredResourceState(requestResourceModel)
+                .build();
 
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
@@ -91,6 +105,65 @@ public class ReadHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    static Stream<Arguments> provideResourcePolicyExceptionParams() {
+        return Stream.of(
+                Arguments.of(InvalidPolicyException.class, false, null),
+                Arguments.of(UnsupportedOperationException.class, false, null),
+                Arguments.of(RedshiftException.class, false, null),
+                Arguments.of(InvalidPolicyException.class, true, CfnInvalidRequestException.class),
+                Arguments.of(RedshiftException.class, true, CfnGeneralServiceException.class)
+        );
+    }
+
+    static Object createExceptionWithBuilder(Class<?> exceptionClass) throws Exception {
+        // Dynamically invoke the builder method
+        Object builderInstance = exceptionClass.getDeclaredMethod("builder").invoke(null);
+        // Build and return the exception object
+        Method buildMethod = builderInstance.getClass().getMethod("build");
+        buildMethod.setAccessible(true);
+        return buildMethod.invoke(builderInstance);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideResourcePolicyExceptionParams")
+    public void catchResourcePolicyExceptionAsExpected(
+            Class<Exception> exceptionClass,
+            boolean containsResourcePolicy,
+            Class<? extends Exception> expectedException
+    ) throws Exception {
+        final ReadHandler handler = new ReadHandler();
+
+        ResourceModel requestResourceModel = getNamespaceRequestResourceModel();
+        if (containsResourcePolicy) {
+            requestResourceModel.setNamespaceResourcePolicy(
+                    Translator.convertStringToJson(NAMESPACE_RESOURCE_POLICY_DOCUMENT, logger)
+            );
+        }
+        final ResourceModel responseResourceModel = getNamespaceResponseResourceModel();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(requestResourceModel)
+            .build();
+
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class)))
+                .thenThrow((Throwable) createExceptionWithBuilder(exceptionClass));
+
+        if (expectedException == null) {
+            when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
+            final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+            assertThat(response).isNotNull();
+            assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+            assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+            assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
+            assertThat(response.getResourceModels()).isNull();
+            assertThat(response.getMessage()).isNull();
+            assertThat(response.getErrorCode()).isNull();
+        } else {
+            assertThrows(expectedException, () -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger));
+        }
     }
 
     @Test
