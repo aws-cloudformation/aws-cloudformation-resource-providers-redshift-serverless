@@ -26,8 +26,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#finalsnapshotname" title="FinalSnapshotName">FinalSnapshotName</a>" : <i>String</i>,
         "<a href="#finalsnapshotretentionperiod" title="FinalSnapshotRetentionPeriod">FinalSnapshotRetentionPeriod</a>" : <i>Integer</i>,
         "<a href="#namespaceresourcepolicy" title="NamespaceResourcePolicy">NamespaceResourcePolicy</a>" : <i>Map</i>,
-        "<a href="#redshiftidcapplicationarn" title="RedshiftIdcApplicationArn">RedshiftIdcApplicationArn</a>" : <i>String</i>,
-        "<a href="#snapshotcopyconfigurations" title="SnapshotCopyConfigurations">SnapshotCopyConfigurations</a>" : <i>[ <a href="snapshotcopyconfiguration.md">SnapshotCopyConfiguration</a>, ... ]</i>
+        "<a href="#redshiftidcapplicationarn" title="RedshiftIdcApplicationArn">RedshiftIdcApplicationArn</a>" : <i>String</i>
     }
 }
 </pre>
@@ -55,8 +54,6 @@ Properties:
     <a href="#finalsnapshotretentionperiod" title="FinalSnapshotRetentionPeriod">FinalSnapshotRetentionPeriod</a>: <i>Integer</i>
     <a href="#namespaceresourcepolicy" title="NamespaceResourcePolicy">NamespaceResourcePolicy</a>: <i>Map</i>
     <a href="#redshiftidcapplicationarn" title="RedshiftIdcApplicationArn">RedshiftIdcApplicationArn</a>: <i>String</i>
-    <a href="#snapshotcopyconfigurations" title="SnapshotCopyConfigurations">SnapshotCopyConfigurations</a>: <i>
-      - <a href="snapshotcopyconfiguration.md">SnapshotCopyConfiguration</a></i>
 </pre>
 
 ## Properties
@@ -233,16 +230,6 @@ _Type_: String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
-#### SnapshotCopyConfigurations
-
-The snapshot copy configurations for the namespace.
-
-_Required_: No
-
-_Type_: List of <a href="snapshotcopyconfiguration.md">SnapshotCopyConfiguration</a>
-
-_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
-
 ## Return Values
 
 ### Ref
@@ -302,3 +289,4 @@ Returns the <code>Status</code> value.
 #### CreationDate
 
 Returns the <code>CreationDate</code> value.
+

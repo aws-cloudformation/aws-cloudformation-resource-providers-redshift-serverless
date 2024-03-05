@@ -16,7 +16,6 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class ReadHandler extends BaseHandlerStd {
-    private boolean containsResourcePolicy = false;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -42,7 +41,7 @@ public class ReadHandler extends BaseHandlerStd {
                     progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Read", proxyClient, model, callbackContext)
                         .translateToServiceRequest(Translator::translateToReadRequest)
                         .makeServiceCall(this::getNamespace)
-                        .handleError(this::defaultErrorHandler)
+                        .handleError(this::getNamespaceErrorHandler)
                         .done(awsResponse -> {
                             callbackContext.setNamespaceArn(awsResponse.namespace().namespaceArn());
                             return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
@@ -55,18 +54,8 @@ public class ReadHandler extends BaseHandlerStd {
                         .makeServiceCall(this::getNamespaceResourcePolicy)
                         .done((_request, _response, _client, _model, _context) -> {
                             _model.setNamespaceResourcePolicy(Translator.convertStringToJson(_response.resourcePolicy().policy(), logger));
-                            return ProgressEvent.progress(_model, _context);
+                            return ProgressEvent.defaultSuccessHandler(_model);
                         });
-                })
-                .then(progress -> {
-                    return proxy.initiate("AWS-RedshiftServerless-Namespace::SnapshotCopyConfigurations::List", proxyClient, progress.getResourceModel(), callbackContext)
-                            .translateToServiceRequest(Translator::translateToListSnapshotCopyConfigurationsRequest)
-                            .makeServiceCall(this::listSnapshotCopyConfigurations)
-                            .handleError(this::defaultErrorHandler)
-                            .done((_request, _response, _client, _model, _context) -> {
-                                _model.setSnapshotCopyConfigurations(Translator.translateToSnapshotCopyConfigurations(_response.snapshotCopyConfigurations()));
-                                return ProgressEvent.defaultSuccessHandler(_model);
-                            });
                 });
     }
 
@@ -148,6 +137,14 @@ public class ReadHandler extends BaseHandlerStd {
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
             final GetNamespaceResponse getNamespaceResponse) {
         return ProgressEvent.defaultSuccessHandler(Translator.translateFromReadResponse(getNamespaceResponse));
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> getNamespaceErrorHandler(final GetNamespaceRequest getNamespaceRequest,
+                                                                                      final Exception exception,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
+                                                                                      final ResourceModel model,
+                                                                                      final CallbackContext context) {
+        return errorHandler(exception);
     }
 
     /**

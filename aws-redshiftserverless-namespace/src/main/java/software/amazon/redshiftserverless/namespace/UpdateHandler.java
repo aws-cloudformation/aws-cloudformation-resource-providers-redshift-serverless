@@ -1,9 +1,7 @@
 package software.amazon.redshiftserverless.namespace;
 
-import lombok.Value;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.SetUtils;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.cloudwatch.model.InvalidParameterValueException;
@@ -11,36 +9,25 @@ import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshift.model.*;
 import software.amazon.awssdk.services.redshift.model.UnsupportedOperationException;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
-import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCopyConfigurationResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationResponse;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class UpdateHandler extends BaseHandlerStd {
+    private Logger logger;
+
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
@@ -100,13 +87,13 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateNamespace)
                                 .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
-                                .handleError(this::defaultErrorHandler)
+                                .handleError(this::updateNamespaceErrorHandler)
                                 .progress())
                 .then(progress -> {
                     progress = proxy.initiate("AWS-RedshiftServerless-Namespace::ReadOnly", proxyClient, updateRequestModel, callbackContext)
                             .translateToServiceRequest(Translator::translateToReadRequest)
                             .makeServiceCall(this::getNamespace)
-                            .handleError(this::defaultErrorHandler)
+                            .handleError(this::getNamespaceErrorHandler)
                             .done(awsResponse -> {
                                 callbackContext.setNamespaceArn(awsResponse.namespace().namespaceArn());
                                 return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
@@ -130,53 +117,6 @@ public class UpdateHandler extends BaseHandlerStd {
                                     .progress();
                         }
                     }
-                    return progress;
-                })
-                .then(progress -> {
-                    // We currently only support CRC for 1 destination region per namespace
-                    if (currentModel.getSnapshotCopyConfigurations() != null && currentModel.getSnapshotCopyConfigurations().size() > 1) {
-                        return ProgressEvent.failed(currentModel, callbackContext, HandlerErrorCode.InvalidRequest,
-                                String.format("You can only have one snapshot copy configuration per namespace %s", currentModel.getNamespace().getNamespaceName()));
-                    }
-
-                    SnapshotCopyConfigurationDiff diff = getSnapshotCopyConfigurationDiff(
-                            Optional.ofNullable(currentModel.getSnapshotCopyConfigurations())
-                                    .orElse(Collections.emptyList())
-                                    .stream()
-                                    .collect(Collectors.toMap(SnapshotCopyConfiguration::getDestinationRegion, Function.identity())),
-                            Optional.ofNullable(request.getPreviousResourceState().getSnapshotCopyConfigurations())
-                                    .orElse(Collections.emptyList())
-                                    .stream()
-                                    .collect(Collectors.toMap(SnapshotCopyConfiguration::getDestinationRegion, Function.identity())),
-                            getSnapshotCopyConfigurations(proxyClient, currentModel));
-
-                    // 1. Delete snapshot copy configurations
-                    for (software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration snapshotCopyConfiguration : diff.getToDelete()) {
-                        progress = progress.then(__ -> proxy.initiate(String.format("AWS-RedshiftServerless-Namespace::DeleteSnapshotCopyConfiguration::%s", snapshotCopyConfiguration.destinationRegion()), proxyClient, currentModel, callbackContext)
-                                .translateToServiceRequest((model) -> Translator.translateToDeleteSnapshotCopyConfigurationRequest(model, snapshotCopyConfiguration.snapshotCopyConfigurationId()))
-                                .makeServiceCall(this::deleteSnapshotCopyConfiguration)
-                                .handleError(this::deleteSnapshotCopyConfigurationErrorHandler)
-                                .progress());
-                    }
-
-                    // 2. Update snapshot copy configurations
-                    for (Map.Entry<String, SnapshotCopyConfiguration> entry : diff.getToUpdate().entrySet()) {
-                        progress = progress.then(__ -> proxy.initiate(String.format("AWS-RedshiftServerless-Namespace::UpdateSnapshotCopyConfiguration::%s", entry.getValue().getDestinationRegion()), proxyClient, currentModel, callbackContext)
-                                .translateToServiceRequest((model) -> Translator.translateToUpdateSnapshotCopyConfigurationRequest(model, entry.getKey(), entry.getValue()))
-                                .makeServiceCall(this::updateSnapshotCopyConfiguration)
-                                .handleError(this::defaultErrorHandler)
-                                .progress());
-                    }
-
-                    // 3. Create snapshot copy configurations
-                    for (SnapshotCopyConfiguration snapshotCopyConfiguration : diff.getToCreate()) {
-                        progress = progress.then(__ -> proxy.initiate(String.format("AWS-RedshiftServerless-Namespace::CreateSnapshotCopyConfiguration::%s", snapshotCopyConfiguration.getDestinationRegion()), proxyClient, currentModel, callbackContext)
-                                .translateToServiceRequest((model) -> Translator.translateToCreateSnapshotCopyConfigurationRequest(model, snapshotCopyConfiguration))
-                                .makeServiceCall(this::createSnapshotCopyConfiguration)
-                                .handleError(this::defaultErrorHandler)
-                                .progress());
-                    }
-
                     return progress;
                 })
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, logger));
@@ -241,98 +181,20 @@ public class UpdateHandler extends BaseHandlerStd {
         return deleteResponse;
     }
 
-
-    private Map<String, software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration> getSnapshotCopyConfigurations(final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel model) {
-        ListSnapshotCopyConfigurationsResponse listResponse = proxyClient.injectCredentialsAndInvokeV2(Translator.translateToListSnapshotCopyConfigurationsRequest(model),
-                proxyClient.client()::listSnapshotCopyConfigurations);
-
-        return listResponse.snapshotCopyConfigurations().stream()
-                .collect(Collectors.toMap(software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration::destinationRegion, Function.identity()));
-    }
-
-    private UpdateSnapshotCopyConfigurationResponse updateSnapshotCopyConfiguration(final UpdateSnapshotCopyConfigurationRequest updateRequest,
-                                                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        UpdateSnapshotCopyConfigurationResponse updateResponse = proxyClient.injectCredentialsAndInvokeV2(updateRequest, proxyClient.client()::updateSnapshotCopyConfiguration);
-        logger.log(String.format("Updated snapshot copy configuration for %s %s in destination region %s.", ResourceModel.TYPE_NAME,
-                updateResponse.snapshotCopyConfiguration().namespaceName(), updateResponse.snapshotCopyConfiguration().destinationRegion()));
-        return updateResponse;
-    }
-
-    private DeleteSnapshotCopyConfigurationResponse deleteSnapshotCopyConfiguration(final DeleteSnapshotCopyConfigurationRequest deleteRequest,
-                                                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        DeleteSnapshotCopyConfigurationResponse deleteResponse = proxyClient.injectCredentialsAndInvokeV2(deleteRequest, proxyClient.client()::deleteSnapshotCopyConfiguration);
-        logger.log(String.format("Deleted snapshot copy configuration for %s %s in destination region %s.", ResourceModel.TYPE_NAME,
-                deleteResponse.snapshotCopyConfiguration().namespaceName(), deleteResponse.snapshotCopyConfiguration().destinationRegion()));
-        return deleteResponse;
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> deleteSnapshotCopyConfigurationErrorHandler(final DeleteSnapshotCopyConfigurationRequest request,
-                                                                                                      final Exception exception,
-                                                                                                      final ProxyClient<RedshiftServerlessClient> client,
-                                                                                                      final ResourceModel model,
-                                                                                                      final CallbackContext context) {
-        if (exception instanceof ResourceNotFoundException) {
-            logger.log(String.format("Snapshot copy configuration id %s does not exist.", request.snapshotCopyConfigurationId()));
-            return ProgressEvent.defaultInProgressHandler(context, 0, model);
-        }
+    private ProgressEvent<ResourceModel, CallbackContext> updateNamespaceErrorHandler(final UpdateNamespaceRequest updateNamespaceRequest,
+                                                                                      final Exception exception,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
+                                                                                      final ResourceModel model,
+                                                                                      final CallbackContext context) {
         return errorHandler(exception);
     }
 
-    /**
-     * Determine snapshot copy configurations to delete, update & create
-     * We only determine the diffs with the previous model state, this ensures that snapshot copy configurations defined in CFN to only be managed.
-     * Therefore, if snapshot copy configurations are created manually but not specified in CFN, these will not be touched by CFN!
-     */
-    private SnapshotCopyConfigurationDiff getSnapshotCopyConfigurationDiff(final Map<String, SnapshotCopyConfiguration> desiredSnapshotCopyConfigurations,
-                                                                           final Map<String, SnapshotCopyConfiguration> previousSnapshotCopyConfigurations,
-                                                                           final Map<String, software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration> existingSnapshotCopyConfigurations) {
-        // Include snapshot copy configurations found through the API which are not in the previous model state
-        SetUtils.intersection(desiredSnapshotCopyConfigurations.keySet(), existingSnapshotCopyConfigurations.keySet())
-                .stream()
-                .filter(destinationRegion -> !previousSnapshotCopyConfigurations.containsKey(destinationRegion))
-                .forEach(destinationRegion -> {
-                    software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration existing = existingSnapshotCopyConfigurations.get(destinationRegion);
-                    previousSnapshotCopyConfigurations.put(destinationRegion, Translator.translateToSnapshotCopyConfiguration(existing));
-                });
-
-        List<SnapshotCopyConfiguration> configurationsToCreate = SetUtils.difference(desiredSnapshotCopyConfigurations.keySet(), previousSnapshotCopyConfigurations.keySet())
-                .stream()
-                .map(desiredSnapshotCopyConfigurations::get)
-                .collect(Collectors.toList());
-
-        List<software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration> configurationsToDelete = SetUtils.difference(previousSnapshotCopyConfigurations.keySet(), desiredSnapshotCopyConfigurations.keySet())
-                .stream()
-                .map(existingSnapshotCopyConfigurations::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        Map<String, SnapshotCopyConfiguration> configurationsToUpdate = new HashMap<>();
-        SetUtils.intersection(desiredSnapshotCopyConfigurations.keySet(), previousSnapshotCopyConfigurations.keySet())
-                .forEach(destinationRegion -> {
-                    SnapshotCopyConfiguration desired = desiredSnapshotCopyConfigurations.get(destinationRegion);
-                    software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration existing = existingSnapshotCopyConfigurations.get(destinationRegion);
-
-                    // If an existing configuration doesn't exist (manually deleted), lets re-create it!
-                    if (existing == null) {
-                        configurationsToCreate.add(desired);
-                    // If destination kms key has changed, then we need to delete and re-create the snapshot copy configuration
-                    } else if (ObjectUtils.notEqual(Optional.ofNullable(desired.getDestinationKmsKeyId()).orElse("AWS_OWNED_KMS_KEY"), existing.destinationKmsKeyId())) {
-                        configurationsToDelete.add(existing);
-                        configurationsToCreate.add(desired);
-                    // If retention period has changed, then we update the snapshot copy configuration
-                    } else if (ObjectUtils.notEqual(Optional.ofNullable(desired.getSnapshotRetentionPeriod()).orElse(-1), existing.snapshotRetentionPeriod())) {
-                        configurationsToUpdate.put(existing.snapshotCopyConfigurationId(), desired);
-                    }
-                });
-
-        return new SnapshotCopyConfigurationDiff(configurationsToCreate, configurationsToDelete, configurationsToUpdate);
-    }
-
-    @Value
-    private static class SnapshotCopyConfigurationDiff {
-        List<SnapshotCopyConfiguration> toCreate;
-        List<software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration> toDelete;
-        Map<String, SnapshotCopyConfiguration> toUpdate;
+    private ProgressEvent<ResourceModel, CallbackContext> getNamespaceErrorHandler(final GetNamespaceRequest getNamespaceRequest,
+                                                                                   final Exception exception,
+                                                                                   final ProxyClient<RedshiftServerlessClient> client,
+                                                                                   final ResourceModel model,
+                                                                                   final CallbackContext context) {
+        return errorHandler(exception);
     }
 
     private boolean compareListParamsEqualOrNot(List<String> prevParam, List<String> currParam) {

@@ -1,22 +1,12 @@
 package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
-import java.util.Collections;
 
 import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshift.model.*;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCopyConfigurationResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration;
-import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -32,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -88,14 +77,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
         ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
         verify(proxyClient.client()).updateNamespace(any(UpdateNamespaceRequest.class));
-        verify(proxyClient.client(), times(2)).listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class));
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
@@ -122,7 +109,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .previousResourceState(prevModel)
                 .build();
 
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
@@ -164,7 +150,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .policy(NEW_NAMESPACE_RESOURCE_POLICY)
                 .build();
 
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().putResourcePolicy(any(PutResourcePolicyRequest.class))).thenReturn(PutResourcePolicyResponse.builder()
@@ -200,7 +185,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdkForManagedAdminPasswords());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdkForManagedAdminPasswords());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
@@ -237,7 +221,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
@@ -276,7 +259,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdkForManagedAdminPasswords());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdkForManagedAdminPasswords());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
@@ -294,148 +276,5 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModel().getNamespace().getAdminPasswordSecretArn()).isEqualTo(SECRET_ARN);
         assertThat(response.getResourceModel().getAdminPasswordSecretKmsKeyId()).isEqualTo(SECRET_KMS_KEY_ID);
         assertThat(response.getResourceModel().getAdminUserPassword()).isNull();
-    }
-
-    @Test
-    public void handleRequest_SnapshotCopyConfiguration_DeleteAndReCreate() {
-        final UpdateHandler handler = new UpdateHandler();
-
-        final ResourceModel requestResourceModel = getUpdateRequestResourceModel().toBuilder()
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-1")
-                        .build()))
-                .build();
-        final ResourceModel responseResourceModel = getCreateResponseResourceModel().toBuilder()
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-1")
-                        .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                        .snapshotRetentionPeriod(-1)
-                        .build()))
-                .build();
-
-        ResourceModel prevModel = ResourceModel.builder()
-                .namespaceName(NAMESPACE_NAME)
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-2")
-                        .build()))
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .previousResourceState(prevModel)
-                .desiredResourceState(requestResourceModel)
-                .build();
-
-        final SnapshotCopyConfiguration oldSnapshotCopyConfiguration = SnapshotCopyConfiguration.builder()
-                .snapshotCopyConfigurationId("snap-id-1234")
-                .destinationRegion("us-west-2")
-                .namespaceName(requestResourceModel.getNamespaceName())
-                .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                .snapshotRetentionPeriod(-1)
-                .build();
-        final SnapshotCopyConfiguration newSnapshotCopyConfiguration = SnapshotCopyConfiguration.builder()
-                .snapshotCopyConfigurationId("snap-id-5678")
-                .destinationRegion("us-west-1")
-                .namespaceName(requestResourceModel.getNamespaceName())
-                .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                .snapshotRetentionPeriod(-1)
-                .build();
-
-        when(proxyClient.client().createSnapshotCopyConfiguration(any(CreateSnapshotCopyConfigurationRequest.class)))
-                .thenReturn(CreateSnapshotCopyConfigurationResponse.builder()
-                        .snapshotCopyConfiguration(newSnapshotCopyConfiguration)
-                        .build());
-        when(proxyClient.client().deleteSnapshotCopyConfiguration(any(DeleteSnapshotCopyConfigurationRequest.class)))
-                .thenReturn(DeleteSnapshotCopyConfigurationResponse.builder()
-                        .snapshotCopyConfiguration(oldSnapshotCopyConfiguration)
-                        .build());
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class)))
-                .thenReturn(ListSnapshotCopyConfigurationsResponse.builder()
-                        .snapshotCopyConfigurations(Collections.singletonList(oldSnapshotCopyConfiguration))
-                        .build())
-                .thenReturn(ListSnapshotCopyConfigurationsResponse.builder()
-                        .snapshotCopyConfigurations(Collections.singletonList(newSnapshotCopyConfiguration))
-                        .build());
-        when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
-        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
-        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
-
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
-        verify(proxyClient.client()).updateNamespace(any(UpdateNamespaceRequest.class));
-        verify(proxyClient.client(), times(1)).deleteSnapshotCopyConfiguration(any(DeleteSnapshotCopyConfigurationRequest.class));
-        verify(proxyClient.client(), times(1)).createSnapshotCopyConfiguration(any(CreateSnapshotCopyConfigurationRequest.class));
-        verify(proxyClient.client(), times(2)).listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class));
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
-    }
-
-    @Test
-    public void handleRequest_SnapshotCopyConfiguration_Update() {
-        final UpdateHandler handler = new UpdateHandler();
-
-        final ResourceModel requestResourceModel = getUpdateRequestResourceModel().toBuilder()
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-2")
-                        .snapshotRetentionPeriod(2)
-                        .build()))
-                .build();
-        final ResourceModel responseResourceModel = getCreateResponseResourceModel().toBuilder()
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-2")
-                        .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                        .snapshotRetentionPeriod(2)
-                        .build()))
-                .build();
-
-        ResourceModel prevModel = ResourceModel.builder()
-                .namespaceName(NAMESPACE_NAME)
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-2")
-                        .build()))
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .previousResourceState(prevModel)
-                .desiredResourceState(requestResourceModel)
-                .build();
-
-        final SnapshotCopyConfiguration snapshotCopyConfiguration = SnapshotCopyConfiguration.builder()
-                .snapshotCopyConfigurationId("snap-id-1234")
-                .destinationRegion("us-west-2")
-                .namespaceName(requestResourceModel.getNamespaceName())
-                .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                .snapshotRetentionPeriod(-1)
-                .build();
-
-        when(proxyClient.client().updateSnapshotCopyConfiguration(any(UpdateSnapshotCopyConfigurationRequest.class)))
-                .thenReturn(UpdateSnapshotCopyConfigurationResponse.builder()
-                        .snapshotCopyConfiguration(snapshotCopyConfiguration.toBuilder().snapshotRetentionPeriod(2).build())
-                        .build());
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class)))
-                .thenReturn(ListSnapshotCopyConfigurationsResponse.builder()
-                        .snapshotCopyConfigurations(Collections.singletonList(snapshotCopyConfiguration))
-                        .build())
-                .thenReturn(ListSnapshotCopyConfigurationsResponse.builder()
-                        .snapshotCopyConfigurations(Collections.singletonList(snapshotCopyConfiguration.toBuilder().snapshotRetentionPeriod(2).build()))
-                        .build());
-        when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
-        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
-        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
-
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
-        verify(proxyClient.client()).updateNamespace(any(UpdateNamespaceRequest.class));
-        verify(proxyClient.client(), times(1)).updateSnapshotCopyConfiguration(any(UpdateSnapshotCopyConfigurationRequest.class));
-        verify(proxyClient.client(), times(2)).listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class));
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
     }
 }

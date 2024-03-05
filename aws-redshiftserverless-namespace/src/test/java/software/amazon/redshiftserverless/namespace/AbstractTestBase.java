@@ -21,7 +21,6 @@ import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceR
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
@@ -185,7 +184,6 @@ public class AbstractTestBase {
             .logExports(LOG_EXPORTS)
             .namespaceName(NAMESPACE_NAME)
             .namespace(translateToModelNamespace(NAMESPACE))
-            .snapshotCopyConfigurations(Collections.emptyList())
             .build();
   }
 
@@ -285,7 +283,6 @@ public class AbstractTestBase {
             .logExports(LOG_EXPORTS)
             .namespaceName(NAMESPACE_NAME)
             .namespace(translateToModelNamespace(NAMESPACE))
-            .snapshotCopyConfigurations(Collections.emptyList())
             .build();
   }
 
@@ -345,12 +342,6 @@ public class AbstractTestBase {
   public static GetResourcePolicyResponse getEmptyResourcePolicyResponseSdk() {
     return GetResourcePolicyResponse.builder()
             .resourcePolicy(NAMESPACE_RESOURCE_POLICY_EMPTY)
-            .build();
-  }
-
-  public static ListSnapshotCopyConfigurationsResponse getSnapshotCopyConfigurationsResponseSdk() {
-    return ListSnapshotCopyConfigurationsResponse.builder()
-            .snapshotCopyConfigurations(Collections.emptyList())
             .build();
   }
 }

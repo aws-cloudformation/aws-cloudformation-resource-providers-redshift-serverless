@@ -1,19 +1,13 @@
 package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
-import java.util.Collections;
 
 import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshift.model.GetResourcePolicyRequest;
 import software.amazon.awssdk.services.redshift.model.PutResourcePolicyRequest;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateNamespaceRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -76,7 +70,6 @@ public class CreateHandlerTest extends AbstractTestBase {
             .build();
         when(proxyClient.client().createNamespace(any(CreateNamespaceRequest.class))).thenReturn(getCreateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
@@ -105,7 +98,6 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .build();
         when(proxyClient.client().createNamespace(any(CreateNamespaceRequest.class))).thenReturn(getCreateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(redshiftProxyClient.client().putResourcePolicy(any(PutResourcePolicyRequest.class))).thenReturn(putResourcePolicyResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getResourcePolicyResponseSdk());
 
@@ -133,7 +125,6 @@ public class CreateHandlerTest extends AbstractTestBase {
             .build();
         when(proxyClient.client().createNamespace(any(CreateNamespaceRequest.class))).thenReturn(getCreateResponseSdkForManagedAdminPasswords());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdkForManagedAdminPasswords());
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
@@ -149,56 +140,5 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModel().getNamespace().getAdminPasswordSecretArn()).isEqualTo(SECRET_ARN);
         assertThat(response.getResourceModel().getAdminPasswordSecretKmsKeyId()).isEqualTo(SECRET_KMS_KEY_ID);
         assertThat(response.getResourceModel().getAdminUserPassword()).isNull();
-    }
-
-    @Test
-    public void testCreateNamespace_SnapshotCopyConfiguration() {
-        final CreateHandler handler = new CreateHandler();
-
-        final ResourceModel requestResourceModel = getCreateRequestResourceModel().toBuilder()
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder().destinationRegion("us-west-2").build()))
-                .build();
-        final ResourceModel responseResourceModel = getCreateResponseResourceModel().toBuilder()
-                .snapshotCopyConfigurations(Collections.singletonList(software.amazon.redshiftserverless.namespace.SnapshotCopyConfiguration.builder()
-                        .destinationRegion("us-west-2")
-                        .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                        .snapshotRetentionPeriod(-1)
-                        .build()))
-                .build();
-
-        final SnapshotCopyConfiguration snapshotCopyConfiguration = SnapshotCopyConfiguration.builder()
-                .snapshotCopyConfigurationId("snap-id-1234")
-                .destinationRegion("us-west-2")
-                .namespaceName(requestResourceModel.getNamespaceName())
-                .destinationKmsKeyId("AWS_OWNED_KMS_KEY")
-                .snapshotRetentionPeriod(-1)
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(requestResourceModel)
-                .build();
-        when(proxyClient.client().createNamespace(any(CreateNamespaceRequest.class))).thenReturn(getCreateResponseSdk());
-        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
-        when(proxyClient.client().createSnapshotCopyConfiguration(any(CreateSnapshotCopyConfigurationRequest.class)))
-                .thenReturn(CreateSnapshotCopyConfigurationResponse.builder()
-                        .snapshotCopyConfiguration(snapshotCopyConfiguration)
-                        .build());
-        when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class)))
-                .thenReturn(ListSnapshotCopyConfigurationsResponse.builder()
-                        .snapshotCopyConfigurations(Collections.singletonList(snapshotCopyConfiguration))
-                        .build());
-        when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
-
-        verify(proxyClient.client(), times(1)).createSnapshotCopyConfiguration(any(CreateSnapshotCopyConfigurationRequest.class));
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
-
     }
 }

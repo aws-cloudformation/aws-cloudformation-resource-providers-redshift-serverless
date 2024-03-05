@@ -1,16 +1,10 @@
 package software.amazon.redshiftserverless.namespace;
 
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
-import software.amazon.awssdk.services.redshiftserverless.model.AccessDeniedException;
 import software.amazon.awssdk.services.redshiftserverless.model.ConflictException;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
@@ -27,7 +21,6 @@ import software.amazon.cloudformation.proxy.delay.Constant;
 import java.time.Duration;
 
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
-  protected Logger logger;
   protected final String NAMESPACE_STATUS_AVAILABLE = "available";
   protected static final Constant BACKOFF_STRATEGY = Constant.of().
           timeout(Duration.ofMinutes(30L)).delay(Duration.ofSeconds(10L)).build();
@@ -77,39 +70,14 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     return false;
   }
 
-  protected ListSnapshotCopyConfigurationsResponse listSnapshotCopyConfigurations(final ListSnapshotCopyConfigurationsRequest listRequest,
-                                                                                  final ProxyClient<RedshiftServerlessClient> proxyClient) {
-    ListSnapshotCopyConfigurationsResponse listResponse = proxyClient.injectCredentialsAndInvokeV2(listRequest, proxyClient.client()::listSnapshotCopyConfigurations);
-    logger.log(String.format("%s %s snapshot configurations has successfully been read.", ResourceModel.TYPE_NAME, listRequest.namespaceName()));
-    return listResponse;
-  }
-
-  protected CreateSnapshotCopyConfigurationResponse createSnapshotCopyConfiguration(final CreateSnapshotCopyConfigurationRequest createRequest,
-                                                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
-    CreateSnapshotCopyConfigurationResponse createResponse = proxyClient.injectCredentialsAndInvokeV2(createRequest, proxyClient.client()::createSnapshotCopyConfiguration);
-    logger.log(String.format("Created snapshot copy configuration for %s %s in destination region %s.", ResourceModel.TYPE_NAME,
-            createResponse.snapshotCopyConfiguration().namespaceName(), createResponse.snapshotCopyConfiguration().destinationRegion()));
-    return createResponse;
-  }
-
-  protected <T> ProgressEvent<ResourceModel, CallbackContext> defaultErrorHandler(final T request,
-                                                                                  final Exception exception,
-                                                                                  final ProxyClient<RedshiftServerlessClient> client,
-                                                                                  final ResourceModel model,
-                                                                                  final CallbackContext context) {
-    return errorHandler(exception);
-  }
-
   protected ProgressEvent<ResourceModel, CallbackContext> errorHandler(final Exception exception) {
     if (exception instanceof ValidationException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
-    } else if (exception instanceof AccessDeniedException) {
-      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.AccessDenied);
     } else if (exception instanceof InternalServerException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceInternalError);
     } else if (exception instanceof ResourceNotFoundException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
-    } else if (exception instanceof TooManyTagsException || exception instanceof ServiceQuotaExceededException) {
+    } else if (exception instanceof TooManyTagsException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceLimitExceeded);
     } else if (exception instanceof ConflictException) {
       if (exception.getMessage().contains("already exists")) {

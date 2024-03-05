@@ -21,11 +21,10 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
-import java.util.Collections;
-import java.util.Optional;
-
 
 public class CreateHandler extends BaseHandlerStd {
+    private Logger logger;
+
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
@@ -42,7 +41,7 @@ public class CreateHandler extends BaseHandlerStd {
                     .translateToServiceRequest(Translator::translateToCreateRequest)
                     .makeServiceCall(this::createNamespace)
                     .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
-                    .handleError(this::defaultErrorHandler)
+                    .handleError(this::createNamespaceErrorHandler)
                     .done((_request, _response, _client, _model, _context) -> {
                         callbackContext.setNamespaceArn(_response.namespace().namespaceArn());
                         return ProgressEvent.progress(_model, callbackContext);
@@ -56,16 +55,6 @@ public class CreateHandler extends BaseHandlerStd {
                         .progress();
                 }
                 return progress;
-            })
-            .then(progress -> {
-                for (SnapshotCopyConfiguration snapshotCopyConfiguration : Optional.ofNullable(progress.getResourceModel().getSnapshotCopyConfigurations()).orElse(Collections.emptyList())) {
-                    progress = progress.then(nextProgress -> proxy.initiate(String.format("AWS-RedshiftServerless-Namespace::CreateSnapshotCopyConfiguration::%s", snapshotCopyConfiguration.getDestinationRegion()), proxyClient, nextProgress.getResourceModel(), callbackContext)
-                            .translateToServiceRequest((model) -> Translator.translateToCreateSnapshotCopyConfigurationRequest(model, snapshotCopyConfiguration))
-                            .makeServiceCall(this::createSnapshotCopyConfiguration)
-                            .handleError(this::defaultErrorHandler)
-                            .progress());
-                }
-               return progress;
             })
             .then(progress ->
                 new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, logger)
@@ -101,5 +90,13 @@ public class CreateHandler extends BaseHandlerStd {
 
         logger.log(String.format("%s successfully put resource policy.", putRequest.resourceArn()));
         return putResponse;
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> createNamespaceErrorHandler(final CreateNamespaceRequest createNamespaceRequest,
+                                                                                      final Exception exception,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
+                                                                                      final ResourceModel model,
+                                                                                      final CallbackContext context) {
+        return errorHandler(exception);
     }
 }

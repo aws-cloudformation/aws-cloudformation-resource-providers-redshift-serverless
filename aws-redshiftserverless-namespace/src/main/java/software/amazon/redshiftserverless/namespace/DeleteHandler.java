@@ -11,6 +11,8 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class DeleteHandler extends BaseHandlerStd {
+    private Logger logger;
+
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
@@ -29,7 +31,7 @@ public class DeleteHandler extends BaseHandlerStd {
                             .backoffDelay(BACKOFF_STRATEGY)
                             .makeServiceCall(this::deleteNamespace)
                             .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActiveAfterDelete(_client, _model, _context))
-                            .handleError(this::defaultErrorHandler)
+                            .handleError(this::deleteNamespaceErrorHandler)
                             .done(deleteNamespaceResponse -> {
                                 logger.log(String.format("%s %s deleted.",ResourceModel.TYPE_NAME, model.getNamespaceName()));
                                 return ProgressEvent.defaultSuccessHandler(null);
@@ -45,5 +47,13 @@ public class DeleteHandler extends BaseHandlerStd {
         deleteNamespaceResponse = proxyClient.injectCredentialsAndInvokeV2(deleteNamespaceRequest, proxyClient.client()::deleteNamespace);
         logger.log(String.format("%s %s successfully deleted.", ResourceModel.TYPE_NAME, deleteNamespaceRequest.namespaceName()));
         return deleteNamespaceResponse;
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> deleteNamespaceErrorHandler(final DeleteNamespaceRequest deleteNamespaceRequest,
+                                                                                      final Exception exception,
+                                                                                      final ProxyClient<RedshiftServerlessClient> client,
+                                                                                      final ResourceModel model,
+                                                                                      final CallbackContext context) {
+        return errorHandler(exception);
     }
 }

@@ -14,11 +14,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListNamespacesResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCopyConfigurationRequest;
 import software.amazon.cloudformation.proxy.Logger;
 
 import java.io.IOException;
@@ -89,57 +85,6 @@ public class Translator {
               return null;
             }).filter (iamRole->iamRole!=null)
             .collect(Collectors.toList());
-  }
-
-  /**
-   * Request to list snapshot copy configurations for a namespace
-   * @param model resource model
-   * @return awsRequest the aws service request to list the snapshot copy configurations
-   */
-  static ListSnapshotCopyConfigurationsRequest translateToListSnapshotCopyConfigurationsRequest(final ResourceModel model) {
-    return ListSnapshotCopyConfigurationsRequest.builder()
-            .namespaceName(model.getNamespaceName())
-            .build();
-  }
-
-  /**
-   * Request to create a snapshot copy configuration for a namespace
-   * @param model resource model
-   * @param snapshotCopyConfiguration the snapshot copy configuration to create
-   * @return awsRequest the aws service request to create a snapshot copy configuration
-   */
-  static CreateSnapshotCopyConfigurationRequest translateToCreateSnapshotCopyConfigurationRequest(final ResourceModel model, final SnapshotCopyConfiguration snapshotCopyConfiguration) {
-    return CreateSnapshotCopyConfigurationRequest.builder()
-            .namespaceName(model.getNamespaceName())
-            .destinationRegion(snapshotCopyConfiguration.getDestinationRegion())
-            .destinationKmsKeyId(snapshotCopyConfiguration.getDestinationKmsKeyId())
-            .snapshotRetentionPeriod(snapshotCopyConfiguration.getSnapshotRetentionPeriod())
-            .build();
-  }
-
-  /**
-   * Request to update a snapshot copy configuration for a namespace
-   * @param model resource model
-   * @param snapshotCopyConfiguration the snapshot copy configuration to update
-   * @return awsRequest the aws service request to update a snapshot copy configuration
-   */
-  static UpdateSnapshotCopyConfigurationRequest translateToUpdateSnapshotCopyConfigurationRequest(final ResourceModel model, final String snapshotCopyConfigurationId, final SnapshotCopyConfiguration snapshotCopyConfiguration) {
-    return UpdateSnapshotCopyConfigurationRequest.builder()
-            .snapshotCopyConfigurationId(snapshotCopyConfigurationId)
-            .snapshotRetentionPeriod(snapshotCopyConfiguration.getSnapshotRetentionPeriod())
-            .build();
-  }
-
-  /**
-   * Request to delete a snapshot copy configuration for a namespace
-   * @param model resource model
-   * @param snapshotCopyConfigurationId the snapshot copy configuration id to delete
-   * @return awsRequest the aws service request to delete a snapshot copy configuration
-   */
-  static DeleteSnapshotCopyConfigurationRequest translateToDeleteSnapshotCopyConfigurationRequest(final ResourceModel model, final String snapshotCopyConfigurationId) {
-    return DeleteSnapshotCopyConfigurationRequest.builder()
-            .snapshotCopyConfigurationId(snapshotCopyConfigurationId)
-            .build();
   }
 
   /**
@@ -348,19 +293,5 @@ public class Translator {
       logger.log("Error parsing Policy String to Json");
     }
     return json;
-  }
-
-  static SnapshotCopyConfiguration translateToSnapshotCopyConfiguration(software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration config) {
-    return SnapshotCopyConfiguration.builder()
-            .destinationRegion(config.destinationRegion())
-            .destinationKmsKeyId(config.destinationKmsKeyId())
-            .snapshotRetentionPeriod(config.snapshotRetentionPeriod())
-            .build();
-  }
-
-  static List<SnapshotCopyConfiguration> translateToSnapshotCopyConfigurations(List<software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration> configs) {
-    return configs.stream()
-            .map(Translator::translateToSnapshotCopyConfiguration)
-            .collect(Collectors.toList());
   }
 }
