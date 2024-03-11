@@ -44,7 +44,7 @@ public class CreateHandler extends BaseHandlerStd {
 
     private CreateWorkgroupResponse createWorkgroup(final CreateWorkgroupRequest awsRequest,
                                                     final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        final int MAX_RETRIES = 4;
+        final int MAX_RETRIES = 5;
         int retryCount = 0;
 
         while (true) {
