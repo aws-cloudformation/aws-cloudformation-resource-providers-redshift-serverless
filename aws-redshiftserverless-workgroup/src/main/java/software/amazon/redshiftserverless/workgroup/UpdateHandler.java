@@ -179,11 +179,35 @@ public class UpdateHandler extends BaseHandlerStd {
 
     private UpdateWorkgroupResponse updateWorkgroup(final UpdateWorkgroupRequest awsRequest,
                                                     final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        UpdateWorkgroupResponse awsResponse;
-        awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::updateWorkgroup);
+        final int MAX_RETRIES = 4;
+        int retryCount = 0;
 
-        logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        while (true) {
+            try {
+                UpdateWorkgroupResponse awsResponse =
+                        proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::updateWorkgroup);
+
+                logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
+
+                return awsResponse;
+            } catch (ConflictException ex) {
+                if (retryCount >= MAX_RETRIES || !isRetriableWorkgroupException(ex)) {
+                    throw ex;
+                }
+
+                logger.log(String.format("Retrying UpdateWorkgroup due to expected ConflictException: " +
+                        "%s. Attempt %d/%d", ex.getMessage(), retryCount + 1, MAX_RETRIES));
+                retryCount++;
+            }
+
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt(); // Restore the interrupted status
+                throw new RuntimeException("Interrupted during retry wait", ie);
+            }
+        }
+
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> updateWorkgroupErrorHandler(final UpdateWorkgroupRequest awsRequest,
