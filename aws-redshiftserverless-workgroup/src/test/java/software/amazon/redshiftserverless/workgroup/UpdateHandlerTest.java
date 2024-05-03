@@ -7,14 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
-import software.amazon.awssdk.services.redshiftserverless.model.ConflictException;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
-import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -77,74 +75,5 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
-    }
-
-    @Test
-    public void handleRequest_retryOnConflictException() {
-        final UpdateHandler handler = new UpdateHandler();
-
-        final ResourceModel requestResourceModel = updateRequestResourceModel();
-        final ResourceModel responseResourceModel = getReadResponseResourceModel();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(requestResourceModel)
-                .build();
-
-        ConflictException exception = ConflictException.builder()
-                .message("There is an operation running on the existing workgroup. Try again later.")
-                .build();
-
-        /**
-         * The Thread.sleep() is actually called here, making unit longer.
-         * MockStatic easily will need a Java version upgrade, then the Mockito upgrade,
-         * I'll leave the upgrade in another commit.
-         */
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
-        when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class)))
-                .thenThrow(exception)
-                .thenReturn(updateResponseSdk());
-        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isNull();
-        assertThat(response.getErrorCode()).isNull();
-    }
-
-    @Test
-    public void handleRequest_noRetryOnOtherException() {
-        final UpdateHandler handler = new UpdateHandler();
-        final ResourceModel requestResourceModel = updateResponseResourceModel();
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(requestResourceModel)
-                .build();
-
-        /**
-         * The Thread.sleep() is actually called here, making unit longer.
-         * MockStatic easily will need a Java version upgrade, then the Mockito upgrade,
-         * I'll leave the upgrade in another commit.
-         */
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build());
-        when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class)))
-                .thenThrow(InternalServerException.builder()
-                        .message("test")
-                        .build());
-        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
-
-        final ProgressEvent<ResourceModel, CallbackContext> response =
-                handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModels()).isNull();
-        assertThat(response.getMessage()).isEqualTo("test");
-        assertThat(response.getErrorCode()).isEqualTo(HandlerErrorCode.InternalFailure);
     }
 }

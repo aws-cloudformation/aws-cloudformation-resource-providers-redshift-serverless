@@ -4,8 +4,14 @@ import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClie
 import software.amazon.awssdk.services.redshiftserverless.model.ConflictException;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateWorkgroupResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.InsufficientCapacityException;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
@@ -34,73 +40,92 @@ public class CreateHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Create", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToCreateRequest)
-                                .makeServiceCall(this::createWorkgroup)
+                                .backoffDelay(BACKOFF_STRATEGY)
+                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
+                                    CreateWorkgroupResponse awsResponse = this.createWorkgroup(awsRequest, sdkProxyClient);
+
+                                    logger.log(String.format("%s : %s has successfully been created.",
+                                            ResourceModel.TYPE_NAME, awsResponse.workgroup().workgroupName()));
+                                    logger.log(awsResponse.toString());
+
+                                    return awsResponse;
+                                })
                                 .stabilize(this::isWorkgroupStable)
+                                .handleError(this::createWorkgroupErrorHandler)
+                                .done(awsResponse -> {
+                                    return ProgressEvent.progress(Translator.translateFromCreateResponse(awsResponse), callbackContext);
+                                })
+                )
+                .then(progress ->
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpace", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
+                                .backoffDelay(BACKOFF_STRATEGY)
+                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
+                                    GetNamespaceResponse awsResponse = this.readNamespace(awsRequest, sdkProxyClient);
+
+                                    logger.log(String.format("%s : %s has successfully been created.",
+                                            ResourceModel.TYPE_NAME, awsResponse.namespace().namespaceName()));
+                                    logger.log(awsResponse.toString());
+
+                                    return awsResponse;
+                                })
+                                .stabilize(this::isNamespaceStable)
                                 .handleError(this::createWorkgroupErrorHandler)
                                 .progress()
                 )
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
-    private CreateWorkgroupResponse createWorkgroup(final CreateWorkgroupRequest awsRequest,
-                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        final int MAX_RETRIES = 5;
-        int retryCount = 0;
+    private boolean isWorkgroupStable(final Object awsRequest,
+                                      final RedshiftServerlessResponse awsResponse,
+                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
+                                      final ResourceModel model,
+                                      final CallbackContext context) {
 
-        while (true) {
-            try {
-                CreateWorkgroupResponse awsResponse =
-                        proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::createWorkgroup);
+        GetWorkgroupRequest getWorkgroupStatusRequest = GetWorkgroupRequest.builder()
+                .workgroupName(model.getWorkgroupName())
+                .build();
 
-                logger.log(String.format("%s has successfully been created.", ResourceModel.TYPE_NAME));
+        GetWorkgroupResponse getWorkgroupResponse = this.readWorkgroup(getWorkgroupStatusRequest, proxyClient);
 
-                return awsResponse;
+        logger.log(String.format("%s : Workgroup: %s has successfully been read.",
+                ResourceModel.TYPE_NAME, getWorkgroupResponse.workgroup().workgroupName()));
 
-            } catch (ConflictException ex) {
-                if (retryCount >= MAX_RETRIES || !isRetriableWorkgroupException(ex)) {
-                    throw ex;
-                }
+        logger.log(getWorkgroupResponse.toString());
 
-                logger.log(String.format("Retrying CreateWorkgroup due to expected ConflictException: " +
-                        "%s. Attempt %d/%d", ex.getMessage(), retryCount + 1, MAX_RETRIES));
-                retryCount++;
-            }
-
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt(); // Restore the interrupted status
-                throw new RuntimeException("Interrupted during retry wait", ie);
-            }
-        }
+        return getWorkgroupResponse.workgroup().status().equals(WorkgroupStatus.AVAILABLE);
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> createWorkgroupErrorHandler(final CreateWorkgroupRequest awsRequest,
+    private boolean isNamespaceStable(final Object awsRequest,
+                                      final RedshiftServerlessResponse awsResponse,
+                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
+                                      final ResourceModel model,
+                                      final CallbackContext context) {
+
+        GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder()
+                .namespaceName(model.getNamespaceName())
+                .build();
+
+        GetNamespaceResponse getNamespaceResponse = this.readNamespace(getNamespaceRequest, proxyClient);
+
+        logger.log(String.format("%s : Namespace: %s has successfully been read.",
+                ResourceModel.TYPE_NAME, getNamespaceResponse.namespace().namespaceName()));
+
+        logger.log(getNamespaceResponse.toString());
+
+        return NAMESPACE_STATUS_AVAILABLE.equalsIgnoreCase(getNamespaceResponse.namespace().statusAsString());
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> createWorkgroupErrorHandler(final Object awsRequest,
                                                                                       final Exception exception,
                                                                                       final ProxyClient<RedshiftServerlessClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
-        if (exception instanceof ValidationException ||
-                exception instanceof TooManyTagsException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
 
-        } else if (exception instanceof ResourceNotFoundException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
+        logger.log(String.format("Operation: %s : encountered exception for model: %s",
+                awsRequest.getClass().getName(), ResourceModel.TYPE_NAME));
+        logger.log(awsRequest.toString());
 
-        } else if (exception instanceof InternalServerException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InternalFailure);
-
-        } else if (exception instanceof ConflictException ||
-                exception instanceof InsufficientCapacityException) {
-            Pattern pattern = Pattern.compile(".*already exists.*", Pattern.CASE_INSENSITIVE);
-            HandlerErrorCode handlerErrorCode = pattern.matcher(exception.getMessage()).matches() ?
-                    HandlerErrorCode.AlreadyExists :
-                    HandlerErrorCode.ResourceConflict;
-
-            return ProgressEvent.defaultFailureHandler(exception, handlerErrorCode);
-
-        } else {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
-        }
+        return this.defaultWorkgroupErrorHandler(awsRequest, exception, client, model, context);
     }
 }

@@ -3,7 +3,10 @@ package software.amazon.redshiftserverless.workgroup;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import software.amazon.awssdk.services.redshiftserverless.model.CreateWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.CreateWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.DeleteWorkgroupResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
@@ -103,6 +106,40 @@ public class Translator {
     }
 
     /**
+     * Translates resource object from sdk into a resource model
+     *
+     * @param awsResponse the aws service describe resource response
+     * @return model resource model
+     */
+    static ResourceModel translateFromCreateResponse(final CreateWorkgroupResponse awsResponse) {
+        return ResourceModel.builder()
+                .workgroupName(awsResponse.workgroup().workgroupName())
+                .namespaceName(awsResponse.workgroup().namespaceName())
+                .workgroup(Workgroup.builder()
+                        .workgroupName(awsResponse.workgroup().workgroupName())
+                        .namespaceName(awsResponse.workgroup().namespaceName())
+                        .build())
+                .build();
+    }
+
+    /**
+     * Translates resource object from sdk into a resource model
+     *
+     * @param awsResponse the aws service describe resource response
+     * @return model resource model
+     */
+    static ResourceModel translateFromDeleteResponse(final DeleteWorkgroupResponse awsResponse) {
+        return ResourceModel.builder()
+                .workgroupName(awsResponse.workgroup().workgroupName())
+                .namespaceName(awsResponse.workgroup().namespaceName())
+                .workgroup(Workgroup.builder()
+                        .workgroupName(awsResponse.workgroup().workgroupName())
+                        .namespaceName(awsResponse.workgroup().namespaceName())
+                        .build())
+                .build();
+    }
+
+    /**
      * Request to delete a resource
      *
      * @param model resource model
@@ -131,6 +168,17 @@ public class Translator {
                 .subnetIds(model.getSubnetIds())
                 .securityGroupIds(model.getSecurityGroupIds())
                 .port(model.getPort())
+                .build();
+    }
+
+    /**
+     * Request to read a resource
+     * @param model resource model
+     * @return awsRequest the aws service request to describe a resource
+     */
+    static GetNamespaceRequest translateToReadNamespaceRequest(final ResourceModel model) {
+        return GetNamespaceRequest.builder()
+                .namespaceName(model.getNamespaceName())
                 .build();
     }
 

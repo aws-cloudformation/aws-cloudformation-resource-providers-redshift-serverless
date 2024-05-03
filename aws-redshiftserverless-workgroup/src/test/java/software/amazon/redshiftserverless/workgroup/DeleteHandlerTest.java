@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -60,7 +62,12 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().deleteWorkgroup(any(DeleteWorkgroupRequest.class))).thenReturn(deleteResponseSdk());
-        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenThrow(ResourceNotFoundException.class);
+        // We first retreive workgroup, then wait for workgroup to be in available state and then get workgroup after delete operation
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class)))
+                .thenThrow(ResourceNotFoundException.builder().build());
+
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();

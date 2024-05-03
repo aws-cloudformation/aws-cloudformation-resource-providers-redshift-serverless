@@ -10,12 +10,14 @@ import software.amazon.awssdk.services.redshiftserverless.model.InternalServerEx
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.TagResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ThrottlingException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
+import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
@@ -46,20 +48,21 @@ public class UpdateHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::ReadInstance", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadRequest)
+                                .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5mins here
                                 .makeServiceCall(this::readWorkgroup)
-                                .handleError(this::operateTagsErrorHandler)
+                                .stabilize(this::isWorkgroupStable) // This basically checks for workgroup to be stabilized before we perform the update operation
+                                .handleError(this::updateWorkgroupErrorHandler)
                                 .done((readRequest, readResponse, client, model, context) -> ProgressEvent.<ResourceModel, CallbackContext>builder()
                                         .callbackContext(context)
                                         .callbackDelaySeconds(0)
                                         .resourceModel(getUpdatableResourceModel(model, Translator.translateFromReadResponse(readResponse)))
                                         .status(OperationStatus.IN_PROGRESS)
                                         .build()))
-
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadTagsRequest)
                                 .makeServiceCall(this::readTags)
-                                .handleError(this::operateTagsErrorHandler)
+                                .handleError(this::updateWorkgroupErrorHandler)
                                 .done((tagsRequest, tagsResponse, client, model, context) -> ProgressEvent.<ResourceModel, CallbackContext>builder()
                                         .callbackContext(context)
                                         .callbackDelaySeconds(0)
@@ -73,14 +76,21 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isWorkgroupStable)
-                                .handleError(this::operateTagsErrorHandler)
+                                .handleError(this::updateWorkgroupErrorHandler)
                                 .progress())
 
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateInstance", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
-                                .makeServiceCall(this::updateWorkgroup)
+                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
+                                    UpdateWorkgroupResponse awsResponse = this.updateWorkgroup(awsRequest, sdkProxyClient);
+
+                                    logger.log(String.format("%s : %s has successfully been updated.", ResourceModel.TYPE_NAME, awsRequest.workgroupName()));
+                                    logger.log(awsResponse.toString());
+
+                                    return awsResponse;
+                                })
                                 .stabilize(this::isWorkgroupStable)
                                 .handleError(this::updateWorkgroupErrorHandler)
                                 .progress())
@@ -113,13 +123,24 @@ public class UpdateHandler extends BaseHandlerStd {
                 .build();
     }
 
-    private GetWorkgroupResponse readWorkgroup(final GetWorkgroupRequest awsRequest,
-                                               final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        GetWorkgroupResponse awsResponse;
-        awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::getWorkgroup);
+    private boolean isWorkgroupStable(final Object awsRequest,
+                                      final RedshiftServerlessResponse awsResponse,
+                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
+                                      final ResourceModel model,
+                                      final CallbackContext context) {
 
-        logger.log(String.format("%s has successfully been read.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        GetWorkgroupRequest getWorkgroupStatusRequest = GetWorkgroupRequest.builder()
+                .workgroupName(model.getWorkgroupName())
+                .build();
+
+        GetWorkgroupResponse getWorkgroupResponse = this.readWorkgroup(getWorkgroupStatusRequest, proxyClient);
+
+        logger.log(String.format("%s : Workgroup: %s has successfully been read.",
+                ResourceModel.TYPE_NAME, getWorkgroupResponse.workgroup().workgroupName()));
+
+        logger.log(getWorkgroupResponse.toString());
+
+        return getWorkgroupResponse.workgroup().status().equals(WorkgroupStatus.AVAILABLE);
     }
 
     private ListTagsForResourceResponse readTags(final ListTagsForResourceRequest awsRequest,
@@ -154,82 +175,14 @@ public class UpdateHandler extends BaseHandlerStd {
         return awsResponse;
     }
 
-    private ProgressEvent<ResourceModel, CallbackContext> operateTagsErrorHandler(final Object awsRequest,
-                                                                                  final Exception exception,
-                                                                                  final ProxyClient<RedshiftServerlessClient> client,
-                                                                                  final ResourceModel model,
-                                                                                  final CallbackContext context) {
-        if (exception instanceof ResourceNotFoundException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
-
-        } else if (exception instanceof ValidationException ||
-                exception instanceof TooManyTagsException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
-
-        } else if (exception instanceof ThrottlingException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.Throttling);
-
-        } else if (exception instanceof InternalServerException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InternalFailure);
-
-        } else {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
-        }
-    }
-
-    private UpdateWorkgroupResponse updateWorkgroup(final UpdateWorkgroupRequest awsRequest,
-                                                    final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        final int MAX_RETRIES = 5;
-        int retryCount = 0;
-
-        while (true) {
-            try {
-                UpdateWorkgroupResponse awsResponse =
-                        proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::updateWorkgroup);
-
-                logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
-
-                return awsResponse;
-            } catch (ConflictException ex) {
-                if (retryCount >= MAX_RETRIES || !isRetriableWorkgroupException(ex)) {
-                    throw ex;
-                }
-
-                logger.log(String.format("Retrying UpdateWorkgroup due to expected ConflictException: " +
-                        "%s. Attempt %d/%d", ex.getMessage(), retryCount + 1, MAX_RETRIES));
-                retryCount++;
-            }
-
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt(); // Restore the interrupted status
-                throw new RuntimeException("Interrupted during retry wait", ie);
-            }
-        }
-
-    }
-
-    private ProgressEvent<ResourceModel, CallbackContext> updateWorkgroupErrorHandler(final UpdateWorkgroupRequest awsRequest,
+    private ProgressEvent<ResourceModel, CallbackContext> updateWorkgroupErrorHandler(final Object awsRequest,
                                                                                       final Exception exception,
                                                                                       final ProxyClient<RedshiftServerlessClient> client,
                                                                                       final ResourceModel model,
                                                                                       final CallbackContext context) {
-        if (exception instanceof ResourceNotFoundException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
-
-        } else if (exception instanceof ValidationException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
-
-        } else if (exception instanceof InternalServerException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InternalFailure);
-
-        } else if (exception instanceof ConflictException ||
-                exception instanceof InsufficientCapacityException) {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ResourceConflict);
-
-        } else {
-            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
-        }
+        logger.log(String.format("Operation: %s : encountered exception for model : %s",
+                awsRequest.getClass().getName(), ResourceModel.TYPE_NAME));
+        logger.log(awsRequest.toString());
+        return this.defaultWorkgroupErrorHandler(awsRequest, exception, client, model, context);
     }
 }
