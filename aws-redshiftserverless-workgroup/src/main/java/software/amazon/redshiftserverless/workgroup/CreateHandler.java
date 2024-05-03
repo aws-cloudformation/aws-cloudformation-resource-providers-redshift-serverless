@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.InsufficientCapacityException;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
@@ -76,7 +77,7 @@ public class CreateHandler extends BaseHandlerStd {
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
-    private boolean isWorkgroupStable(final Object awsRequest,
+    private boolean isWorkgroupStable(final CreateWorkgroupRequest awsRequest,
                                       final RedshiftServerlessResponse awsResponse,
                                       final ProxyClient<RedshiftServerlessClient> proxyClient,
                                       final ResourceModel model,
@@ -96,7 +97,7 @@ public class CreateHandler extends BaseHandlerStd {
         return getWorkgroupResponse.workgroup().status().equals(WorkgroupStatus.AVAILABLE);
     }
 
-    private boolean isNamespaceStable(final Object awsRequest,
+    private boolean isNamespaceStable(final GetNamespaceRequest awsRequest,
                                       final RedshiftServerlessResponse awsResponse,
                                       final ProxyClient<RedshiftServerlessClient> proxyClient,
                                       final ResourceModel model,
@@ -113,7 +114,7 @@ public class CreateHandler extends BaseHandlerStd {
 
         logger.log(getNamespaceResponse.toString());
 
-        return NAMESPACE_STATUS_AVAILABLE.equalsIgnoreCase(getNamespaceResponse.namespace().statusAsString());
+        return getNamespaceResponse.namespace().status().equals(NamespaceStatus.AVAILABLE);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> createWorkgroupErrorHandler(final Object awsRequest,

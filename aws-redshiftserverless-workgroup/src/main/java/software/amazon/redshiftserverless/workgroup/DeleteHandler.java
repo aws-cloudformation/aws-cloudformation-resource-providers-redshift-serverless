@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResp
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
@@ -94,7 +95,7 @@ public class DeleteHandler extends BaseHandlerStd {
         return false;
     }
 
-    private boolean isNamespaceStable(final Object awsRequest,
+    private boolean isNamespaceStable(final GetNamespaceRequest awsRequest,
                                       final RedshiftServerlessResponse awsResponse,
                                       final ProxyClient<RedshiftServerlessClient> proxyClient,
                                       final ResourceModel model,
@@ -111,7 +112,7 @@ public class DeleteHandler extends BaseHandlerStd {
 
         logger.log(getNamespaceResponse.toString());
 
-        return NAMESPACE_STATUS_AVAILABLE.equalsIgnoreCase(getNamespaceResponse.namespace().statusAsString());
+        return getNamespaceResponse.namespace().status().equals(NamespaceStatus.AVAILABLE);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> deleteWorkgroupErrorHandler(final Object awsRequest,

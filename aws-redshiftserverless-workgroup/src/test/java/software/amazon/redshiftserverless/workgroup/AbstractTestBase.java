@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResp
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
@@ -36,7 +37,7 @@ public class AbstractTestBase {
     private static final int UPDATED_BASE_CAPACITY;
     private static final int UPDATED_MAX_CAPACITY;
     private static final WorkgroupStatus STATUS;
-    private static final String NAMESPACE_STATUS;
+    private static final NamespaceStatus NAMESPACE_STATUS;
     private static final List<String> SUBNET_IDS;
     private static final List<String> SECURITY_GROUP_IDS;
     private static final Set<ConfigParameter> CONFIG_PARAMETERS;
@@ -50,7 +51,7 @@ public class AbstractTestBase {
 
         WORKGROUP_NAME = "DUMMY_WORKGROUP";
         NAMESPACE_NAME = "DUMMY_NAMESPACE";
-        NAMESPACE_STATUS = "available";
+        NAMESPACE_STATUS = NamespaceStatus.AVAILABLE;
         WORKGROUP_ARN = "DUMMY_WORKGROUP_ARN";
         BASE_CAPACITY = 0;
         UPDATED_BASE_CAPACITY = 0;
