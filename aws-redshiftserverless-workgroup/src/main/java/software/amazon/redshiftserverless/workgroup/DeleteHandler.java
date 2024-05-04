@@ -21,7 +21,6 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class DeleteHandler extends BaseHandlerStd {
-    private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(final AmazonWebServicesClientProxy proxy,
                                                                           final ResourceHandlerRequest<ResourceModel> request,
@@ -36,83 +35,14 @@ public class DeleteHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Delete", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
-                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
-                                    DeleteWorkgroupResponse awsResponse = this.deleteWorkgroup(awsRequest, sdkProxyClient);
-
-                                    logger.log(String.format("%s : %s has successfully been deleted.",
-                                            ResourceModel.TYPE_NAME, awsResponse.workgroup().workgroupName()));
-                                    logger.log(awsResponse.toString());
-
-                                    return awsResponse;
-                                })
+                                .makeServiceCall(this::deleteWorkgroup)
                                 .stabilize(this::isWorkgroupDeleted)
                                 .handleError(this::deleteWorkgroupErrorHandler)
                                 .done(awsResponse -> {
                                     return ProgressEvent.progress(Translator.translateFromDeleteResponse(awsResponse), callbackContext);
                                 })
                 )
-                .then(progress ->
-                        proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpace", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                                .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
-                                .backoffDelay(BACKOFF_STRATEGY)
-                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
-                                    GetNamespaceResponse awsResponse = this.readNamespace(awsRequest, sdkProxyClient);
-
-                                    logger.log(String.format("%s : %s has successfully been created.",
-                                            ResourceModel.TYPE_NAME, awsResponse.namespace().namespaceName()));
-                                    logger.log(awsResponse.toString());
-
-                                    return awsResponse;
-                                })
-                                .stabilize(this::isNamespaceStable)
-                                .handleError(this::deleteWorkgroupErrorHandler)
-                                .progress()
-                )
                 .then(progress -> ProgressEvent.defaultSuccessHandler(null));
-    }
-
-    private boolean isWorkgroupDeleted(final DeleteWorkgroupRequest awsRequest,
-                                       final RedshiftServerlessResponse awsResponse,
-                                       final ProxyClient<RedshiftServerlessClient> proxyClient,
-                                       final ResourceModel model,
-                                       final CallbackContext context) {
-
-        GetWorkgroupRequest getWorkgroupStatusRequest = GetWorkgroupRequest.builder()
-                .workgroupName(model.getWorkgroupName())
-                .build();
-
-        try {
-            GetWorkgroupResponse getWorkgroupResponse = this.readWorkgroup(getWorkgroupStatusRequest, proxyClient);
-
-            logger.log(String.format("%s : Workgroup: %s has successfully been read.",
-                    ResourceModel.TYPE_NAME, getWorkgroupResponse.workgroup().workgroupName()));
-
-            logger.log(getWorkgroupResponse.toString());
-        } catch (ResourceNotFoundException e) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean isNamespaceStable(final GetNamespaceRequest awsRequest,
-                                      final RedshiftServerlessResponse awsResponse,
-                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
-                                      final ResourceModel model,
-                                      final CallbackContext context) {
-
-        GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder()
-                .namespaceName(model.getNamespaceName())
-                .build();
-
-        GetNamespaceResponse getNamespaceResponse = this.readNamespace(getNamespaceRequest, proxyClient);
-
-        logger.log(String.format("%s : Namespace: %s has successfully been read.",
-                ResourceModel.TYPE_NAME, getNamespaceResponse.namespace().namespaceName()));
-
-        logger.log(getNamespaceResponse.toString());
-
-        return getNamespaceResponse.namespace().status().equals(NamespaceStatus.AVAILABLE);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> deleteWorkgroupErrorHandler(final Object awsRequest,

@@ -8,8 +8,6 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
-import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
-import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.InsufficientCapacityException;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
@@ -26,7 +24,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import java.util.regex.Pattern;
 
 public class CreateHandler extends BaseHandlerStd {
-    private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
@@ -42,15 +39,7 @@ public class CreateHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Create", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToCreateRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
-                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
-                                    CreateWorkgroupResponse awsResponse = this.createWorkgroup(awsRequest, sdkProxyClient);
-
-                                    logger.log(String.format("%s : %s has successfully been created.",
-                                            ResourceModel.TYPE_NAME, awsResponse.workgroup().workgroupName()));
-                                    logger.log(awsResponse.toString());
-
-                                    return awsResponse;
-                                })
+                                .makeServiceCall(this::createWorkgroup)
                                 .stabilize(this::isWorkgroupStable)
                                 .handleError(this::createWorkgroupErrorHandler)
                                 .done(awsResponse -> {
@@ -61,60 +50,12 @@ public class CreateHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpace", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
-                                .makeServiceCall((awsRequest, sdkProxyClient) -> {
-                                    GetNamespaceResponse awsResponse = this.readNamespace(awsRequest, sdkProxyClient);
-
-                                    logger.log(String.format("%s : %s has successfully been created.",
-                                            ResourceModel.TYPE_NAME, awsResponse.namespace().namespaceName()));
-                                    logger.log(awsResponse.toString());
-
-                                    return awsResponse;
-                                })
+                                .makeServiceCall(this::readNamespace)
                                 .stabilize(this::isNamespaceStable)
                                 .handleError(this::createWorkgroupErrorHandler)
                                 .progress()
                 )
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
-    }
-
-    private boolean isWorkgroupStable(final CreateWorkgroupRequest awsRequest,
-                                      final RedshiftServerlessResponse awsResponse,
-                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
-                                      final ResourceModel model,
-                                      final CallbackContext context) {
-
-        GetWorkgroupRequest getWorkgroupStatusRequest = GetWorkgroupRequest.builder()
-                .workgroupName(model.getWorkgroupName())
-                .build();
-
-        GetWorkgroupResponse getWorkgroupResponse = this.readWorkgroup(getWorkgroupStatusRequest, proxyClient);
-
-        logger.log(String.format("%s : Workgroup: %s has successfully been read.",
-                ResourceModel.TYPE_NAME, getWorkgroupResponse.workgroup().workgroupName()));
-
-        logger.log(getWorkgroupResponse.toString());
-
-        return getWorkgroupResponse.workgroup().status().equals(WorkgroupStatus.AVAILABLE);
-    }
-
-    private boolean isNamespaceStable(final GetNamespaceRequest awsRequest,
-                                      final RedshiftServerlessResponse awsResponse,
-                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
-                                      final ResourceModel model,
-                                      final CallbackContext context) {
-
-        GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder()
-                .namespaceName(model.getNamespaceName())
-                .build();
-
-        GetNamespaceResponse getNamespaceResponse = this.readNamespace(getNamespaceRequest, proxyClient);
-
-        logger.log(String.format("%s : Namespace: %s has successfully been read.",
-                ResourceModel.TYPE_NAME, getNamespaceResponse.namespace().namespaceName()));
-
-        logger.log(getNamespaceResponse.toString());
-
-        return getNamespaceResponse.namespace().status().equals(NamespaceStatus.AVAILABLE);
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> createWorkgroupErrorHandler(final Object awsRequest,

@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 
 public class UpdateHandler extends BaseHandlerStd {
-    private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
@@ -121,26 +120,6 @@ public class UpdateHandler extends BaseHandlerStd {
                 .port((Integer) getDelta.apply(desiredModel.getPort(), previousModel.getPort()))
                 .workgroup(previousModel.getWorkgroup())
                 .build();
-    }
-
-    private boolean isWorkgroupStable(final Object awsRequest,
-                                      final RedshiftServerlessResponse awsResponse,
-                                      final ProxyClient<RedshiftServerlessClient> proxyClient,
-                                      final ResourceModel model,
-                                      final CallbackContext context) {
-
-        GetWorkgroupRequest getWorkgroupStatusRequest = GetWorkgroupRequest.builder()
-                .workgroupName(model.getWorkgroupName())
-                .build();
-
-        GetWorkgroupResponse getWorkgroupResponse = this.readWorkgroup(getWorkgroupStatusRequest, proxyClient);
-
-        logger.log(String.format("%s : Workgroup: %s has successfully been read.",
-                ResourceModel.TYPE_NAME, getWorkgroupResponse.workgroup().workgroupName()));
-
-        logger.log(getWorkgroupResponse.toString());
-
-        return getWorkgroupResponse.workgroup().status().equals(WorkgroupStatus.AVAILABLE);
     }
 
     private ListTagsForResourceResponse readTags(final ListTagsForResourceRequest awsRequest,
