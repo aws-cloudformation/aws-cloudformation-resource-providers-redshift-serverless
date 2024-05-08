@@ -42,6 +42,15 @@ public class DeleteHandler extends BaseHandlerStd {
                                     return ProgressEvent.progress(Translator.translateFromDeleteResponse(awsResponse), callbackContext);
                                 })
                 )
+                .then(progress ->
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpaceAfterDelete", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
+                                .backoffDelay(BACKOFF_STRATEGY)
+                                .makeServiceCall(this::readNamespace)
+                                .stabilize(this::isNamespaceStable)
+                                .handleError(this::deleteWorkgroupErrorHandler)
+                                .progress()
+                )
                 .then(progress -> ProgressEvent.defaultSuccessHandler(null));
     }
 

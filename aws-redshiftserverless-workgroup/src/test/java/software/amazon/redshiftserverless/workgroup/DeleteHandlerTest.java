@@ -65,6 +65,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
         // We first retreive workgroup, then wait for workgroup to be in available state and then get workgroup after delete operation
         when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class)))
                 .thenThrow(ResourceNotFoundException.builder().build());
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
