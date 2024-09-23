@@ -32,6 +32,14 @@ public class DeleteHandler extends BaseHandlerStd {
                             .handleError(this::defaultErrorHandler)
                             .done(deleteNamespaceResponse -> {
                                 logger.log(String.format("%s %s deleted.",ResourceModel.TYPE_NAME, model.getNamespaceName()));
+                                // TODO: Need to add a stabilize operation to verify if secret is deleted
+                                // This is a temporary fix to handle deletion of secrets for managed passwords
+                                // Since deletion of secret is handled async CTv2 is failing even in SingleTestMode
+                                try {
+                                    Thread.sleep(10000);
+                                } catch(InterruptedException ex) {
+                                    Thread.currentThread().interrupt();
+                                }
                                 return ProgressEvent.defaultSuccessHandler(null);
                             })
                 );
