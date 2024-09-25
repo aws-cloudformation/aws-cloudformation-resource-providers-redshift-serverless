@@ -36,7 +36,7 @@ public class DeleteHandler extends BaseHandlerStd {
                                 // This is a temporary fix to handle deletion of secrets for managed passwords
                                 // Since deletion of secret is handled async CTv2 is failing even in SingleTestMode
                                 try {
-                                    Thread.sleep(10000);
+                                    Thread.sleep(30000);
                                 } catch(InterruptedException ex) {
                                     Thread.currentThread().interrupt();
                                 }
