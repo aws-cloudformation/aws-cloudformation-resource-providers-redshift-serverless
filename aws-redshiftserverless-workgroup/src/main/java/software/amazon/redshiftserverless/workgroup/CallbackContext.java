@@ -8,4 +8,5 @@ import software.amazon.cloudformation.proxy.StdCallbackContext;
 @lombok.EqualsAndHashCode(callSuper = true)
 public class CallbackContext extends StdCallbackContext {
     int retryOnResourceNotFound = 5;
+    boolean propagationDelay = false;
 }

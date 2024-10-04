@@ -40,6 +40,10 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     public static final String BUSY_WORKGROUP_RETRY_EXCEPTION_MESSAGE =
             "There is an operation running on the existing workgroup";
 
+    // This is for delete workgroup operation. We need AdminWF to finish the operation completely
+    // This is needed for CTV2 to work
+    public static final int EVENTUAL_CONSISTENCY_DELAY_SECONDS = 300;
+
     protected static boolean isRetriableWorkgroupException(ConflictException exception) {
         return exception.getMessage().contains(BUSY_WORKGROUP_RETRY_EXCEPTION_MESSAGE);
     }
