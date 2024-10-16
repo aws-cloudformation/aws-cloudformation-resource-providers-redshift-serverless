@@ -31,7 +31,7 @@ The code uses [Lombok](https://projectlombok.org/), and [you may have to install
 ## Note: This should be tested in the same region as your deployed resource.
 ## This would just test the resource handler changes and deploy resource in your account. This uses your local aws credentials
 ## The permissions provided here doesn't truly represent the necessary permission defined in the schema and need to be updated before you execute contract tests.
-## References: 
+## References:
 ##    - https://w.amazon.com/bin/view/AWS21/Design/Uluru/Onboarding_Guide/Uluru_OpenSource_And_Developing_In_Amazon/IntegrationTests/
 
 1. cd <resource_folder> && source <virtualenvfolder>/bin/activate && sam local start-lambda
@@ -51,7 +51,7 @@ The code uses [Lombok](https://projectlombok.org/), and [you may have to install
 ## References:
 ##    - https://docs.aws.amazon.com/cli/latest/reference/cloudformation/create-stack.html
 
-1. cp <resource_folder>/local-test-artifacts/create-<resource>.yaml cp local-test-artifacts/create-<resource>-<feature>.json 
+1. cp <resource_folder>/local-test-artifacts/create-<resource>.yaml cp local-test-artifacts/create-<resource>-<feature>.json
 2. cd <resource_folder> && aws cloudformation create-stack --stack-name <stack-name> --template-body file://local-test-artifacts/create-<resource>-<feature>.yaml> --region <region>
 3. Verify if the cloudformation template is deployed successfully into your account.
 

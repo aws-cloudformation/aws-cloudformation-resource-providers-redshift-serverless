@@ -31,6 +31,7 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class UpdateHandler extends BaseHandlerStd {
         final CallbackContext callbackContext,
         final ProxyClient<RedshiftServerlessClient> proxyClient,
         final ProxyClient<RedshiftClient> redshiftProxyClient,
+        final ProxyClient<SecretsManagerClient> secretsManagerProxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -180,7 +182,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
                     return progress;
                 })
-                .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, logger));
+                .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger));
     }
 
     private UpdateNamespaceResponse updateNamespace(final UpdateNamespaceRequest updateNamespaceRequest,

@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretRequest;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -45,6 +47,12 @@ public class DeleteHandlerTest extends AbstractTestBase {
     @Mock
     RedshiftClient redshiftSdkClient;
 
+    @Mock
+    private ProxyClient<SecretsManagerClient> secretsManagerProxyClient;
+
+    @Mock
+    SecretsManagerClient secretsManagerSdkClient;
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -53,6 +61,9 @@ public class DeleteHandlerTest extends AbstractTestBase {
 
         redshiftSdkClient = mock(RedshiftClient.class);
         redshiftProxyClient = MOCK_PROXY(proxy, redshiftSdkClient);
+
+        secretsManagerSdkClient = mock(SecretsManagerClient.class);
+        secretsManagerProxyClient = MOCK_PROXY(proxy, secretsManagerSdkClient);
     }
 
     @AfterEach
@@ -74,7 +85,34 @@ public class DeleteHandlerTest extends AbstractTestBase {
         when(proxyClient.client().deleteNamespace(any(DeleteNamespaceRequest.class))).thenReturn(getDeleteResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class)))
                 .thenThrow(ResourceNotFoundException.class);
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_WithManagedPasswords() {
+        final DeleteHandler handler = new DeleteHandler();
+
+        final ResourceModel requestResourceModel = getDeleteRequestResourceModel();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(requestResourceModel)
+                .build();
+
+        when(proxyClient.client().deleteNamespace(any(DeleteNamespaceRequest.class))).thenReturn(getDeleteResponseSdk());
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class)))
+                .thenReturn(getNamespaceResponseSdkForManagedAdminPasswords())
+                .thenThrow(ResourceNotFoundException.class);
+        when(secretsManagerProxyClient.client().describeSecret(any(DescribeSecretRequest.class)))
+                .thenThrow(software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException.class);
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);

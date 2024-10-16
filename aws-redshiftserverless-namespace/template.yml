@@ -13,11 +13,11 @@ Resources:
     Properties:
       Handler: software.amazon.redshiftserverless.namespace.HandlerWrapper::handleRequest
       Runtime: java17
-      CodeUri: ./target/aws-redshiftserverless-namespace-1.0.jar
+      CodeUri: ./target/aws-redshiftserverless-namespace-handler-1.0-SNAPSHOT.jar
 
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
       Handler: software.amazon.redshiftserverless.namespace.HandlerWrapper::testEntrypoint
       Runtime: java17
-      CodeUri: ./target/aws-redshiftserverless-namespace-1.0.jar
+      CodeUri: ./target/aws-redshiftserverless-namespace-handler-1.0-SNAPSHOT.jar

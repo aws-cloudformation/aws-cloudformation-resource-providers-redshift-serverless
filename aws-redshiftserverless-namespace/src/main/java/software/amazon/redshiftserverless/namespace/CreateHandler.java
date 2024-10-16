@@ -20,6 +20,7 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -32,6 +33,7 @@ public class CreateHandler extends BaseHandlerStd {
         final CallbackContext callbackContext,
         final ProxyClient<RedshiftServerlessClient> proxyClient,
         final ProxyClient<RedshiftClient> redshiftProxyClient,
+        final ProxyClient<SecretsManagerClient> secretsManagerProxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -68,7 +70,7 @@ public class CreateHandler extends BaseHandlerStd {
                return progress;
             })
             .then(progress ->
-                new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, logger)
+                new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger)
             );
     }
 
