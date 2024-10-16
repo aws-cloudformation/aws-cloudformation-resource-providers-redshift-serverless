@@ -9,6 +9,7 @@ import software.amazon.cloudformation.proxy.StdCallbackContext;
 public class CallbackContext extends StdCallbackContext {
     String namespaceArn = null;
     boolean callBackForDelete = false;
+    String adminPasswordSecretArn = null;
 
     public void setNamespaceArn(String namespaceArn) {this.namespaceArn = namespaceArn; }
 
@@ -20,5 +21,13 @@ public class CallbackContext extends StdCallbackContext {
 
     public boolean getCallBackForDelete() {
         return callBackForDelete;
+    }
+
+    public String getAdminPasswordSecretArn() {
+        return adminPasswordSecretArn;
+    }
+
+    public void setAdminPasswordSecretArn(String adminPasswordSecretArn) {
+        this.adminPasswordSecretArn = adminPasswordSecretArn;
     }
 }

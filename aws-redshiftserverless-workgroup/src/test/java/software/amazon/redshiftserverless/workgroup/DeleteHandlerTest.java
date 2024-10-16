@@ -66,7 +66,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
         when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class)))
                 .thenThrow(ResourceNotFoundException.builder().build());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
-        
+
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();

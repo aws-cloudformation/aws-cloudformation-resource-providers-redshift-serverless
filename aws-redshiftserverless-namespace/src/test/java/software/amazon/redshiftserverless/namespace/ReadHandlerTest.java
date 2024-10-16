@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -61,6 +62,9 @@ public class ReadHandlerTest extends AbstractTestBase {
 
     @Mock
     private ProxyClient<RedshiftClient> redshiftProxyClient;
+
+    @Mock
+    private ProxyClient<SecretsManagerClient> secretsManagerProxyClient;
 
     @Mock
     RedshiftClient redshiftSdkClient;
@@ -96,7 +100,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -153,7 +157,7 @@ public class ReadHandlerTest extends AbstractTestBase {
 
         if (expectedException == null) {
             when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
-            final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+            final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
             assertThat(response).isNotNull();
             assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
             assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
@@ -162,7 +166,7 @@ public class ReadHandlerTest extends AbstractTestBase {
             assertThat(response.getMessage()).isNull();
             assertThat(response.getErrorCode()).isNull();
         } else {
-            assertThrows(expectedException, () -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger));
+            assertThrows(expectedException, () -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger));
         }
     }
 
@@ -184,7 +188,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getResourcePolicyResponseSdk());
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
@@ -226,7 +230,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
 
         verify(proxyClient.client(), times(1)).listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class));
         assertThat(response).isNotNull();
@@ -276,7 +280,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
 
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, logger);
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger);
         assertThat(response).isNotNull();
         if (expectedErrorCode == null) {
             assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
