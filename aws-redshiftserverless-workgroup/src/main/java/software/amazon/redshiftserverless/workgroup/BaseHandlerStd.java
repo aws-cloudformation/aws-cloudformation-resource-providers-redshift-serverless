@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
+import software.amazon.awssdk.services.redshiftserverless.model.ThrottlingException;
 import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
@@ -230,6 +231,9 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
 
         } else if (exception instanceof ValidationException) {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
+
+        } else if (exception instanceof ThrottlingException) {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.Throttling);
 
         } else {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);

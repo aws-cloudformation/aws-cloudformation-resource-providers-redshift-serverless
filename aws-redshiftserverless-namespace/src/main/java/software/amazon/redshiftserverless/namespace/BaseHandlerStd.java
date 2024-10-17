@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopy
 import software.amazon.awssdk.services.redshiftserverless.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftserverless.model.ThrottlingException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.awssdk.services.redshift.RedshiftClient;
@@ -148,6 +149,8 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceInternalError);
     } else if (exception instanceof ResourceNotFoundException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.NotFound);
+    } else if (exception instanceof ThrottlingException) {
+      return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.Throttling);
     } else if (exception instanceof TooManyTagsException || exception instanceof ServiceQuotaExceededException) {
       return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceLimitExceeded);
     } else if (exception instanceof ConflictException) {
