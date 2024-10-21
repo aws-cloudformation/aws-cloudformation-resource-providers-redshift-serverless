@@ -10,9 +10,12 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResp
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.awssdk.services.redshift.RedshiftClient;
@@ -35,6 +38,10 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
   protected final String NAMESPACE_STATUS_AVAILABLE = "available";
   protected static final Constant BACKOFF_STRATEGY = Constant.of().
           timeout(Duration.ofMinutes(30L)).delay(Duration.ofSeconds(10L)).build();
+  protected static final Constant PREOPERATION_BACKOFF_STRATEGY = Constant.of()
+          .timeout(Duration.ofMinutes(5L))
+          .delay(Duration.ofSeconds(5L))
+          .build();
 
   @Override
   public final ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -62,7 +69,11 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     final ProxyClient<SecretsManagerClient> secretsManagerProxyClient,
     final Logger logger);
 
-  protected boolean isNamespaceActive (final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {
+  protected boolean isNamespaceActive (final Object awsRequest,
+                                       final RedshiftServerlessResponse awsResponse,
+                                       final ProxyClient<RedshiftServerlessClient> proxyClient,
+                                       final ResourceModel resourceModel,
+                                       final CallbackContext context) {
     GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder().namespaceName(resourceModel.getNamespaceName()).build();
     GetNamespaceResponse getNamespaceResponse = proxyClient.injectCredentialsAndInvokeV2(getNamespaceRequest, proxyClient.client()::getNamespace);
     Namespace namespace = getNamespaceResponse.namespace();
@@ -71,6 +82,15 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     }
 
     return NAMESPACE_STATUS_AVAILABLE.equalsIgnoreCase(getNamespaceResponse.namespace().statusAsString());
+  }
+
+  protected ListTagsForResourceResponse readTags(final ListTagsForResourceRequest awsRequest,
+                                                 final ProxyClient<RedshiftServerlessClient> proxyClient) {
+
+    ListTagsForResourceResponse awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::listTagsForResource);
+
+    logger.log(String.format("%s's tags have successfully been read.", ResourceModel.TYPE_NAME));
+    return awsResponse;
   }
 
   protected boolean isNamespaceActiveAfterDelete (final ProxyClient<RedshiftServerlessClient> proxyClient, ResourceModel resourceModel, CallbackContext context) {

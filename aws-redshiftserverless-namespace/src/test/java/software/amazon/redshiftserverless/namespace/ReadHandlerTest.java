@@ -19,6 +19,8 @@ import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessException;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration;
@@ -96,6 +98,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getEmptyResourcePolicyResponseSdk());
@@ -151,6 +154,7 @@ public class ReadHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class)))
                 .thenThrow((Throwable) createExceptionWithBuilder(exceptionClass));
@@ -184,6 +188,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(redshiftProxyClient.client().getResourcePolicy(any(GetResourcePolicyRequest.class))).thenReturn(getResourcePolicyResponseSdk());
@@ -217,6 +222,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class)))
                 .thenReturn(ListSnapshotCopyConfigurationsResponse.builder()
                         .snapshotCopyConfigurations(Collections.singletonList(SnapshotCopyConfiguration.builder()
@@ -275,6 +281,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class)))
                 .thenThrow((Throwable) createExceptionWithBuilder(exceptionClass));
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());

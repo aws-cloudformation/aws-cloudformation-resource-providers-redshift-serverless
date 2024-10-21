@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCo
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.SnapshotCopyConfiguration;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationRequest;
@@ -92,6 +94,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
@@ -126,6 +129,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .previousResourceState(prevModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
@@ -168,6 +172,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .policy(NEW_NAMESPACE_RESOURCE_POLICY)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
@@ -204,6 +209,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdkForManagedAdminPasswords());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdkForManagedAdminPasswords());
@@ -241,6 +247,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
@@ -280,6 +287,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .desiredResourceState(requestResourceModel)
             .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().listSnapshotCopyConfigurations(any(ListSnapshotCopyConfigurationsRequest.class))).thenReturn(getSnapshotCopyConfigurationsResponseSdk());
         when(proxyClient.client().updateNamespace(any(UpdateNamespaceRequest.class))).thenReturn(getUpdateResponseSdkForManagedAdminPasswords());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdkForManagedAdminPasswords());
@@ -344,6 +352,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .snapshotRetentionPeriod(-1)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().createSnapshotCopyConfiguration(any(CreateSnapshotCopyConfigurationRequest.class)))
                 .thenReturn(CreateSnapshotCopyConfigurationResponse.builder()
                         .snapshotCopyConfiguration(newSnapshotCopyConfiguration)
@@ -415,6 +424,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .snapshotRetentionPeriod(-1)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().updateSnapshotCopyConfiguration(any(UpdateSnapshotCopyConfigurationRequest.class)))
                 .thenReturn(UpdateSnapshotCopyConfigurationResponse.builder()
                         .snapshotCopyConfiguration(snapshotCopyConfiguration.toBuilder().snapshotRetentionPeriod(2).build())

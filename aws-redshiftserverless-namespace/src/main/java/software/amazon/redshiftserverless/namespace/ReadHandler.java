@@ -60,6 +60,16 @@ public class ReadHandler extends BaseHandlerStd {
                     return progress;
                 })
                 .then(progress -> {
+                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Read::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                        .translateToServiceRequest(Translator::translateToReadTagsRequest)
+                        .makeServiceCall(this::readTags)
+                        .handleError(this::defaultErrorHandler)
+                        .done((_request, _response, _client, _model, _context) -> {
+                            return ProgressEvent.progress(Translator.translateFromReadTagsResponse(_response, _model), _context);
+                        });
+                    return progress;
+                })
+                .then(progress -> {
                     return proxy.initiate("AWS-Redshift-ResourcePolicy::Get", redshiftProxyClient, progress.getResourceModel(), callbackContext)
                         .translateToServiceRequest(resourceModelRequest -> Translator.translateToGetResourcePolicy(resourceModelRequest, callbackContext.getNamespaceArn()))
                         .makeServiceCall(this::getNamespaceResourcePolicy)
