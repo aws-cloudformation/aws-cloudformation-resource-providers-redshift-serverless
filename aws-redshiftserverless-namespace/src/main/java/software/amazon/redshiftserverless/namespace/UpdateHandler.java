@@ -15,8 +15,11 @@ import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCo
 import software.amazon.awssdk.services.redshiftserverless.model.DeleteSnapshotCopyConfigurationResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListSnapshotCopyConfigurationsResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftserverless.model.TagResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotCopyConfigurationRequest;
@@ -28,6 +31,7 @@ import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
@@ -61,8 +65,7 @@ public class UpdateHandler extends BaseHandlerStd {
         ResourceModel tempUpdateRequestModel = currentModel.toBuilder()
                 .adminUserPassword(StringUtils.equals(prevModel.getAdminUserPassword(), currentModel.getAdminUserPassword()) ? null : currentModel.getAdminUserPassword())
                 .adminUsername(StringUtils.equals(prevModel.getAdminUsername(), currentModel.getAdminUsername()) ? null : currentModel.getAdminUsername())
-                //TODO: we only support updating db-name after GA
-//                .dbName(StringUtils.equals(prevModel.getDbName(), currentModel.getDbName()) ? null : currentModel.getDbName())
+                .dbName(StringUtils.equals(prevModel.getDbName(), currentModel.getDbName()) ? null : currentModel.getDbName())
                 .kmsKeyId(StringUtils.equals(prevModel.getKmsKeyId(), currentModel.getKmsKeyId()) ? null : currentModel.getKmsKeyId())
                 .defaultIamRoleArn(StringUtils.equals(prevModel.getDefaultIamRoleArn(), currentModel.getDefaultIamRoleArn()) ? null : currentModel.getDefaultIamRoleArn())
                 .iamRoles(compareListParamsEqualOrNot(prevModel.getIamRoles(), currentModel.getIamRoles()) ? null : currentModel.getIamRoles())
@@ -97,24 +100,48 @@ public class UpdateHandler extends BaseHandlerStd {
 
         final ResourceModel updateRequestModel = tempUpdateRequestModel;
         return ProgressEvent.progress(currentModel, callbackContext)
-                .then(progress ->
-                        proxy.initiate("AWS-RedshiftServerless-Namespace::Update::first", proxyClient, updateRequestModel, progress.getCallbackContext())
+                .then(progress -> {
+                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Update::ReadInstanceBeforeUpdate", proxyClient, updateRequestModel, callbackContext)
+                        .translateToServiceRequest(Translator::translateToReadRequest)
+                        .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5mins here
+                        .makeServiceCall(this::getNamespace)
+                        .stabilize(this::isNamespaceActive) // This basically checks for namespace to be stabilized before we perform the update operation
+                        .handleError(this::defaultErrorHandler)
+                        .done(awsResponse -> {
+                            callbackContext.setNamespaceArn(awsResponse.namespace().namespaceArn());
+                            return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
+                        });
+                    return progress;
+                })
+                .then(progress -> {
+                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Update::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                            .translateToServiceRequest(Translator::translateToReadTagsRequest)
+                            .makeServiceCall(this::readTags)
+                            .handleError(this::defaultErrorHandler)
+                            .done((tagsRequest, tagsResponse, client, model, context) -> {
+                                return ProgressEvent.progress(Translator.translateFromReadTagsResponse(tagsResponse, model), callbackContext);
+                            });
+                    return progress;
+                })
+                .then(progress -> {
+                    progress = proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
+                                .backoffDelay(BACKOFF_STRATEGY)
+                                .makeServiceCall(this::updateTags)
+                                .stabilize(this::isNamespaceActive)
+                                .handleError(this::defaultErrorHandler)
+                                .progress();
+                    return progress;
+                })
+                .then(progress -> {
+                        progress = proxy.initiate("AWS-RedshiftServerless-Namespace::UpdateInstance", proxyClient, updateRequestModel, progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateNamespace)
-                                .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
+                                .stabilize(this::isNamespaceActive)
                                 .handleError(this::defaultErrorHandler)
-                                .progress())
-                .then(progress -> {
-                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::ReadOnly", proxyClient, updateRequestModel, callbackContext)
-                            .translateToServiceRequest(Translator::translateToReadRequest)
-                            .makeServiceCall(this::getNamespace)
-                            .handleError(this::defaultErrorHandler)
-                            .done(awsResponse -> {
-                                callbackContext.setNamespaceArn(awsResponse.namespace().namespaceArn());
-                                return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
-                            });
-                    return progress;
+                                .progress();
+                        return progress;
                 })
                 .then(progress -> {
                     if (callbackContext.getNamespaceArn() != null && currentModel.getNamespaceResourcePolicy() != null)  {
@@ -183,6 +210,29 @@ public class UpdateHandler extends BaseHandlerStd {
                     return progress;
                 })
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, redshiftProxyClient, secretsManagerProxyClient, logger));
+    }
+
+    private TagResourceResponse updateTags(final UpdateTagsRequest awsRequest,
+                                           final ProxyClient<RedshiftServerlessClient> proxyClient) {
+        TagResourceResponse awsResponse = null;
+
+        if (awsRequest.getDeleteOldTagsRequest().tagKeys().isEmpty()) {
+            logger.log(String.format("No tags would be deleted for the resource: %s.", ResourceModel.TYPE_NAME));
+
+        } else {
+            proxyClient.injectCredentialsAndInvokeV2(awsRequest.getDeleteOldTagsRequest(), proxyClient.client()::untagResource);
+            logger.log(String.format("Delete tags for the resource: %s.", ResourceModel.TYPE_NAME));
+        }
+
+        if (awsRequest.getCreateNewTagsRequest().tags().isEmpty()) {
+            logger.log(String.format("No tags would be created for the resource: %s.", ResourceModel.TYPE_NAME));
+
+        } else {
+            awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest.getCreateNewTagsRequest(), proxyClient.client()::tagResource);
+            logger.log(String.format("Create tags for the resource: %s.", ResourceModel.TYPE_NAME));
+        }
+
+        return awsResponse;
     }
 
     private UpdateNamespaceResponse updateNamespace(final UpdateNamespaceRequest updateNamespaceRequest,

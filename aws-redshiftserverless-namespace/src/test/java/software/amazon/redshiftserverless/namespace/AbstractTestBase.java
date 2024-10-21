@@ -185,6 +185,7 @@ public class AbstractTestBase {
             .logExports(LOG_EXPORTS)
             .namespaceName(NAMESPACE_NAME)
             .namespace(translateToModelNamespace(NAMESPACE))
+            .tags(Collections.emptyList())
             .snapshotCopyConfigurations(Collections.emptyList())
             .build();
   }
@@ -283,6 +284,7 @@ public class AbstractTestBase {
             .iamRoles(IAM_ROLES)
             .kmsKeyId(KMS_KEY_ID)
             .logExports(LOG_EXPORTS)
+            .tags(Collections.emptyList())
             .namespaceName(NAMESPACE_NAME)
             .namespace(translateToModelNamespace(NAMESPACE))
             .snapshotCopyConfigurations(Collections.emptyList())

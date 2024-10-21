@@ -30,6 +30,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                - "iam:CreateServiceLinkedRole"
                 - "iam:PassRole"
                 - "kms:CancelKeyDeletion"
                 - "kms:CreateGrant"
@@ -51,6 +52,9 @@ Resources:
                 - "redshift-serverless:GetNamespace"
                 - "redshift-serverless:ListNamespaces"
                 - "redshift-serverless:ListSnapshotCopyConfigurations"
+                - "redshift-serverless:ListTagsForResource"
+                - "redshift-serverless:TagResource"
+                - "redshift-serverless:UntagResource"
                 - "redshift-serverless:UpdateNamespace"
                 - "redshift-serverless:UpdateSnapshotCopyConfiguration"
                 - "redshift:DeleteResourcePolicy"

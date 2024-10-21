@@ -43,7 +43,7 @@ public class CreateHandler extends BaseHandlerStd {
                 return proxy.initiate("AWS-RedshiftServerless-Namespace::Create", proxyClient, progress.getResourceModel(), callbackContext)
                     .translateToServiceRequest(Translator::translateToCreateRequest)
                     .makeServiceCall(this::createNamespace)
-                    .stabilize((_awsRequest, _awsResponse, _client, _model, _context) -> isNamespaceActive(_client, _model, _context))
+                    .stabilize(this::isNamespaceActive)
                     .handleError(this::defaultErrorHandler)
                     .done((_request, _response, _client, _model, _context) -> {
                         callbackContext.setNamespaceArn(_response.namespace().namespaceArn());
