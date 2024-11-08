@@ -36,6 +36,17 @@ public class CreateHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
                 .then(progress ->
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::Create::ReadNamespaceBeforeCreate", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
+                                .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5mins here
+                                .makeServiceCall(this::readNamespace)
+                                .stabilize(this::isNamespaceStable) // This basically checks for namespace to be in stable state before we create workgroup
+                                .handleError(this::createWorkgroupErrorHandler)
+                                .done(awsResponse -> {
+                                    return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext);
+                                })
+                )
+                .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Create", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToCreateRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
@@ -47,7 +58,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 })
                 )
                 .then(progress ->
-                        proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpace", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpaceAfterCreate", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::readNamespace)

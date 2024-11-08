@@ -38,7 +38,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     protected Logger logger;
 
     public static final String BUSY_WORKGROUP_RETRY_EXCEPTION_MESSAGE =
-            "There is an operation running on the existing workgroup";
+            "There is an operation in progress";
 
     // This is for delete workgroup operation. We need AdminWF to finish the operation completely
     // This is needed for CTV2 to work
@@ -54,7 +54,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
             .build();
 
     protected static final Constant PREOPERATION_BACKOFF_STRATEGY = Constant.of()
-            .timeout(Duration.ofMinutes(5L))
+            .timeout(Duration.ofMinutes(60L))
             .delay(Duration.ofSeconds(5L))
             .build();
 
@@ -130,14 +130,40 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
 
     }
 
+    // Since there are source to target operations on the cluster
+    // We will receive operation in progress in such cases.
+    // This needs to be handled on CFN side as this will break contract tests
     protected DeleteWorkgroupResponse deleteWorkgroup(final DeleteWorkgroupRequest awsRequest,
-                                                      final ProxyClient<RedshiftServerlessClient> proxyClient) {
+                                                      final ProxyClient<RedshiftServerlessClient> proxyClient) throws ConflictException {
+        boolean operationInProgress = false;
+        int max_retries = 5;
+        int current_retry = 0;
+        DeleteWorkgroupResponse awsResponse = null;
 
-        DeleteWorkgroupResponse awsResponse = proxyClient.injectCredentialsAndInvokeV2(
-                awsRequest, proxyClient.client()::deleteWorkgroup);
-
-        logger.log(String.format("Workgroup : %s has successfully been deleted.", awsResponse.workgroup().workgroupName()));
-        logger.log(awsResponse.toString());
+        do {
+            try {
+                awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::deleteWorkgroup);
+                logger.log(String.format("Workgroup : %s has successfully been deleted.", awsResponse.workgroup().workgroupName()));
+                logger.log(awsResponse.toString());
+                operationInProgress = false;
+            } catch (ConflictException e) {
+                Pattern pattern = Pattern.compile(".*There is an operation in progress.*", Pattern.CASE_INSENSITIVE);
+                if(pattern.matcher(e.getMessage()).matches()) {
+                    logger.log("There is an operation in progress during delete. We will wait and retry in 60 secs");
+                    operationInProgress = true;
+                    current_retry = current_retry + 1;
+                    // Since there are source to target operations on the cluster
+                    try {
+                        Thread.sleep(60000);
+                    } catch(InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    // We need to explicitly catch operation in progress or reraise other conflict exceptions
+                    throw e;
+                }
+            }
+        } while((current_retry < max_retries) && operationInProgress);
 
         return awsResponse;
     }

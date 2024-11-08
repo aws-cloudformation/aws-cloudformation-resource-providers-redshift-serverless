@@ -63,7 +63,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().deleteWorkgroup(any(DeleteWorkgroupRequest.class))).thenReturn(deleteResponseSdk());
         // We first retreive workgroup, then wait for workgroup to be in available state and then get workgroup after delete operation
-        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class)))
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk()).thenReturn(getReadResponseSdk())
                 .thenThrow(ResourceNotFoundException.builder().build());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
 

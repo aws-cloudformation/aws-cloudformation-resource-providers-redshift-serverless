@@ -267,7 +267,16 @@
         }
     },
     "tagging": {
-        "taggable": true
+        "taggable": true,
+        "tagOnCreate": true,
+        "tagUpdatable": true,
+        "cloudFormationSystemTags": false,
+        "tagProperty": "/properties/Tags",
+        "permissions": [
+            "redshift-serverless:ListTagsForResource",
+            "redshift-serverless:TagResource",
+            "redshift-serverless:UntagResource"
+        ]
     },
     "additionalProperties": false,
     "required": [
@@ -328,7 +337,9 @@
                 "redshift-serverless:CreateNamespace",
                 "redshift-serverless:CreateWorkgroup",
                 "redshift-serverless:GetWorkgroup",
-                "redshift-serverless:GetNamespace"
+                "redshift-serverless:GetNamespace",
+                "redshift-serverless:ListTagsForResource",
+                "redshift-serverless:TagResource"
             ]
         },
         "read": {
@@ -340,7 +351,8 @@
                 "ec2:DescribeSubnets",
                 "ec2:DescribeAccountAttributes",
                 "ec2:DescribeAvailabilityZones",
-                "redshift-serverless:GetWorkgroup"
+                "redshift-serverless:GetWorkgroup",
+                "redshift-serverless:ListTagsForResource"
             ]
         },
         "update": {
@@ -356,7 +368,10 @@
                 "redshift-serverless:TagResource",
                 "redshift-serverless:UntagResource",
                 "redshift-serverless:GetWorkgroup",
-                "redshift-serverless:UpdateWorkgroup"
+                "redshift-serverless:UpdateWorkgroup",
+                "redshift-serverless:ListTagsForResource",
+                "redshift-serverless:TagResource",
+                "redshift-serverless:UntagResource"
             ]
         },
         "delete": {
@@ -370,7 +385,9 @@
                 "ec2:DescribeAvailabilityZones",
                 "redshift-serverless:GetWorkgroup",
                 "redshift-serverless:GetNamespace",
-                "redshift-serverless:DeleteWorkgroup"
+                "redshift-serverless:DeleteWorkgroup",
+                "redshift-serverless:ListTagsForResource",
+                "redshift-serverless:UntagResource"
             ]
         },
         "list": {
@@ -382,7 +399,8 @@
                 "ec2:DescribeSubnets",
                 "ec2:DescribeAccountAttributes",
                 "ec2:DescribeAvailabilityZones",
-                "redshift-serverless:ListWorkgroups"
+                "redshift-serverless:ListWorkgroups",
+                "redshift-serverless:ListTagsForResource"
             ]
         }
     }

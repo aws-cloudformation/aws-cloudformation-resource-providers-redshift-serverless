@@ -32,6 +32,28 @@ public class DeleteHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
                 .then(progress ->
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::Delete::ReadWorkgroup", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToReadRequest)
+                                .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5mins here
+                                .makeServiceCall(this::readWorkgroup)
+                                .stabilize(this::isWorkgroupStable) // This basically checks for workgroup to be in stable state before we delete workgroup
+                                .handleError(this::deleteWorkgroupErrorHandler)
+                                .done( awsResponse -> {
+                                    return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
+                                })
+                )
+                .then(progress ->
+                        proxy.initiate("AWS-RedshiftServerless-Workgroup::Delete::ReadNamespaceBeforeDelete", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
+                                .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5mins here
+                                .makeServiceCall(this::readNamespace)
+                                .stabilize(this::isNamespaceStable) // This basically checks for namespace to be in stable state before we delete workgroup
+                                .handleError(this::deleteWorkgroupErrorHandler)
+                                .done( awsResponse -> {
+                                    return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext);
+                                })
+                )
+                .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Delete", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
                                 .backoffDelay(BACKOFF_STRATEGY)
