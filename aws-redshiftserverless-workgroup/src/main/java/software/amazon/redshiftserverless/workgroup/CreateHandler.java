@@ -78,6 +78,10 @@ public class CreateHandler extends BaseHandlerStd {
         logger.log(String.format("Operation: %s : encountered exception for model: %s",
                 awsRequest.getClass().getName(), ResourceModel.TYPE_NAME));
         logger.log(awsRequest.toString());
+        Pattern pattern = Pattern.compile(".*is not authorized to perform: redshift-serverless:TagResource.*", Pattern.CASE_INSENSITIVE);
+        if(pattern.matcher(exception.getMessage()).matches()){
+            return ProgressEvent.failed(model, context, HandlerErrorCode.UnauthorizedTaggingOperation, exception.getMessage());
+        }
 
         return this.defaultWorkgroupErrorHandler(awsRequest, exception, client, model, context);
     }

@@ -64,16 +64,6 @@ public class DeleteHandler extends BaseHandlerStd {
                                     return ProgressEvent.progress(Translator.translateFromDeleteResponse(awsResponse), callbackContext);
                                 })
                 )
-                .then(progress -> {
-                    if (progress.getCallbackContext().isPropagationDelay()) {
-                        logger.log("Propagation delay completed");
-                        return ProgressEvent.progress(progress.getResourceModel(), progress.getCallbackContext());
-                    }
-                    progress.getCallbackContext().setPropagationDelay(true);
-                    logger.log("Setting propagation delay");
-                    return ProgressEvent.defaultInProgressHandler(progress.getCallbackContext(),
-                            EVENTUAL_CONSISTENCY_DELAY_SECONDS, progress.getResourceModel());
-                })
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpaceAfterDelete", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadNamespaceRequest)

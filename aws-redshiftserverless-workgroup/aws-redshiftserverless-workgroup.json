@@ -316,10 +316,7 @@
         "/properties/MaxCapacity",
         "/properties/ConfigParameters",
         "/properties/SecurityGroupIds",
-        "/properties/SubnetIds",
-        "/properties/Tags",
-        "/properties/Tags/*/Key",
-        "/properties/Tags/*/Value"
+        "/properties/SubnetIds"
     ],
     "primaryIdentifier": [
         "/properties/WorkgroupName"

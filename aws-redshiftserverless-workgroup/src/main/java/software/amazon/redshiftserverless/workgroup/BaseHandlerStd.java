@@ -10,6 +10,8 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
@@ -229,6 +231,15 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
         }
 
         return false;
+    }
+
+    protected ListTagsForResourceResponse readTags(final ListTagsForResourceRequest awsRequest,
+                                                   final ProxyClient<RedshiftServerlessClient> proxyClient) {
+        ListTagsForResourceResponse awsResponse;
+        awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::listTagsForResource);
+
+        logger.log(String.format("%s's tags have successfully been read.", ResourceModel.TYPE_NAME));
+        return awsResponse;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> defaultWorkgroupErrorHandler(final Object awsRequest,
