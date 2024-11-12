@@ -125,6 +125,7 @@ public class AbstractTestBase {
                 .configParameters(CONFIG_PARAMETERS)
                 .port(DEFAULT_PORT)
                 .publiclyAccessible(true)
+                .tags(List.of())
                 .workgroup(Workgroup.builder()
                         .workgroupName(WORKGROUP_NAME)
                         .namespaceName(NAMESPACE_NAME)

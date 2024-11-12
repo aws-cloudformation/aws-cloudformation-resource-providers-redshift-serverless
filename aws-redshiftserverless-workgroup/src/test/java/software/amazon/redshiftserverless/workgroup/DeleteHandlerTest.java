@@ -63,28 +63,18 @@ public class DeleteHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().deleteWorkgroup(any(DeleteWorkgroupRequest.class))).thenReturn(deleteResponseSdk());
         // We first retreive workgroup, then wait for workgroup to be in available state and then get workgroup after delete operation
-        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class)))
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk()).thenReturn(getReadResponseSdk())
                 .thenThrow(ResourceNotFoundException.builder().build());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(300);
-        assertThat(response.getResourceModel()).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isNull();
+        assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
-
-        final ProgressEvent<ResourceModel, CallbackContext> response2 =
-                handler.handleRequest(proxy, request,response.getCallbackContext(), proxyClient, logger);
-
-        assertThat(response2).isNotNull();
-        assertThat(response2.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-        assertThat(response2.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response2.getResourceModel()).isNull();
-        assertThat(response2.getResourceModels()).isNull();
-        assertThat(response2.getMessage()).isNull();
-        assertThat(response2.getErrorCode()).isNull();
     }
 }

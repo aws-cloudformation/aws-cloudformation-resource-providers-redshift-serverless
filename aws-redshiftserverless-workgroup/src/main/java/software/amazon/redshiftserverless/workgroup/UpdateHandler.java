@@ -61,7 +61,9 @@ public class UpdateHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToReadTagsRequest)
                                 .makeServiceCall(this::readTags)
-                                .handleError(this::updateWorkgroupErrorHandler)
+                                .handleError((_awsRequest, _sdkEx, _client, _model, _callbackContext) ->
+                                        ProgressEvent.failed(_model, _callbackContext, HandlerErrorCode.UnauthorizedTaggingOperation, _sdkEx.getMessage())
+                                )
                                 .done((tagsRequest, tagsResponse, client, model, context) -> ProgressEvent.<ResourceModel, CallbackContext>builder()
                                         .callbackContext(context)
                                         .callbackDelaySeconds(0)
@@ -75,7 +77,9 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isWorkgroupStable)
-                                .handleError(this::updateWorkgroupErrorHandler)
+                                .handleError((_awsRequest, _sdkEx, _client, _model, _callbackContext) ->
+                                        ProgressEvent.failed(_model, _callbackContext, HandlerErrorCode.UnauthorizedTaggingOperation, _sdkEx.getMessage())
+                                )
                                 .progress())
 
                 .then(progress ->
@@ -120,15 +124,6 @@ public class UpdateHandler extends BaseHandlerStd {
                 .port((Integer) getDelta.apply(desiredModel.getPort(), previousModel.getPort()))
                 .workgroup(previousModel.getWorkgroup())
                 .build();
-    }
-
-    private ListTagsForResourceResponse readTags(final ListTagsForResourceRequest awsRequest,
-                                                 final ProxyClient<RedshiftServerlessClient> proxyClient) {
-        ListTagsForResourceResponse awsResponse;
-        awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::listTagsForResource);
-
-        logger.log(String.format("%s's tags have successfully been read.", ResourceModel.TYPE_NAME));
-        return awsResponse;
     }
 
     private TagResourceResponse updateTags(final UpdateTagsRequest awsRequest,
