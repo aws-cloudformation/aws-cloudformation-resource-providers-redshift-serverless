@@ -56,6 +56,18 @@
             },
             "additionalProperties": false
         },
+        "PerformanceTarget": {
+            "type": "object",
+            "properties": {
+                "Status": {
+                    "$ref": "#/definitions/PerformanceTargetStatus"
+                },
+                "Level": {
+                    "type": "integer"
+                }
+            },
+            "additionalProperties": false
+        },
         "VpcEndpoint": {
             "type": "object",
             "properties": {
@@ -144,6 +156,9 @@
                 },
                 "CreationDate": {
                     "type": "string"
+                },
+                "PricePerformanceTarget": {
+                    "$ref": "#/definitions/PerformanceTarget"
                 }
             },
             "additionalProperties": false
@@ -175,6 +190,13 @@
                 "AVAILABLE",
                 "MODIFYING",
                 "DELETING"
+            ]
+        },
+        "PerformanceTargetStatus": {
+            "type": "string",
+            "enum": [
+                "ENABLED",
+                "DISABLED"
             ]
         }
     },
@@ -251,6 +273,10 @@
             "description": "The custom port to use when connecting to a workgroup. Valid port ranges are 5431-5455 and 8191-8215. The default is 5439.",
             "type": "integer"
         },
+        "PricePerformanceTarget": {
+            "description": "A property that represents the price performance target settings for the workgroup.",
+            "$ref": "#/definitions/PerformanceTarget"
+        },
         "Tags": {
             "description": "The map of the key-value pairs used to tag the workgroup.",
             "type": "array",
@@ -308,6 +334,8 @@
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/SubnetId",
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/PrivateIpAddress",
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/AvailabilityZone",
+        "/properties/Workgroup/PricePerformanceTarget/*/Status/*/PerformanceTargetStatus",
+        "/properties/Workgroup/PricePerformanceTarget/*/Level",
         "/properties/Workgroup/PubliclyAccessible",
         "/properties/Workgroup/CreationDate"
     ],

@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsRe
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.WorkgroupStatus;
+import software.amazon.awssdk.services.redshiftserverless.model.PerformanceTargetStatus;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
 import software.amazon.cloudformation.proxy.LoggerProxy;
@@ -32,16 +33,20 @@ public class AbstractTestBase {
     private static final String WORKGROUP_NAME;
     private static final String NAMESPACE_NAME;
     private static final String WORKGROUP_ARN;
+    private static final String PERFORMANCE_TARGET_STATUS;
     private static final int BASE_CAPACITY;
     private static final int MAX_CAPACITY;
     private static final int UPDATED_BASE_CAPACITY;
     private static final int UPDATED_MAX_CAPACITY;
+    private static final int PERFORMANCE_TARGET_LEVEL;
     private static final WorkgroupStatus STATUS;
     private static final NamespaceStatus NAMESPACE_STATUS;
     private static final List<String> SUBNET_IDS;
     private static final List<String> SECURITY_GROUP_IDS;
     private static final Set<ConfigParameter> CONFIG_PARAMETERS;
     private static final int DEFAULT_PORT;
+    private static final PerformanceTarget PERFORMANCE_TARGET;
+
     private static final List<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> RESPONSE_CONFIG_PARAMS;
 
     static {
@@ -63,6 +68,12 @@ public class AbstractTestBase {
         CONFIG_PARAMETERS = Collections.emptySet();
         RESPONSE_CONFIG_PARAMS = Collections.emptyList();
         DEFAULT_PORT = 5439;
+        PERFORMANCE_TARGET_LEVEL = 1;
+        PERFORMANCE_TARGET_STATUS = PerformanceTargetStatus.ENABLED.toString();
+        PERFORMANCE_TARGET = PerformanceTarget.builder()
+                .status(PERFORMANCE_TARGET_STATUS)
+                .level(PERFORMANCE_TARGET_LEVEL)
+                .build();
     }
 
     static ProxyClient<RedshiftServerlessClient> MOCK_PROXY(
@@ -126,6 +137,7 @@ public class AbstractTestBase {
                 .port(DEFAULT_PORT)
                 .publiclyAccessible(true)
                 .tags(List.of())
+                .pricePerformanceTarget(PERFORMANCE_TARGET)
                 .workgroup(Workgroup.builder()
                         .workgroupName(WORKGROUP_NAME)
                         .namespaceName(NAMESPACE_NAME)
@@ -137,6 +149,7 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(CONFIG_PARAMETERS)
                         .creationDate("null")
+                        .pricePerformanceTarget(PERFORMANCE_TARGET)
                         .publiclyAccessible(true)
                         .endpoint(Endpoint.builder().port(DEFAULT_PORT).vpcEndpoints(Collections.emptyList()).build())
                         .build())
@@ -166,6 +179,10 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(RESPONSE_CONFIG_PARAMS)
                         .publiclyAccessible(true)
+                        .pricePerformanceTarget(software.amazon.awssdk.services.redshiftserverless.model.PerformanceTarget.builder()
+                                .status(PERFORMANCE_TARGET_STATUS)
+                                .level(PERFORMANCE_TARGET_LEVEL)
+                                .build())
                         .endpoint(software.amazon.awssdk.services.redshiftserverless.model.Endpoint.builder()
                                 .port(DEFAULT_PORT)
                                 .vpcEndpoints(Collections.emptyList())
@@ -214,6 +231,7 @@ public class AbstractTestBase {
                 .securityGroupIds(SECURITY_GROUP_IDS)
                 .subnetIds(SUBNET_IDS)
                 .configParameters(CONFIG_PARAMETERS)
+                .pricePerformanceTarget(PERFORMANCE_TARGET)
                 .publiclyAccessible(true)
                 .port(DEFAULT_PORT)
                 .build();
