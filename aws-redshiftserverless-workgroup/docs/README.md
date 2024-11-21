@@ -279,14 +279,6 @@ Returns the <code>PrivateIpAddress</code> value.
 
 Returns the <code>AvailabilityZone</code> value.
 
-#### PerformanceTargetStatus
-
-Returns the <code>PerformanceTargetStatus</code> value.
-
-#### Level
-
-Returns the <code>Level</code> value.
-
 #### PubliclyAccessible
 
 Returns the <code>PubliclyAccessible</code> value.

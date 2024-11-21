@@ -63,7 +63,9 @@
                     "$ref": "#/definitions/PerformanceTargetStatus"
                 },
                 "Level": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
                 }
             },
             "additionalProperties": false
@@ -275,6 +277,7 @@
         },
         "PricePerformanceTarget": {
             "description": "A property that represents the price performance target settings for the workgroup.",
+            "type": "object",
             "$ref": "#/definitions/PerformanceTarget"
         },
         "Tags": {
@@ -334,8 +337,6 @@
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/SubnetId",
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/PrivateIpAddress",
         "/properties/Workgroup/Endpoint/VpcEndpoints/*/NetworkInterfaces/*/AvailabilityZone",
-        "/properties/Workgroup/PricePerformanceTarget/*/Status/*/PerformanceTargetStatus",
-        "/properties/Workgroup/PricePerformanceTarget/*/Level",
         "/properties/Workgroup/PubliclyAccessible",
         "/properties/Workgroup/CreationDate"
     ],
