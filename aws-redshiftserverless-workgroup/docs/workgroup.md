@@ -10,6 +10,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 {
     "<a href="#configparameters" title="ConfigParameters">ConfigParameters</a>" : <i>[ <a href="configparameter.md">ConfigParameter</a>, ... ]</i>,
     "<a href="#endpoint" title="Endpoint">Endpoint</a>" : <i><a href="endpoint.md">Endpoint</a></i>,
+    "<a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>" : <i><a href="performancetarget.md">PerformanceTarget</a></i>
 }
 </pre>
 
@@ -19,6 +20,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
 <a href="#configparameters" title="ConfigParameters">ConfigParameters</a>: <i>
       - <a href="configparameter.md">ConfigParameter</a></i>
 <a href="#endpoint" title="Endpoint">Endpoint</a>: <i><a href="endpoint.md">Endpoint</a></i>
+<a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>: <i><a href="performancetarget.md">PerformanceTarget</a></i>
 </pre>
 
 ## Properties
@@ -39,3 +41,10 @@ _Type_: <a href="endpoint.md">Endpoint</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
+#### PricePerformanceTarget
+
+_Required_: No
+
+_Type_: <a href="performancetarget.md">PerformanceTarget</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)

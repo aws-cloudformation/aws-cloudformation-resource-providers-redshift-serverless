@@ -22,6 +22,7 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#subnetids" title="SubnetIds">SubnetIds</a>" : <i>[ String, ... ]</i>,
         "<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>" : <i>Boolean</i>,
         "<a href="#port" title="Port">Port</a>" : <i>Integer</i>,
+        "<a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>" : <i><a href="performancetarget.md">PerformanceTarget</a></i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
     }
 }
@@ -45,6 +46,7 @@ Properties:
       - String</i>
     <a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>: <i>Boolean</i>
     <a href="#port" title="Port">Port</a>: <i>Integer</i>
+    <a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>: <i><a href="performancetarget.md">PerformanceTarget</a></i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
 </pre>
@@ -163,6 +165,14 @@ _Type_: Integer
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
+#### PricePerformanceTarget
+
+_Required_: No
+
+_Type_: <a href="performancetarget.md">PerformanceTarget</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
 #### Tags
 
 The map of the key-value pairs used to tag the workgroup.
@@ -276,4 +286,3 @@ Returns the <code>PubliclyAccessible</code> value.
 #### CreationDate
 
 Returns the <code>CreationDate</code> value.
-

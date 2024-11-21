@@ -50,6 +50,7 @@ public class Translator {
                 .configParameters(translateToSdkConfigParameters(model.getConfigParameters()))
                 .securityGroupIds(model.getSecurityGroupIds())
                 .subnetIds(model.getSubnetIds())
+                .pricePerformanceTarget(translateToSdkPerformanceTarget(model.getPricePerformanceTarget()))
                 .publiclyAccessible(model.getPubliclyAccessible())
                 .tags(translateToSdkTags(model.getTags()))
                 .port(model.getPort())
@@ -84,6 +85,7 @@ public class Translator {
                 .configParameters(translateToModelConfigParameters(awsResponse.workgroup().configParameters()))
                 .securityGroupIds(awsResponse.workgroup().securityGroupIds())
                 .subnetIds(awsResponse.workgroup().subnetIds())
+                .pricePerformanceTarget(translateToModelPerformanceTarget(awsResponse.workgroup().pricePerformanceTarget()))
                 .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
                 .port(awsResponse.workgroup().endpoint().port())
                 .workgroup(Workgroup.builder()
@@ -99,6 +101,7 @@ public class Translator {
                         .subnetIds(awsResponse.workgroup().subnetIds())
                         .status(awsResponse.workgroup().statusAsString())
                         .endpoint(translateToModelEndpoint(awsResponse.workgroup().endpoint()))
+                        .pricePerformanceTarget(translateToModelPerformanceTarget(awsResponse.workgroup().pricePerformanceTarget()))
                         .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
                         .creationDate(Objects.toString(awsResponse.workgroup().creationDate()))
                         .build())
@@ -164,6 +167,7 @@ public class Translator {
                 .maxCapacity(model.getMaxCapacity())
                 .enhancedVpcRouting(model.getEnhancedVpcRouting())
                 .configParameters(translateToSdkConfigParameters(model.getConfigParameters()))
+                .pricePerformanceTarget(translateToSdkPerformanceTarget(model.getPricePerformanceTarget()))
                 .publiclyAccessible(model.getPubliclyAccessible())
                 .subnetIds(model.getSubnetIds())
                 .securityGroupIds(model.getSecurityGroupIds())
@@ -291,6 +295,14 @@ public class Translator {
                 .stream()
                 .map(Translator::translateToModelTag)
                 .collect(Collectors.toList());
+    }
+
+    private static PerformanceTarget translateToModelPerformanceTarget(software.amazon.awssdk.services.redshiftserverless.model.PerformanceTarget performanceTarget) {
+        return GSON.fromJson(GSON.toJson(performanceTarget), PerformanceTarget.class);
+    }
+
+    private static software.amazon.awssdk.services.redshiftserverless.model.PerformanceTarget translateToSdkPerformanceTarget(PerformanceTarget performanceTarget) {
+        return GSON.fromJson(GSON.toJson(performanceTarget), software.amazon.awssdk.services.redshiftserverless.model.PerformanceTarget.class);
     }
 
     private static software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter translateToSdkConfigParameter(ConfigParameter configParameter) {
