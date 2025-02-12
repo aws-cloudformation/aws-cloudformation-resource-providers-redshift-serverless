@@ -161,6 +161,18 @@
                 },
                 "PricePerformanceTarget": {
                     "$ref": "#/definitions/PerformanceTarget"
+                },
+                "TrackName": {
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "pattern": "^[a-zA-Z0-9_]+$"
+                },
+                "PendingTrackName": {
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "pattern": "^[a-zA-Z0-9_]+$"
                 }
             },
             "additionalProperties": false
@@ -290,6 +302,12 @@
             "maxItems": 200,
             "minItems": 0
         },
+        "TrackName": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_]+$"
+        },
         "Workgroup": {
             "description": "Definition for workgroup resource",
             "$ref": "#/definitions/Workgroup"
@@ -328,6 +346,7 @@
         "/properties/Workgroup/ConfigParameters/*/ParameterValue",
         "/properties/Workgroup/SecurityGroupIds",
         "/properties/Workgroup/SubnetIds",
+        "/properties/Workgroup/TrackName",
         "/properties/Workgroup/Status",
         "/properties/Workgroup/Endpoint/Address",
         "/properties/Workgroup/Endpoint/Port",
@@ -345,7 +364,8 @@
         "/properties/MaxCapacity",
         "/properties/ConfigParameters",
         "/properties/SecurityGroupIds",
-        "/properties/SubnetIds"
+        "/properties/SubnetIds",
+        "/properties/TrackName"
     ],
     "primaryIdentifier": [
         "/properties/WorkgroupName"
