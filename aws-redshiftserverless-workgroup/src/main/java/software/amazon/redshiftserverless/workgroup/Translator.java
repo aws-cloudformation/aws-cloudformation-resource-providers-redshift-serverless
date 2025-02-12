@@ -54,6 +54,7 @@ public class Translator {
                 .publiclyAccessible(model.getPubliclyAccessible())
                 .tags(translateToSdkTags(model.getTags()))
                 .port(model.getPort())
+                .trackName(model.getTrackName())
                 .build();
     }
 
@@ -88,6 +89,7 @@ public class Translator {
                 .pricePerformanceTarget(translateToModelPerformanceTarget(awsResponse.workgroup().pricePerformanceTarget()))
                 .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
                 .port(awsResponse.workgroup().endpoint().port())
+                .trackName(awsResponse.workgroup().trackName())
                 .workgroup(Workgroup.builder()
                         .workgroupId(awsResponse.workgroup().workgroupId())
                         .workgroupArn(awsResponse.workgroup().workgroupArn())
@@ -103,6 +105,8 @@ public class Translator {
                         .endpoint(translateToModelEndpoint(awsResponse.workgroup().endpoint()))
                         .pricePerformanceTarget(translateToModelPerformanceTarget(awsResponse.workgroup().pricePerformanceTarget()))
                         .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
+                        .trackName(awsResponse.workgroup().trackName())
+                        .pendingTrackName(awsResponse.workgroup().pendingTrackName())
                         .creationDate(Objects.toString(awsResponse.workgroup().creationDate()))
                         .build())
                 .build();
@@ -172,6 +176,7 @@ public class Translator {
                 .subnetIds(model.getSubnetIds())
                 .securityGroupIds(model.getSecurityGroupIds())
                 .port(model.getPort())
+                .trackName(model.getTrackName())
                 .build();
     }
 

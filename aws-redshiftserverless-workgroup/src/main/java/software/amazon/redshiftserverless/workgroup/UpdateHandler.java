@@ -123,6 +123,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .securityGroupIds((List<String>) getDelta.apply(desiredModel.getSecurityGroupIds(), previousModel.getSecurityGroupIds()))
                 .pricePerformanceTarget((PerformanceTarget) getDelta.apply(desiredModel.getPricePerformanceTarget(), previousModel.getPricePerformanceTarget()))
                 .port((Integer) getDelta.apply(desiredModel.getPort(), previousModel.getPort()))
+                .trackName((String) getDelta.apply(desiredModel.getTrackName(), previousModel.getTrackName()))
                 .workgroup(previousModel.getWorkgroup())
                 .build();
     }
