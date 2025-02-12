@@ -45,8 +45,6 @@ public class AbstractTestBase {
     private static final List<String> SECURITY_GROUP_IDS;
     private static final Set<ConfigParameter> CONFIG_PARAMETERS;
     private static final int DEFAULT_PORT;
-    private static final String TRACK_NAME;
-    private static final String PENDING_TRACK_NAME;
     private static final PerformanceTarget PERFORMANCE_TARGET;
 
     private static final List<software.amazon.awssdk.services.redshiftserverless.model.ConfigParameter> RESPONSE_CONFIG_PARAMS;
@@ -70,8 +68,6 @@ public class AbstractTestBase {
         CONFIG_PARAMETERS = Collections.emptySet();
         RESPONSE_CONFIG_PARAMS = Collections.emptyList();
         DEFAULT_PORT = 5439;
-        TRACK_NAME = "DUMMY_TRACK";
-        PENDING_TRACK_NAME = "PENDING_DUMMY_TRACK";
         PERFORMANCE_TARGET_LEVEL = 1;
         PERFORMANCE_TARGET_STATUS = PerformanceTargetStatus.ENABLED.toString();
         PERFORMANCE_TARGET = PerformanceTarget.builder()
@@ -140,7 +136,6 @@ public class AbstractTestBase {
                 .configParameters(CONFIG_PARAMETERS)
                 .port(DEFAULT_PORT)
                 .publiclyAccessible(true)
-                .trackName(TRACK_NAME)
                 .tags(List.of())
                 .pricePerformanceTarget(PERFORMANCE_TARGET)
                 .workgroup(Workgroup.builder()
@@ -156,8 +151,6 @@ public class AbstractTestBase {
                         .creationDate("null")
                         .pricePerformanceTarget(PERFORMANCE_TARGET)
                         .publiclyAccessible(true)
-                        .trackName(TRACK_NAME)
-                        .pendingTrackName(PENDING_TRACK_NAME)
                         .endpoint(Endpoint.builder().port(DEFAULT_PORT).vpcEndpoints(Collections.emptyList()).build())
                         .build())
                 .build();
@@ -186,8 +179,6 @@ public class AbstractTestBase {
                         .subnetIds(SUBNET_IDS)
                         .configParameters(RESPONSE_CONFIG_PARAMS)
                         .publiclyAccessible(true)
-                        .trackName(TRACK_NAME)
-                        .pendingTrackName(PENDING_TRACK_NAME)
                         .pricePerformanceTarget(software.amazon.awssdk.services.redshiftserverless.model.PerformanceTarget.builder()
                                 .status(PERFORMANCE_TARGET_STATUS)
                                 .level(PERFORMANCE_TARGET_LEVEL)
@@ -242,7 +233,6 @@ public class AbstractTestBase {
                 .configParameters(CONFIG_PARAMETERS)
                 .pricePerformanceTarget(PERFORMANCE_TARGET)
                 .publiclyAccessible(true)
-                .trackName(TRACK_NAME)
                 .port(DEFAULT_PORT)
                 .build();
 
