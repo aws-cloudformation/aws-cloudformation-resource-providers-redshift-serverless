@@ -214,6 +214,7 @@ public class Translator {
                 .stream()
                 .map(workgroup -> ResourceModel.builder()
                         .workgroupName(workgroup.workgroupName())
+                        .trackName(workgroup.trackName())
                         .build())
                 .collect(Collectors.toList());
     }
