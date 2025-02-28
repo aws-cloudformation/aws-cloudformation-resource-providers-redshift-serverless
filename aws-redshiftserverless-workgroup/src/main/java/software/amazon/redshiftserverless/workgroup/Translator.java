@@ -54,6 +54,7 @@ public class Translator {
                 .publiclyAccessible(model.getPubliclyAccessible())
                 .tags(translateToSdkTags(model.getTags()))
                 .port(model.getPort())
+                .trackName(model.getTrackName())
                 .build();
     }
 
@@ -88,6 +89,7 @@ public class Translator {
                 .pricePerformanceTarget(translateToModelPerformanceTarget(awsResponse.workgroup().pricePerformanceTarget()))
                 .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
                 .port(awsResponse.workgroup().endpoint().port())
+                .trackName(awsResponse.workgroup().trackName())
                 .workgroup(Workgroup.builder()
                         .workgroupId(awsResponse.workgroup().workgroupId())
                         .workgroupArn(awsResponse.workgroup().workgroupArn())
@@ -104,6 +106,7 @@ public class Translator {
                         .pricePerformanceTarget(translateToModelPerformanceTarget(awsResponse.workgroup().pricePerformanceTarget()))
                         .publiclyAccessible(awsResponse.workgroup().publiclyAccessible())
                         .creationDate(Objects.toString(awsResponse.workgroup().creationDate()))
+                        .trackName(awsResponse.workgroup().trackName())
                         .build())
                 .build();
     }
@@ -172,6 +175,7 @@ public class Translator {
                 .subnetIds(model.getSubnetIds())
                 .securityGroupIds(model.getSecurityGroupIds())
                 .port(model.getPort())
+                .trackName(model.getTrackName())
                 .build();
     }
 
@@ -209,6 +213,7 @@ public class Translator {
                 .stream()
                 .map(workgroup -> ResourceModel.builder()
                         .workgroupName(workgroup.workgroupName())
+                        .trackName(workgroup.trackName())
                         .build())
                 .collect(Collectors.toList());
     }

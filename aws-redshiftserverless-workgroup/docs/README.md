@@ -24,6 +24,8 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#port" title="Port">Port</a>" : <i>Integer</i>,
         "<a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>" : <i><a href="performancetarget.md">PerformanceTarget</a></i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
+        "<a href="#trackname" title="TrackName">TrackName</a>" : <i>String</i>,
+        "<a href="#workgroup" title="Workgroup">Workgroup</a>" : <i><a href="workgroup.md">Workgroup</a></i>
     }
 }
 </pre>
@@ -49,6 +51,8 @@ Properties:
     <a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>: <i><a href="performancetarget.md">PerformanceTarget</a></i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
+    <a href="#trackname" title="TrackName">TrackName</a>: <i>String</i>
+    <a href="#workgroup" title="Workgroup">Workgroup</a>: <i><a href="workgroup.md">Workgroup</a></i>
 </pre>
 
 ## Properties
@@ -183,6 +187,28 @@ _Type_: List of <a href="tag.md">Tag</a>
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 
+#### TrackName
+
+_Required_: No
+
+_Type_: String
+
+_Minimum Length_: <code>1</code>
+
+_Maximum Length_: <code>256</code>
+
+_Pattern_: <code>^[a-zA-Z0-9_]+$</code>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### Workgroup
+
+_Required_: No
+
+_Type_: <a href="workgroup.md">Workgroup</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
 ## Return Values
 
 ### Ref
@@ -194,10 +220,6 @@ When you pass the logical ID of this resource to the intrinsic `Ref` function, R
 The `Fn::GetAtt` intrinsic function returns a value for a specified attribute of this type. The following are the available attributes and sample return values.
 
 For more information about using the `Fn::GetAtt` intrinsic function, see [Fn::GetAtt](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html).
-
-#### Workgroup
-
-Returns the <code>Workgroup</code> value.
 
 #### WorkgroupId
 
@@ -214,14 +236,6 @@ Returns the <code>WorkgroupName</code> value.
 #### NamespaceName
 
 Returns the <code>NamespaceName</code> value.
-
-#### BaseCapacity
-
-Returns the <code>BaseCapacity</code> value.
-
-#### MaxCapacity
-
-Returns the <code>MaxCapacity</code> value.
 
 #### EnhancedVpcRouting
 
@@ -242,6 +256,10 @@ Returns the <code>SecurityGroupIds</code> value.
 #### SubnetIds
 
 Returns the <code>SubnetIds</code> value.
+
+#### TrackName
+
+Returns the <code>TrackName</code> value.
 
 #### Status
 
