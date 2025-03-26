@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResou
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListWorkgroupsResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.TagResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UntagResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
@@ -176,6 +178,36 @@ public class Translator {
                 .securityGroupIds(model.getSecurityGroupIds())
                 .port(model.getPort())
                 .trackName(model.getTrackName())
+                .build();
+    }
+
+    /**
+     * Request to restore workgroup from a snapshot
+     *
+     * @param model resource model
+     * @return awsRequest the aws service request to modify a resource
+     */
+    static RestoreFromSnapshotRequest translateToRestoreFromSnapshotRequest(final ResourceModel model) {
+        return RestoreFromSnapshotRequest.builder()
+                .workgroupName(model.getWorkgroupName())
+                .namespaceName(model.getNamespaceName())
+                .snapshotArn(model.getSnapshotArn())
+                .snapshotName(model.getSnapshotName())
+                .ownerAccount(model.getSnapshotOwnerAccount())
+                .build();
+    }
+
+    /**
+     * Request to restore workgroup from a recovery point
+     *
+     * @param model resource model
+     * @return awsRequest the aws service request to modify a resource
+     */
+    static RestoreFromRecoveryPointRequest translateToRestoreFromRecoveryPointRequest(final ResourceModel model) {
+        return RestoreFromRecoveryPointRequest.builder()
+                .workgroupName(model.getWorkgroupName())
+                .namespaceName(model.getNamespaceName())
+                .recoveryPointId(model.getRecoveryPointId())
                 .build();
     }
 

@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFound
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
+import software.amazon.awssdk.services.redshiftserverless.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
 import software.amazon.awssdk.services.redshiftserverless.model.InsufficientCapacityException;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
@@ -267,6 +268,9 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
 
         } else if (exception instanceof ValidationException) {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.InvalidRequest);
+
+        } else if (exception instanceof ServiceQuotaExceededException) {
+            return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.ServiceLimitExceeded);
 
         } else {
             return ProgressEvent.defaultFailureHandler(exception, HandlerErrorCode.GeneralServiceException);
