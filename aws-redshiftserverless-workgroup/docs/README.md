@@ -23,6 +23,10 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>" : <i>Boolean</i>,
         "<a href="#port" title="Port">Port</a>" : <i>Integer</i>,
         "<a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>" : <i><a href="performancetarget.md">PerformanceTarget</a></i>,
+        "<a href="#snapshotarn" title="SnapshotArn">SnapshotArn</a>" : <i>String</i>,
+        "<a href="#snapshotname" title="SnapshotName">SnapshotName</a>" : <i>String</i>,
+        "<a href="#snapshotowneraccount" title="SnapshotOwnerAccount">SnapshotOwnerAccount</a>" : <i>String</i>,
+        "<a href="#recoverypointid" title="RecoveryPointId">RecoveryPointId</a>" : <i>String</i>,
         "<a href="#tags" title="Tags">Tags</a>" : <i>[ <a href="tag.md">Tag</a>, ... ]</i>,
         "<a href="#trackname" title="TrackName">TrackName</a>" : <i>String</i>,
         "<a href="#workgroup" title="Workgroup">Workgroup</a>" : <i><a href="workgroup.md">Workgroup</a></i>
@@ -49,6 +53,10 @@ Properties:
     <a href="#publiclyaccessible" title="PubliclyAccessible">PubliclyAccessible</a>: <i>Boolean</i>
     <a href="#port" title="Port">Port</a>: <i>Integer</i>
     <a href="#priceperformancetarget" title="PricePerformanceTarget">PricePerformanceTarget</a>: <i><a href="performancetarget.md">PerformanceTarget</a></i>
+    <a href="#snapshotarn" title="SnapshotArn">SnapshotArn</a>: <i>String</i>
+    <a href="#snapshotname" title="SnapshotName">SnapshotName</a>: <i>String</i>
+    <a href="#snapshotowneraccount" title="SnapshotOwnerAccount">SnapshotOwnerAccount</a>: <i>String</i>
+    <a href="#recoverypointid" title="RecoveryPointId">RecoveryPointId</a>: <i>String</i>
     <a href="#tags" title="Tags">Tags</a>: <i>
       - <a href="tag.md">Tag</a></i>
     <a href="#trackname" title="TrackName">TrackName</a>: <i>String</i>
@@ -174,6 +182,46 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 _Required_: No
 
 _Type_: <a href="performancetarget.md">PerformanceTarget</a>
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### SnapshotArn
+
+The Amazon Resource Name (ARN) of the snapshot to restore from.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### SnapshotName
+
+The snapshot name to restore from.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### SnapshotOwnerAccount
+
+The Amazon Web Services account that owns the snapshot.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### RecoveryPointId
+
+The recovery point id to restore from.
+
+_Required_: No
+
+_Type_: String
 
 _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
 

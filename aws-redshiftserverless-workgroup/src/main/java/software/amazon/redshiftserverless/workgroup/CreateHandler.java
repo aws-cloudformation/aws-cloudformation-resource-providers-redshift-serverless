@@ -12,6 +12,10 @@ import software.amazon.awssdk.services.redshiftserverless.model.InsufficientCapa
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.TooManyTagsException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -20,6 +24,7 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Pattern;
 
@@ -66,6 +71,41 @@ public class CreateHandler extends BaseHandlerStd {
                                 .handleError(this::createWorkgroupErrorHandler)
                                 .progress()
                 )
+                .then(progress -> {
+                    if (!StringUtils.isEmpty(request.getDesiredResourceState().getSnapshotArn()) ||
+                            !StringUtils.isEmpty(request.getDesiredResourceState().getSnapshotName())) {
+                        return proxy.initiate("AWS-RedshiftServerless-Workgroup::Create::RestoreFromSnapshot", proxyClient, request.getDesiredResourceState(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToRestoreFromSnapshotRequest)
+                                .backoffDelay(BACKOFF_STRATEGY)
+                                .makeServiceCall((awsRequest, client) -> {
+                                    RestoreFromSnapshotResponse response = client.injectCredentialsAndInvokeV2(awsRequest, client.client()::restoreFromSnapshot);
+                                    logger.log(String.format("%s : %s has been restored from snapshot.", ResourceModel.TYPE_NAME, awsRequest.workgroupName()));
+                                    logger.log(String.format("%s : %s restore from snapshot response: %s", ResourceModel.TYPE_NAME, awsRequest.workgroupName(), response));
+                                    return response;
+                                })
+                                .stabilize(this::isWorkgroupStable)
+                                .handleError(this::createWorkgroupErrorHandler)
+                                .progress();
+                    }
+                    return progress;
+                })
+                .then(progress -> {
+                    if (!StringUtils.isEmpty(request.getDesiredResourceState().getRecoveryPointId())) {
+                        return proxy.initiate("AWS-RedshiftServerless-Workgroup::Create::RestoreFromRecoveryPoint", proxyClient, request.getDesiredResourceState(), progress.getCallbackContext())
+                                .translateToServiceRequest(Translator::translateToRestoreFromRecoveryPointRequest)
+                                .backoffDelay(BACKOFF_STRATEGY)
+                                .makeServiceCall((awsRequest, client) -> {
+                                    RestoreFromRecoveryPointResponse response = client.injectCredentialsAndInvokeV2(awsRequest, client.client()::restoreFromRecoveryPoint);
+                                    logger.log(String.format("%s : %s has been restored from recovery point.", ResourceModel.TYPE_NAME, awsRequest.workgroupName()));
+                                    logger.log(String.format("%s : %s restore from recovery point response: %s", ResourceModel.TYPE_NAME, awsRequest.workgroupName(), response));
+                                    return response;
+                                })
+                                .stabilize(this::isWorkgroupStable)
+                                .handleError(this::createWorkgroupErrorHandler)
+                                .progress();
+                    }
+                    return progress;
+                })
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 

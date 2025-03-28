@@ -11,6 +11,10 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -75,5 +79,113 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_RestoreFromSnapshot_Success() {
+        final UpdateHandler handler = new UpdateHandler();
+
+        final ResourceModel responseResourceModel = updateResponseResourceModel();
+
+        final ResourceModel requestModel = updateRequestResourceModel();
+        requestModel.setSnapshotArn("arn:aws:redshift-serverless:us-west-2:123456789012:snapshot/example-snapshot");
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .previousResourceState(createRequestResourceModel())
+                .desiredResourceState(requestModel)
+                .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
+        when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
+        when(proxyClient.client().restoreFromSnapshot(any(RestoreFromSnapshotRequest.class))).thenReturn(
+                RestoreFromSnapshotResponse.builder().snapshotName("snapshotName").build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isEqualTo(responseResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client()).restoreFromSnapshot(any(RestoreFromSnapshotRequest.class));
+    }
+
+    @Test
+    public void handleRequest_RestoreFromSnapshot_Failed() {
+        final UpdateHandler handler = new UpdateHandler();
+
+        final ResourceModel requestModel = updateRequestResourceModel();
+        requestModel.setSnapshotArn("arn:aws:redshift-serverless:us-west-2:123456789012:snapshot/example-snapshot");
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .previousResourceState(createRequestResourceModel())
+                .desiredResourceState(requestModel)
+                .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
+        when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
+        when(proxyClient.client().restoreFromSnapshot(any(RestoreFromSnapshotRequest.class))).thenThrow(ValidationException.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
+
+        verify(proxyClient.client()).restoreFromSnapshot(any(RestoreFromSnapshotRequest.class));
+    }
+
+    @Test
+    public void handleRequest_RestoreFromRecoveryPoint_Success() {
+        final UpdateHandler handler = new UpdateHandler();
+
+        final ResourceModel requestModel = updateRequestResourceModel();
+        requestModel.setRecoveryPointId("testRecoveryPointId");
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .previousResourceState(createRequestResourceModel())
+                .desiredResourceState(requestModel)
+                .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
+        when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
+        when(proxyClient.client().restoreFromRecoveryPoint(any(RestoreFromRecoveryPointRequest.class)))
+                .thenReturn(RestoreFromRecoveryPointResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+    }
+
+    @Test
+    public void handleRequest_RestoreFromRecoveryPoint_Failed() {
+        final UpdateHandler handler = new UpdateHandler();
+
+        final ResourceModel requestModel = updateRequestResourceModel();
+        requestModel.setRecoveryPointId("testRecoveryPointId");
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .previousResourceState(createRequestResourceModel())
+                .desiredResourceState(requestModel)
+                .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
+        when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
+        when(proxyClient.client().restoreFromRecoveryPoint(any(RestoreFromRecoveryPointRequest.class)))
+                .thenThrow(ValidationException.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
+
+        verify(proxyClient.client()).restoreFromRecoveryPoint(any(RestoreFromRecoveryPointRequest.class));
     }
 }
