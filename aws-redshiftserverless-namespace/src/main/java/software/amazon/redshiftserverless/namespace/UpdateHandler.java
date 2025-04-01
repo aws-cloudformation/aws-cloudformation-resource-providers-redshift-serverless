@@ -124,7 +124,7 @@ public class UpdateHandler extends BaseHandlerStd {
                     return progress;
                 })
                 .then(progress -> {
-                    progress = proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
