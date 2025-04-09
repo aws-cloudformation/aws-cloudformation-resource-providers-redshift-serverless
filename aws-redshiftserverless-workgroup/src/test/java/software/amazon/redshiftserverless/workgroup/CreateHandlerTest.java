@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequ
 import software.amazon.awssdk.services.redshiftserverless.model.GetWorkgroupRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnapshotResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointRequest;
@@ -82,6 +83,27 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_TagsResourceFailure() {
+        final CreateHandler handler = new CreateHandler();
+
+        final ResourceModel requestResourceModel = createRequestResourceModel();
+        final ResourceModel responseResourceModel = getReadResponseResourceModel();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(requestResourceModel)
+                .build();
+
+        when(proxyClient.client().createWorkgroup(any(CreateWorkgroupRequest.class))).thenThrow(
+                ValidationException.builder().message("is not authorized to perform: redshift-serverless:TagResource").build());
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
     }
 
     @Test
