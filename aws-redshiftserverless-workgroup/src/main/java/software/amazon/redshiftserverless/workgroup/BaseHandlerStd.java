@@ -139,7 +139,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     protected DeleteWorkgroupResponse deleteWorkgroup(final DeleteWorkgroupRequest awsRequest,
                                                       final ProxyClient<RedshiftServerlessClient> proxyClient) throws ConflictException {
         boolean operationInProgress = false;
-        int max_retries = 5;
+        int max_retries = 10;
         int current_retry = 0;
         DeleteWorkgroupResponse awsResponse = null;
 
@@ -156,8 +156,9 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
                     operationInProgress = true;
                     current_retry = current_retry + 1;
                     // Since there are source to target operations on the cluster
+                    // We need handler to return Progress event within 70secs or it will fail
                     try {
-                        Thread.sleep(60000);
+                        Thread.sleep(30000);
                     } catch(InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }

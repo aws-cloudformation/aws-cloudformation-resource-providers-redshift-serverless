@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromSnaps
 import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.RestoreFromRecoveryPointResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateWorkgroupRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -25,6 +26,7 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -79,6 +81,26 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_NoReadTagsPermissions() {
+        final UpdateHandler handler = new UpdateHandler();
+
+        final ResourceModel responseResourceModel = updateResponseResourceModel();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .previousResourceState(createRequestResourceModel())
+                .desiredResourceState(updateRequestResourceModel())
+                .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenThrow(ValidationException.builder().build());
+        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
     }
 
     @Test
