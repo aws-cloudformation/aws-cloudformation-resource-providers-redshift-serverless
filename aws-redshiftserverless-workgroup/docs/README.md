@@ -285,6 +285,14 @@ Returns the <code>WorkgroupName</code> value.
 
 Returns the <code>NamespaceName</code> value.
 
+#### BaseCapacity
+
+Returns the <code>BaseCapacity</code> value.
+
+#### MaxCapacity
+
+Returns the <code>MaxCapacity</code> value.
+
 #### EnhancedVpcRouting
 
 Returns the <code>EnhancedVpcRouting</code> value.
