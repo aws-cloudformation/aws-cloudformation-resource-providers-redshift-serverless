@@ -299,14 +299,25 @@ public class Translator {
                                                         final ResourceModel currentResourceState) {
     String resourceArn = currentResourceState.getNamespace().getNamespaceArn();
 
-    List<Tag> toBeCreatedTags = desiredResourceState.getTags() == null ? Collections.emptyList() : desiredResourceState.getTags()
+    // If desiredResourceState.getTags() is null, we should preserve existing tags
+    // This ensures that when CloudFormation doesn't specify tags in the update,
+    // we don't remove existing tags
+    final List<Tag> effectiveDesiredTags;
+    if (desiredResourceState.getTags() == null && currentResourceState.getTags() != null) {
+      // Preserve existing tags by using them as the desired tags
+      effectiveDesiredTags = currentResourceState.getTags();
+    } else {
+      effectiveDesiredTags = desiredResourceState.getTags();
+    }
+
+    List<Tag> toBeCreatedTags = effectiveDesiredTags == null ? Collections.emptyList() : effectiveDesiredTags
             .stream()
             .filter(tag -> currentResourceState.getTags() == null || !currentResourceState.getTags().contains(tag))
             .collect(Collectors.toList());
 
     List<Tag> toBeDeletedTags = currentResourceState.getTags() == null ? Collections.emptyList() : currentResourceState.getTags()
             .stream()
-            .filter(tag -> desiredResourceState.getTags() == null || !desiredResourceState.getTags().contains(tag))
+            .filter(tag -> effectiveDesiredTags == null || !effectiveDesiredTags.contains(tag))
             .collect(Collectors.toList());
 
     return UpdateTagsRequest.builder()
