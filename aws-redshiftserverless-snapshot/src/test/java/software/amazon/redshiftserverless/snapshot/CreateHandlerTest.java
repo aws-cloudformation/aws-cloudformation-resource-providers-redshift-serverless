@@ -7,6 +7,8 @@ import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClie
 import software.amazon.awssdk.services.redshiftserverless.model.CreateSnapshotRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetSnapshotRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -59,6 +61,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(proxyClient.client().createSnapshot(any(CreateSnapshotRequest.class))).thenReturn(getCreateResponseSdk());
         when(proxyClient.client().getSnapshot(any(GetSnapshotRequest.class))).thenReturn(getSnapshotResponseSdk());

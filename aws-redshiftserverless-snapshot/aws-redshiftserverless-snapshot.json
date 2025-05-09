@@ -92,30 +92,6 @@
             "maxLength": 64,
             "minLength": 3
         },
-        "NamespaceArn": {
-            "description": "The ARN for the Redshift namespace that the snapshot is associated with.",
-            "type": "string"
-        },
-        "SnapshotArn": {
-            "description": "The ARN for the snapshot.",
-            "type": "string"
-        },
-        "SnapshotIdentifier": {
-            "description": "The identifier for the snapshot.",
-            "type": "string"
-        },
-        "SnapshotCreateTime": {
-            "description": "The creation time of the snapshot.",
-            "type": "string"
-        },
-        "AdminUsername": {
-            "description": "The username of the database user that owns the snapshot.",
-            "type": "string"
-        },
-        "KmsKeyId": {
-            "description": "The KMS key ID used to encrypt the snapshot.",
-            "type": "string"
-        },
         "OwnerAccount": {
             "description": "The owner account of the snapshot.",
             "type": "string"
@@ -140,16 +116,30 @@
         }
     },
     "tagging": {
-        "taggable": false
+        "taggable": true,
+        "tagOnCreate": true,
+        "tagUpdatable": false,
+        "cloudFormationSystemTags": false,
+        "tagProperty": "/properties/Tags",
+        "permissions": [
+            "redshift-serverless:ListTagsForResource",
+            "redshift-serverless:TagResource",
+            "redshift-serverless:UntagResource"
+        ]
     },
     "required": [
         "SnapshotName"
     ],
     "createOnlyProperties": [
         "/properties/NamespaceName",
-        "/properties/SnapshotName"
+        "/properties/SnapshotName",
+        "/properties/Tags",
+        "/properties/Tags/*/Key",
+        "/properties/Tags/*/Value"
     ],
     "readOnlyProperties": [
+        "/properties/Snapshot",
+        "/properties/OwnerAccount",
         "/properties/Snapshot/SnapshotName",
         "/properties/Snapshot/NamespaceName",
         "/properties/Snapshot/NamespaceArn",
@@ -160,11 +150,6 @@
         "/properties/Snapshot/KmsKeyId",
         "/properties/Snapshot/OwnerAccount",
         "/properties/Snapshot/RetentionPeriod"
-    ],
-    "writeOnlyProperties": [
-        "/properties/Tags",
-        "/properties/Tags/*/Key",
-        "/properties/Tags/*/Value"
     ],
     "primaryIdentifier": [
         "/properties/SnapshotName"

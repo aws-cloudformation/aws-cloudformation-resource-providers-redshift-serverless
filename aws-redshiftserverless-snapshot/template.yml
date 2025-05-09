@@ -21,4 +21,3 @@ Resources:
       Handler: software.amazon.redshiftserverless.snapshot.HandlerWrapper::testEntrypoint
       Runtime: java17
       CodeUri: ./target/aws-redshiftserverless-snapshot-handler-1.0-SNAPSHOT.jar
-

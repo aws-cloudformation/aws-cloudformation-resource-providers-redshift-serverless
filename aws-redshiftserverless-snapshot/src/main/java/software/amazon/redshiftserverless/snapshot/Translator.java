@@ -79,12 +79,7 @@ public class Translator {
   static ResourceModel translateFromReadResponse(final GetSnapshotResponse awsResponse) {
     return ResourceModel.builder()
             .namespaceName(awsResponse.snapshot().namespaceName())
-            .namespaceArn(awsResponse.snapshot().namespaceArn())
             .snapshotName(awsResponse.snapshot().snapshotName())
-            .snapshotArn(awsResponse.snapshot().snapshotArn())
-            .snapshotCreateTime(Objects.toString(awsResponse.snapshot().snapshotCreateTime()))
-            .adminUsername(awsResponse.snapshot().adminUsername())
-            .kmsKeyId(awsResponse.snapshot().kmsKeyId())
             .ownerAccount(awsResponse.snapshot().ownerAccount())
             .retentionPeriod(awsResponse.snapshot().snapshotRetentionPeriod())
             .snapshot(Snapshot.builder()
@@ -191,6 +186,32 @@ public class Translator {
     return awsRequest;
   }
 
+  /**
+   * Request to read tags for a resource
+   *
+   * @param model resource model
+   * @return awsRequest the aws service request to update tags of a resource
+   */
+  static ListTagsForResourceRequest translateToReadTagsRequest(final ResourceModel model) {
+    return ListTagsForResourceRequest.builder()
+            .resourceArn(model.getSnapshot().getSnapshotArn())
+            .build();
+  }
+
+  /**
+   * Translates resource object from sdk into a resource model
+   *
+   * @param awsResponse the aws service describe resource response
+   * @param model       the resource model contained the current resource info
+   * @return awsRequest the aws service request to update tags of a resource
+   */
+  static ResourceModel translateFromReadTagsResponse(final ListTagsForResourceResponse awsResponse,
+                                                     final ResourceModel model) {
+    return model.toBuilder()
+            .tags(translateToModelTags(awsResponse.tags()))
+            .build();
+  }
+
   private static software.amazon.awssdk.services.redshiftserverless.model.Tag translateToSdkTag(Tag tag) {
     return GSON.fromJson(GSON.toJson(tag), software.amazon.awssdk.services.redshiftserverless.model.Tag.class);
   }
@@ -199,6 +220,17 @@ public class Translator {
     return tags == null ? null : tags
             .stream()
             .map(Translator::translateToSdkTag)
+            .collect(Collectors.toList());
+  }
+
+  private static Tag translateToModelTag(software.amazon.awssdk.services.redshiftserverless.model.Tag tag) {
+    return GSON.fromJson(GSON.toJson(tag), Tag.class);
+  }
+
+  private static List<Tag> translateToModelTags(Collection<software.amazon.awssdk.services.redshiftserverless.model.Tag> tags) {
+    return tags == null ? null : tags
+            .stream()
+            .map(Translator::translateToModelTag)
             .collect(Collectors.toList());
   }
 }

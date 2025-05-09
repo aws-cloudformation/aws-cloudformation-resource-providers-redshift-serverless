@@ -34,7 +34,17 @@ public class ReadHandler extends BaseHandlerStd {
                             .makeServiceCall(this::getSnapshot)
                             .handleError(this::defaultErrorHandler)
                             .done(awsResponse -> {
-                                return ProgressEvent.success(Translator.translateFromReadResponse(awsResponse), callbackContext);
+                                return ProgressEvent.progress(Translator.translateFromReadResponse(awsResponse), callbackContext);
+                            });
+                    return progress;
+                })
+                .then(progress -> {
+                    progress = proxy.initiate("AWS-RedshiftServerless-Snapshot::Read::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                            .translateToServiceRequest(Translator::translateToReadTagsRequest)
+                            .makeServiceCall(this::readTags)
+                            .handleError(this::defaultErrorHandler)
+                            .done((_request, _response, _client, _model, _context) -> {
+                                return ProgressEvent.success(Translator.translateFromReadTagsResponse(_response, _model), _context);
                             });
                     return progress;
                 });

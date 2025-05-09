@@ -62,10 +62,14 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        CallbackContext callbackContext = new CallbackContext();
+        callbackContext.setNamespaceName(NAMESPACE_NAME);
+
+        when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(proxyClient.client().deleteSnapshot(any(DeleteSnapshotRequest.class))).thenReturn(getDeleteResponseSdk());
         when(proxyClient.client().getSnapshot(any(GetSnapshotRequest.class)))
                 .thenThrow(ResourceNotFoundException.class);
-        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, callbackContext, proxyClient, logger);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);

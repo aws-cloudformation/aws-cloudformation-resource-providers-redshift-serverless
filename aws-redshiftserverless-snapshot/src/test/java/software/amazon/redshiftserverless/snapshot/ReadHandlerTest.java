@@ -11,6 +11,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetSnapshotRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.RedshiftServerlessException;
 import software.amazon.awssdk.services.redshiftserverless.model.ValidationException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -73,6 +75,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().getSnapshot(any(GetSnapshotRequest.class))).thenReturn(getSnapshotResponseSdk());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);

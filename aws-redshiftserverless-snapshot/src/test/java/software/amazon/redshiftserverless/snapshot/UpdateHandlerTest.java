@@ -8,6 +8,8 @@ import software.amazon.awssdk.services.redshift.model.*;
 import software.amazon.awssdk.services.redshiftserverless.RedshiftServerlessClient;
 import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetSnapshotRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.UpdateSnapshotRequest;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -70,6 +72,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestResourceModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().getNamespace(any(GetNamespaceRequest.class))).thenReturn(getNamespaceResponseSdk());
         when(proxyClient.client().updateSnapshot(any(UpdateSnapshotRequest.class))).thenReturn(getUpdateResponseSdk());
         when(proxyClient.client().getSnapshot(any(GetSnapshotRequest.class))).thenReturn(getSnapshotResponseSdk());

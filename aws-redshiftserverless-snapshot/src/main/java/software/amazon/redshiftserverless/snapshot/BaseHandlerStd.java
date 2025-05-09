@@ -8,6 +8,8 @@ import software.amazon.awssdk.services.redshiftserverless.model.GetNamespaceResp
 import software.amazon.awssdk.services.redshiftserverless.model.GetSnapshotRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.GetSnapshotResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.InternalServerException;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.redshiftserverless.model.Namespace;
 import software.amazon.awssdk.services.redshiftserverless.model.NamespaceStatus;
 import software.amazon.awssdk.services.redshiftserverless.model.ResourceNotFoundException;
@@ -34,8 +36,7 @@ import java.time.Duration;
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     protected Logger logger;
 
-    // This is for all the operations. We need AdminWF to finish the operation completely
-    // This is needed for CTV2 to work
+    // This is needed to make sure that the operation on the backend succeeds
     public static final int EVENTUAL_CONSISTENCY_DELAY_SECONDS = 300;
 
     Exponential getBackOffStrategy() {
@@ -100,9 +101,8 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     protected boolean isNamespaceActive (final ProxyClient<RedshiftServerlessClient> proxyClient, CallbackContext context) {
         String namespaceName = context.getNamespaceName();
 
-        // For namespaces that aren't opted in to Redshift Managed Passwords, AdminPasswordSecretArn is null
         if (StringUtils.isNullOrEmpty(namespaceName)) {
-            return true;
+            return false;
         }
 
         GetNamespaceRequest getNamespaceRequest = GetNamespaceRequest.builder()
@@ -162,6 +162,15 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
             return true;
         }
         return false;
+    }
+
+    protected ListTagsForResourceResponse readTags(final ListTagsForResourceRequest awsRequest,
+                                                   final ProxyClient<RedshiftServerlessClient> proxyClient) {
+
+        ListTagsForResourceResponse awsResponse = proxyClient.injectCredentialsAndInvokeV2(awsRequest, proxyClient.client()::listTagsForResource);
+
+        logger.log(String.format("%s's tags have successfully been read.", ResourceModel.TYPE_NAME));
+        return awsResponse;
     }
 
     protected <T> ProgressEvent<ResourceModel, CallbackContext> defaultErrorHandler(final T request,

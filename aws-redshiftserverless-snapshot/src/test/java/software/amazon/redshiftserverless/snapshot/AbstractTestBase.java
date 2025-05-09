@@ -119,13 +119,8 @@ public class AbstractTestBase {
   public static ResourceModel getCreateRequestResourceModel() {
     return ResourceModel.builder()
             .snapshotName(SNAPSHOT_NAME)
-            .snapshotArn(SNAPSHOT_ARN)
             .namespaceName(NAMESPACE_NAME)
-            .namespaceArn(NAMESPACE_ARN)
-            .adminUsername(ADMIN_USERNAME)
             .ownerAccount(OWNER_ACCOUNT)
-            .kmsKeyId(KMS_KEY_ID)
-            .snapshotCreateTime(CREATION_DATE.toString())
             .retentionPeriod(SNAPSHOT_RETENTION_PERIOD)
             .tags(new ArrayList<software.amazon.redshiftserverless.snapshot.Tag>())
             .build();
@@ -134,15 +129,11 @@ public class AbstractTestBase {
   public static ResourceModel getCreateResponseResourceModel() {
     return ResourceModel.builder()
             .snapshotName(SNAPSHOT_NAME)
-            .snapshotArn(SNAPSHOT_ARN)
             .namespaceName(NAMESPACE_NAME)
-            .namespaceArn(NAMESPACE_ARN)
-            .adminUsername(ADMIN_USERNAME)
             .ownerAccount(OWNER_ACCOUNT)
-            .kmsKeyId(KMS_KEY_ID)
-            .snapshotCreateTime(CREATION_DATE.toString())
             .retentionPeriod(SNAPSHOT_RETENTION_PERIOD)
             .snapshot(translateToModelSnapshot(SNAPSHOT))
+            .tags(Collections.emptyList())
             .build();
   }
 
@@ -184,15 +175,11 @@ public class AbstractTestBase {
   public static ResourceModel getSnapshotResponseResourceModel() {
     return ResourceModel.builder()
             .snapshotName(SNAPSHOT_NAME)
-            .snapshotArn(SNAPSHOT_ARN)
             .namespaceName(NAMESPACE_NAME)
-            .namespaceArn(NAMESPACE_ARN)
-            .adminUsername(ADMIN_USERNAME)
             .ownerAccount(OWNER_ACCOUNT)
-            .kmsKeyId(KMS_KEY_ID)
-            .snapshotCreateTime(CREATION_DATE.toString())
             .retentionPeriod(SNAPSHOT_RETENTION_PERIOD)
             .snapshot(translateToModelSnapshot(SNAPSHOT))
+            .tags(Collections.emptyList())
             .build();
   }
 

@@ -40,7 +40,7 @@ public class CreateHandler extends BaseHandlerStd {
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Snapshot::Create::ReadNamespaceBeforeCreate", proxyClient, model, callbackContext)
                                 .translateToServiceRequest(Translator::translateToReadNamespaceRequest)
-                                .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5mins here
+                                .backoffDelay(PREOPERATION_BACKOFF_STRATEGY)// We wait for max of 5sec here
                                 .makeServiceCall(this::readNamespace)
                                 .stabilize(this::isNamespaceStable) // This basically checks for namespace to be in stable state before we create snapshot
                                 .handleError(this::defaultErrorHandler)
@@ -51,7 +51,7 @@ public class CreateHandler extends BaseHandlerStd {
                 .then(progress -> {
                     return proxy.initiate("AWS-RedshiftServerless-Snapshot::Create", proxyClient, model, callbackContext)
                             .translateToServiceRequest(Translator::translateToCreateRequest)
-                            .backoffDelay(getBackOffStrategy())
+                            .backoffDelay(getBackOffStrategy()) // We wait for max of 4mins here
                             .makeServiceCall(this::createSnapshot)
                             .stabilize(this::isNamespaceStable)
                             .handleError(this::defaultErrorHandler)
