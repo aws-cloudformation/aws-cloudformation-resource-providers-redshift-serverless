@@ -27,6 +27,7 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Pattern;
+import java.util.List;
 
 public class CreateHandler extends BaseHandlerStd {
 
@@ -51,16 +52,24 @@ public class CreateHandler extends BaseHandlerStd {
                                     return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext);
                                 })
                 )
-                .then(progress ->
-                        proxy.initiate("AWS-RedshiftServerless-Workgroup::Create", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                                .translateToServiceRequest(Translator::translateToCreateRequest)
+                .then(progress -> {
+                        List<Tag> mergedTags = TagHelper.convertToTagList(
+                                TagHelper.mergeTags(
+                                        request,
+                                        TagHelper.convertToMap(request.getDesiredResourceState().getTags()),
+                                        request.getSystemTags(),
+                                        TagHelper.convertToMap(progress.getResourceModel().getTags())
+                                ));
+                        return proxy.initiate("AWS-RedshiftServerless-Workgroup::Create", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest((model) -> Translator.translateToCreateRequest(model, mergedTags))
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::createWorkgroup)
                                 .stabilize(this::isWorkgroupStable)
                                 .handleError(this::createWorkgroupErrorHandler)
                                 .done(awsResponse -> {
                                     return ProgressEvent.progress(Translator.translateFromCreateResponse(awsResponse), callbackContext);
-                                })
+                                });
+                    }
                 )
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::ReadNameSpaceAfterCreate", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
