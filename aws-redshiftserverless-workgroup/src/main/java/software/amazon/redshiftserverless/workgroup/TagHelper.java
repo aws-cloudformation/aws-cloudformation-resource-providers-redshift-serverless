@@ -1,14 +1,4 @@
-package software.amazon.redshiftserverless.namespace;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.List;
-import java.util.stream.Collectors;
+package software.amazon.redshiftserverless.workgroup;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
@@ -16,12 +6,10 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.core.SdkClient;
-// TODO: Critical! Please replace the CloudFormation Tag model below with your service's own SDK Tag model
-import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.Logger;
-import software.amazon.cloudformation.proxy.ProgressEvent;
-import software.amazon.cloudformation.proxy.ProxyClient;
-import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TagHelper {
     /**
@@ -201,4 +189,3 @@ public class TagHelper {
         return Sets.difference(new HashSet<>(previousTags), new HashSet<>(desiredTags));
     }
 }
-

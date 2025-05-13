@@ -301,6 +301,7 @@ public class AbstractTestBase {
             .defaultIamRoleArn(DEFAULT_IAM_ROLE_ARN)
             .iamRoles(IAM_ROLES)
             .logExports(LOG_EXPORTS)
+            .tags(new ArrayList<>())
             .build();
   }
 

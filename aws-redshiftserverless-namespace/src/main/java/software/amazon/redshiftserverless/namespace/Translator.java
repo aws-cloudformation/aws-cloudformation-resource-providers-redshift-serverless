@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResou
 import software.amazon.awssdk.services.redshiftserverless.model.TagResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UntagResourceRequest;
 import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -35,6 +36,10 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static software.amazon.redshiftserverless.namespace.TagHelper.convertToTagList;
+import static software.amazon.redshiftserverless.namespace.TagHelper.generateTagsToAdd;
+import static software.amazon.redshiftserverless.namespace.TagHelper.generateTagsToRemove;
 
 /**
  * This class is a centralized placeholder for
@@ -49,9 +54,10 @@ public class Translator {
   /**
    * Request to create a resource
    * @param model resource model
-   * @return awsRequest the aws service request to create a resource
+   * @return mergedTags - tags merging resource, stack and system tags.
    */
-  static CreateNamespaceRequest translateToCreateRequest(final ResourceModel model) {
+  static CreateNamespaceRequest translateToCreateRequest(final ResourceModel model, final List<Tag>mergedTags) {
+    List<Tag>tags = new ArrayList<>();
     return CreateNamespaceRequest.builder()
             .namespaceName(model.getNamespaceName())
             .adminUsername(model.getAdminUsername())
@@ -61,7 +67,7 @@ public class Translator {
             .defaultIamRoleArn(model.getDefaultIamRoleArn())
             .iamRoles(model.getIamRoles())
             .logExportsWithStrings(model.getLogExports())
-            .tags(translateToSdkTags(model.getTags()))
+            .tags(translateToSdkTags(mergedTags))
             .manageAdminPassword(model.getManageAdminPassword())
             .adminPasswordSecretKmsKeyId(model.getAdminPasswordSecretKmsKeyId())
             .redshiftIdcApplicationArn(model.getRedshiftIdcApplicationArn())
@@ -204,6 +210,30 @@ public class Translator {
             .defaultIamRoleArn(model.getDefaultIamRoleArn())
             .manageAdminPassword(model.getManageAdminPassword())
             .adminPasswordSecretKmsKeyId(model.getAdminPasswordSecretKmsKeyId())
+            .build();
+  }
+
+  /**
+   * Request to update properties of a previously created resource
+   * @param previousTags Tags associated before Update operation
+   * @param desiredTags Tags to be associated after Update operation
+   * @param resourceArn ResourceArn to associate the tags
+   * @return UpdateTagsRequest
+   */
+  static UpdateTagsRequest translateToUpdateTagsRequest(Map<String, String>previousTags, Map<String, String>desiredTags, String resourceArn) {
+    List<Tag> toBeCreatedTags = convertToTagList(generateTagsToAdd(previousTags, desiredTags));
+
+    List<String> tagKeysToBeDeleted = generateTagsToRemove(previousTags, desiredTags);
+
+    return UpdateTagsRequest.builder()
+            .createNewTagsRequest(TagResourceRequest.builder()
+                    .tags(translateToSdkTags(toBeCreatedTags))
+                    .resourceArn(resourceArn)
+                    .build())
+            .deleteOldTagsRequest(UntagResourceRequest.builder()
+                    .tagKeys(tagKeysToBeDeleted)
+                    .resourceArn(resourceArn)
+                    .build())
             .build();
   }
 

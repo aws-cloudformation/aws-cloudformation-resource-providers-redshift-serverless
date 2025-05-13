@@ -26,6 +26,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+import static software.amazon.redshiftserverless.workgroup.TagHelper.convertToTagList;
+import static software.amazon.redshiftserverless.workgroup.TagHelper.generateTagsToRemove;
+import static software.amazon.redshiftserverless.workgroup.TagHelper.generateTagsToAdd;
+
 /**
  * This class is a centralized placeholder for
  * - api request construction
@@ -42,7 +47,7 @@ public class Translator {
      * @param model resource model
      * @return awsRequest the aws service request to create a resource
      */
-    static CreateWorkgroupRequest translateToCreateRequest(final ResourceModel model) {
+    static CreateWorkgroupRequest translateToCreateRequest(final ResourceModel model,  final List<Tag>mergedTags) {
         return CreateWorkgroupRequest.builder()
                 .workgroupName(model.getWorkgroupName())
                 .namespaceName(model.getNamespaceName())
@@ -54,7 +59,7 @@ public class Translator {
                 .subnetIds(model.getSubnetIds())
                 .pricePerformanceTarget(translateToSdkPerformanceTarget(model.getPricePerformanceTarget()))
                 .publiclyAccessible(model.getPubliclyAccessible())
-                .tags(translateToSdkTags(model.getTags()))
+                .tags(translateToSdkTags(mergedTags))
                 .port(model.getPort())
                 .trackName(model.getTrackName())
                 .build();
@@ -318,6 +323,22 @@ public class Translator {
                                 .stream()
                                 .map(Tag::getKey)
                                 .collect(Collectors.toList()))
+                        .resourceArn(resourceArn)
+                        .build())
+                .build();
+    }
+
+    static UpdateTagsRequest translateToUpdateTagsRequest(Map<String, String> previousTags, Map<String, String>desiredTags, String resourceArn) {
+        List<Tag> toBeCreatedTags = convertToTagList(generateTagsToAdd(previousTags, desiredTags));
+        List<String> tagKeysToBeDeleted = generateTagsToRemove(previousTags, desiredTags);
+
+        return UpdateTagsRequest.builder()
+                .createNewTagsRequest(TagResourceRequest.builder()
+                        .tags(translateToSdkTags(toBeCreatedTags))
+                        .resourceArn(resourceArn)
+                        .build())
+                .deleteOldTagsRequest(UntagResourceRequest.builder()
+                        .tagKeys(tagKeysToBeDeleted)
                         .resourceArn(resourceArn)
                         .build())
                 .build();

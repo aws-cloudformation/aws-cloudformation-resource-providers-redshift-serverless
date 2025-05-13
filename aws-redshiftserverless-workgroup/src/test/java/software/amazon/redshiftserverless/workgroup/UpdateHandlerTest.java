@@ -116,7 +116,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestModel)
                 .build();
 
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
         when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
         when(proxyClient.client().restoreFromSnapshot(any(RestoreFromSnapshotRequest.class))).thenReturn(
@@ -196,7 +195,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestModel)
                 .build();
 
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
         when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
         when(proxyClient.client().restoreFromRecoveryPoint(any(RestoreFromRecoveryPointRequest.class)))
