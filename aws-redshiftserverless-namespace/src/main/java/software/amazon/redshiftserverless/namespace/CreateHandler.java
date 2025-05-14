@@ -25,6 +25,7 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.List;
+import java.util.Set;
 
 
 public class CreateHandler extends BaseHandlerStd {
@@ -41,12 +42,12 @@ public class CreateHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
             .then(progress -> {
-                List<Tag>mergedTags = TagHelper.convertToTagList(
+                Set<Tag>mergedTags = TagHelper.convertToTagSet(
                         TagHelper.mergeTags(
                                 request,
                                 TagHelper.convertToMap(request.getDesiredResourceState().getTags()),
                                 request.getSystemTags(),
-                                TagHelper.convertToMap(progress.getResourceModel().getTags())
+                                request.getDesiredResourceTags()
                         ));
                 return proxy.initiate("AWS-RedshiftServerless-Namespace::Create", proxyClient, progress.getResourceModel(), callbackContext)
                         .translateToServiceRequest((model) -> Translator.translateToCreateRequest(model, mergedTags))

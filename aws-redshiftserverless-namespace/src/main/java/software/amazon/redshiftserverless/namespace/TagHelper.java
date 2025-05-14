@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
@@ -57,9 +56,9 @@ public class TagHelper {
      * @param tagMap Map of tags to convert
      * @return Set of Tag objects
      */
-    public static List<Tag> convertToTagList(final Map<String, String> tagMap) {
+    public static Set<Tag> convertToTagSet(final Map<String, String> tagMap) {
         if (MapUtils.isEmpty(tagMap)) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
         return tagMap.entrySet().stream()
                 .filter(tag -> tag.getValue() != null)
@@ -67,7 +66,7 @@ public class TagHelper {
                         .key(tag.getKey())
                         .value(tag.getValue())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -175,12 +174,12 @@ public class TagHelper {
      *
      * Determines the tags the customer desired to remove from the function.
      */
-    public static List<String> generateTagsToRemove(final Map<String, String> previousTags, final Map<String, String> desiredTags) {
+    public static Set<String> generateTagsToRemove(final Map<String, String> previousTags, final Map<String, String> desiredTags) {
         final Set<String> desiredTagNames = desiredTags.keySet();
 
         return previousTags.keySet().stream()
                 .filter(tagName -> !desiredTagNames.contains(tagName))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     /**
