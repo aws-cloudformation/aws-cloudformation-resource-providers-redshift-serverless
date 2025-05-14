@@ -83,9 +83,7 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isWorkgroupStable)
-                                .handleError((_awsRequest, _sdkEx, _client, _model, _callbackContext) ->
-                                        ProgressEvent.failed(_model, _callbackContext, HandlerErrorCode.UnauthorizedTaggingOperation, _sdkEx.getMessage())
-                                )
+                                .handleError(this::updateWorkgroupErrorHandler)
                                 .progress();
                     }
                     return progress;
