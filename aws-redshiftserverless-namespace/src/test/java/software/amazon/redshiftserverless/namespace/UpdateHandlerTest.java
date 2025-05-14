@@ -2,6 +2,7 @@ package software.amazon.redshiftserverless.namespace;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.ArrayList;
 
 import software.amazon.awssdk.services.redshift.RedshiftClient;
 import software.amazon.awssdk.services.redshift.model.*;
@@ -87,6 +88,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         final ResourceModel responseResourceModel = getUpdateResponseResourceModel();
         ResourceModel prevModel = ResourceModel.builder()
                 .namespaceName(NAMESPACE_NAME)
+                .tags(new ArrayList<>())
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()

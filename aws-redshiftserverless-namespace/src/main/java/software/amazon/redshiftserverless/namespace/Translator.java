@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.redshiftserverless.model.ListTagsForResou
 import software.amazon.awssdk.services.redshiftserverless.model.TagResourceRequest;
 import software.amazon.awssdk.services.redshiftserverless.model.UntagResourceRequest;
 import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -35,6 +36,10 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static software.amazon.redshiftserverless.namespace.TagHelper.convertToTagSet;
+import static software.amazon.redshiftserverless.namespace.TagHelper.generateTagsToAdd;
+import static software.amazon.redshiftserverless.namespace.TagHelper.generateTagsToRemove;
 
 /**
  * This class is a centralized placeholder for
@@ -49,9 +54,9 @@ public class Translator {
   /**
    * Request to create a resource
    * @param model resource model
-   * @return awsRequest the aws service request to create a resource
+   * @return mergedTags - tags merging resource, stack and system tags.
    */
-  static CreateNamespaceRequest translateToCreateRequest(final ResourceModel model) {
+  static CreateNamespaceRequest translateToCreateRequest(final ResourceModel model, final Set<Tag>mergedTags) {
     return CreateNamespaceRequest.builder()
             .namespaceName(model.getNamespaceName())
             .adminUsername(model.getAdminUsername())
@@ -61,7 +66,7 @@ public class Translator {
             .defaultIamRoleArn(model.getDefaultIamRoleArn())
             .iamRoles(model.getIamRoles())
             .logExportsWithStrings(model.getLogExports())
-            .tags(translateToSdkTags(model.getTags()))
+            .tags(translateToSdkTags(mergedTags))
             .manageAdminPassword(model.getManageAdminPassword())
             .adminPasswordSecretKmsKeyId(model.getAdminPasswordSecretKmsKeyId())
             .redshiftIdcApplicationArn(model.getRedshiftIdcApplicationArn())
@@ -208,6 +213,30 @@ public class Translator {
   }
 
   /**
+   * Request to update properties of a previously created resource
+   * @param previousTags Tags associated before Update operation
+   * @param desiredTags Tags to be associated after Update operation
+   * @param resourceArn ResourceArn to associate the tags
+   * @return UpdateTagsRequest
+   */
+  static UpdateTagsRequest translateToUpdateTagsRequest(Map<String, String>previousTags, Map<String, String>desiredTags, String resourceArn) {
+    Set<Tag> toBeCreatedTags = convertToTagSet(generateTagsToAdd(previousTags, desiredTags));
+
+    Set<String> tagKeysToBeDeleted = generateTagsToRemove(previousTags, desiredTags);
+
+    return UpdateTagsRequest.builder()
+            .createNewTagsRequest(TagResourceRequest.builder()
+                    .tags(translateToSdkTags(toBeCreatedTags))
+                    .resourceArn(resourceArn)
+                    .build())
+            .deleteOldTagsRequest(UntagResourceRequest.builder()
+                    .tagKeys(tagKeysToBeDeleted)
+                    .resourceArn(resourceArn)
+                    .build())
+            .build();
+  }
+
+  /**
    * Request to list resources
    * @param nextToken token passed to the aws service list resources request
    * @return awsRequest the aws service request to list resources within aws account
@@ -288,62 +317,15 @@ public class Translator {
             .build();
   }
 
-  /**
-   * Request to update tags for a resource
-   *
-   * @param desiredResourceState the resource model request to update tags
-   * @param currentResourceState the resource model request to delete tags
-   * @return awsRequest the aws service request to update tags of a resource
-   */
-  static UpdateTagsRequest translateToUpdateTagsRequest(final ResourceModel desiredResourceState,
-                                                        final ResourceModel currentResourceState) {
-    String resourceArn = currentResourceState.getNamespace().getNamespaceArn();
-
-    // If desiredResourceState.getTags() is null, we should preserve existing tags
-    // This ensures that when CloudFormation doesn't specify tags in the update,
-    // we don't remove existing tags
-    final List<Tag> effectiveDesiredTags;
-    if (desiredResourceState.getTags() == null && currentResourceState.getTags() != null) {
-      // Preserve existing tags by using them as the desired tags
-      effectiveDesiredTags = currentResourceState.getTags();
-    } else {
-      effectiveDesiredTags = desiredResourceState.getTags();
-    }
-
-    List<Tag> toBeCreatedTags = effectiveDesiredTags == null ? Collections.emptyList() : effectiveDesiredTags
-            .stream()
-            .filter(tag -> currentResourceState.getTags() == null || !currentResourceState.getTags().contains(tag))
-            .collect(Collectors.toList());
-
-    List<Tag> toBeDeletedTags = currentResourceState.getTags() == null ? Collections.emptyList() : currentResourceState.getTags()
-            .stream()
-            .filter(tag -> effectiveDesiredTags == null || !effectiveDesiredTags.contains(tag))
-            .collect(Collectors.toList());
-
-    return UpdateTagsRequest.builder()
-            .createNewTagsRequest(TagResourceRequest.builder()
-                    .tags(translateToSdkTags(toBeCreatedTags))
-                    .resourceArn(resourceArn)
-                    .build())
-            .deleteOldTagsRequest(UntagResourceRequest.builder()
-                    .tagKeys(toBeDeletedTags
-                            .stream()
-                            .map(Tag::getKey)
-                            .collect(Collectors.toList()))
-                    .resourceArn(resourceArn)
-                    .build())
-            .build();
-  }
-
   private static software.amazon.awssdk.services.redshiftserverless.model.Tag translateToSdkTag(Tag tag) {
     return GSON.fromJson(GSON.toJson(tag), software.amazon.awssdk.services.redshiftserverless.model.Tag.class);
   }
 
-  private static List<software.amazon.awssdk.services.redshiftserverless.model.Tag> translateToSdkTags(final List<Tag> tags) {
+  private static Set<software.amazon.awssdk.services.redshiftserverless.model.Tag> translateToSdkTags(final Set<Tag> tags) {
     return tags == null ? null : tags
             .stream()
             .map(Translator::translateToSdkTag)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
   }
 
   private static Tag translateToModelTag(software.amazon.awssdk.services.redshiftserverless.model.Tag tag) {

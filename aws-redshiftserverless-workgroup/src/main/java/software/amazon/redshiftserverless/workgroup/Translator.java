@@ -25,6 +25,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Map;
+
+
+import static software.amazon.redshiftserverless.workgroup.TagHelper.convertToTagSet;
+import static software.amazon.redshiftserverless.workgroup.TagHelper.generateTagsToRemove;
+import static software.amazon.redshiftserverless.workgroup.TagHelper.generateTagsToAdd;
 
 /**
  * This class is a centralized placeholder for
@@ -42,7 +48,7 @@ public class Translator {
      * @param model resource model
      * @return awsRequest the aws service request to create a resource
      */
-    static CreateWorkgroupRequest translateToCreateRequest(final ResourceModel model) {
+    static CreateWorkgroupRequest translateToCreateRequest(final ResourceModel model,  final Set<Tag>mergedTags) {
         return CreateWorkgroupRequest.builder()
                 .workgroupName(model.getWorkgroupName())
                 .namespaceName(model.getNamespaceName())
@@ -54,7 +60,7 @@ public class Translator {
                 .subnetIds(model.getSubnetIds())
                 .pricePerformanceTarget(translateToSdkPerformanceTarget(model.getPricePerformanceTarget()))
                 .publiclyAccessible(model.getPubliclyAccessible())
-                .tags(translateToSdkTags(model.getTags()))
+                .tags(translateToSdkTags(mergedTags))
                 .port(model.getPort())
                 .trackName(model.getTrackName())
                 .build();
@@ -276,37 +282,9 @@ public class Translator {
                 .build();
     }
 
-    /**
-     * Request to update tags for a resource
-     *
-     * @param desiredResourceState the resource model request to update tags
-     * @param currentResourceState the resource model request to delete tags
-     * @return awsRequest the aws service request to update tags of a resource
-     */
-    static UpdateTagsRequest translateToUpdateTagsRequest(final ResourceModel desiredResourceState,
-                                                          final ResourceModel currentResourceState) {
-        String resourceArn = currentResourceState.getWorkgroup().getWorkgroupArn();
-
-        // If desiredResourceState.getTags() is null, we should preserve existing tags
-        // This ensures that when CloudFormation doesn't specify tags in the update,
-        // we don't remove existing tags
-        final List<Tag> effectiveDesiredTags;
-        if (desiredResourceState.getTags() == null && currentResourceState.getTags() != null) {
-            // Preserve existing tags by using them as the desired tags
-            effectiveDesiredTags = currentResourceState.getTags();
-        } else {
-            effectiveDesiredTags = desiredResourceState.getTags();
-        }
-
-        List<Tag> toBeCreatedTags = effectiveDesiredTags == null ? Collections.emptyList() : effectiveDesiredTags
-                .stream()
-                .filter(tag -> currentResourceState.getTags() == null || !currentResourceState.getTags().contains(tag))
-                .collect(Collectors.toList());
-
-        List<Tag> toBeDeletedTags = currentResourceState.getTags() == null ? Collections.emptyList() : currentResourceState.getTags()
-                .stream()
-                .filter(tag -> effectiveDesiredTags == null || !effectiveDesiredTags.contains(tag))
-                .collect(Collectors.toList());
+    static UpdateTagsRequest translateToUpdateTagsRequest(Map<String, String> previousTags, Map<String, String>desiredTags, String resourceArn) {
+        Set<Tag> toBeCreatedTags = convertToTagSet(generateTagsToAdd(previousTags, desiredTags));
+        Set<String> tagKeysToBeDeleted = generateTagsToRemove(previousTags, desiredTags);
 
         return UpdateTagsRequest.builder()
                 .createNewTagsRequest(TagResourceRequest.builder()
@@ -314,10 +292,7 @@ public class Translator {
                         .resourceArn(resourceArn)
                         .build())
                 .deleteOldTagsRequest(UntagResourceRequest.builder()
-                        .tagKeys(toBeDeletedTags
-                                .stream()
-                                .map(Tag::getKey)
-                                .collect(Collectors.toList()))
+                        .tagKeys(tagKeysToBeDeleted)
                         .resourceArn(resourceArn)
                         .build())
                 .build();
@@ -327,7 +302,7 @@ public class Translator {
         return GSON.fromJson(GSON.toJson(tag), software.amazon.awssdk.services.redshiftserverless.model.Tag.class);
     }
 
-    private static List<software.amazon.awssdk.services.redshiftserverless.model.Tag> translateToSdkTags(final List<Tag> tags) {
+    private static List<software.amazon.awssdk.services.redshiftserverless.model.Tag> translateToSdkTags(final Set<Tag> tags) {
         return tags == null ? null : tags
                 .stream()
                 .map(Translator::translateToSdkTag)

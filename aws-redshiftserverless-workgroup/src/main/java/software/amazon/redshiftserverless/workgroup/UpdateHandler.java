@@ -30,11 +30,13 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public class UpdateHandler extends BaseHandlerStd {
@@ -62,31 +64,30 @@ public class UpdateHandler extends BaseHandlerStd {
                                         .resourceModel(getUpdatableResourceModel(model, Translator.translateFromReadResponse(readResponse)))
                                         .status(OperationStatus.IN_PROGRESS)
                                         .build()))
-                .then(progress ->
-                        proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                                .translateToServiceRequest(Translator::translateToReadTagsRequest)
-                                .makeServiceCall(this::readTags)
-                                .handleError((_awsRequest, _sdkEx, _client, _model, _callbackContext) ->
-                                        ProgressEvent.failed(_model, _callbackContext, HandlerErrorCode.UnauthorizedTaggingOperation, _sdkEx.getMessage())
-                                )
-                                .done((tagsRequest, tagsResponse, client, model, context) -> ProgressEvent.<ResourceModel, CallbackContext>builder()
-                                        .callbackContext(context)
-                                        .callbackDelaySeconds(0)
-                                        .resourceModel(Translator.translateFromReadTagsResponse(tagsResponse, model))
-                                        .status(OperationStatus.IN_PROGRESS)
-                                        .build()))
-
-                .then(progress ->
-                        proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                                .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
+                .then(progress -> {
+                    Map<String, String> previousTags = TagHelper.mergeTags(
+                            request,
+                            TagHelper.convertToMap(request.getPreviousResourceState().getTags()),
+                            request.getPreviousSystemTags(),
+                            request.getPreviousResourceTags()
+                    );
+                    Map<String, String>desiredTags = TagHelper.mergeTags(
+                            request,
+                            TagHelper.convertToMap(request.getDesiredResourceState().getTags()),
+                            request.getSystemTags(),
+                            request.getDesiredResourceTags()
+                    );
+                    if (ObjectUtils.notEqual(previousTags, desiredTags)) {
+                        progress = proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(previousTags, desiredTags, resourceModel.getWorkgroup().getWorkgroupArn()))//Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isWorkgroupStable)
-                                .handleError((_awsRequest, _sdkEx, _client, _model, _callbackContext) ->
-                                        ProgressEvent.failed(_model, _callbackContext, HandlerErrorCode.UnauthorizedTaggingOperation, _sdkEx.getMessage())
-                                )
-                                .progress())
-
+                                .handleError(this::updateWorkgroupErrorHandler)
+                                .progress();
+                    }
+                    return progress;
+                })
                 .then(progress ->
                         proxy.initiate("AWS-RedshiftServerless-Workgroup::Update::UpdateInstance", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)

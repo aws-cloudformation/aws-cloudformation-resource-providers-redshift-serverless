@@ -45,9 +45,11 @@ public class ReadHandler extends BaseHandlerStd {
                     progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Read::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                             .translateToServiceRequest(Translator::translateToReadTagsRequest)
                             .makeServiceCall(this::readTags)
-                            .handleError((_awsRequest, _sdkEx, _client, _model, _callbackContext) ->
-                                    ProgressEvent.failed(_model, _callbackContext, HandlerErrorCode.UnauthorizedTaggingOperation, _sdkEx.getMessage())
-                            )
+                            .handleError((awsRequest, exception, client, resourceModel, cxt) -> {
+                                logger.log(String.format("Operation: %s : encountered exception for model: %s", awsRequest.getClass().getName(), ResourceModel.TYPE_NAME));
+                                logger.log(awsRequest.toString());
+                                return this.defaultWorkgroupErrorHandler(awsRequest, exception, client, resourceModel, cxt);
+                            })
                             .done((_request, _response, _client, _model, _context) -> {
                                 return ProgressEvent.defaultSuccessHandler(Translator.translateFromReadTagsResponse(_response, _model));
                             });

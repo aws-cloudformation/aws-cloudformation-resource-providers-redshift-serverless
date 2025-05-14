@@ -46,6 +46,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static software.amazon.redshiftserverless.namespace.TagHelper.shouldUpdateTags;
+
 public class UpdateHandler extends BaseHandlerStd {
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -72,6 +74,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 .logExports(compareListParamsEqualOrNot(prevModel.getLogExports(), currentModel.getLogExports()) ? null : currentModel.getLogExports())
                 .manageAdminPassword((prevModel.getManageAdminPassword() == currentModel.getManageAdminPassword()) ? null : currentModel.getManageAdminPassword())
                 .adminPasswordSecretKmsKeyId(StringUtils.equals(prevModel.getAdminPasswordSecretKmsKeyId(), currentModel.getAdminPasswordSecretKmsKeyId()) ? null : currentModel.getAdminPasswordSecretKmsKeyId())
+                .tags(currentModel.getTags())
                 .build();
 
         // To update the adminUserPassword or adminUserName, we need to specify both username and password in update request
@@ -114,23 +117,28 @@ public class UpdateHandler extends BaseHandlerStd {
                     return progress;
                 })
                 .then(progress -> {
-                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Update::ReadTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                            .translateToServiceRequest(Translator::translateToReadTagsRequest)
-                            .makeServiceCall(this::readTags)
-                            .handleError(this::defaultErrorHandler)
-                            .done((tagsRequest, tagsResponse, client, model, context) -> {
-                                return ProgressEvent.progress(Translator.translateFromReadTagsResponse(tagsResponse, model), callbackContext);
-                            });
-                    return progress;
-                })
-                .then(progress -> {
-                    progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
-                                .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(request.getDesiredResourceState(), resourceModel))
+                    Map<String, String>previousTags = TagHelper.mergeTags(
+                            request,
+                            TagHelper.convertToMap(request.getPreviousResourceState().getTags()),
+                            request.getPreviousSystemTags(),
+                            request.getPreviousResourceTags()
+                    );
+
+                    Map<String, String>desiredTags = TagHelper.mergeTags(
+                            request,
+                            TagHelper.convertToMap(request.getDesiredResourceState().getTags()),
+                            request.getSystemTags(),
+                            request.getDesiredResourceTags()
+                    );
+                    if (ObjectUtils.notEqual(previousTags, desiredTags)) {
+                        progress = proxy.initiate("AWS-RedshiftServerless-Namespace::Update::UpdateTags", proxyClient, progress.getResourceModel(), progress.getCallbackContext())
+                                .translateToServiceRequest(resourceModel -> Translator.translateToUpdateTagsRequest(previousTags, desiredTags, resourceModel.getNamespace().getNamespaceArn()))
                                 .backoffDelay(BACKOFF_STRATEGY)
                                 .makeServiceCall(this::updateTags)
                                 .stabilize(this::isNamespaceActive)
                                 .handleError(this::defaultErrorHandler)
                                 .progress();
+                    }
                     return progress;
                 })
                 .then(progress -> {

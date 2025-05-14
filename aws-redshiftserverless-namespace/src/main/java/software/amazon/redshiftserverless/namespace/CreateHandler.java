@@ -24,6 +24,8 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.List;
+import java.util.Set;
 
 
 public class CreateHandler extends BaseHandlerStd {
@@ -40,15 +42,22 @@ public class CreateHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
             .then(progress -> {
+                Set<Tag>mergedTags = TagHelper.convertToTagSet(
+                        TagHelper.mergeTags(
+                                request,
+                                TagHelper.convertToMap(request.getDesiredResourceState().getTags()),
+                                request.getSystemTags(),
+                                request.getDesiredResourceTags()
+                        ));
                 return proxy.initiate("AWS-RedshiftServerless-Namespace::Create", proxyClient, progress.getResourceModel(), callbackContext)
-                    .translateToServiceRequest(Translator::translateToCreateRequest)
-                    .makeServiceCall(this::createNamespace)
-                    .stabilize(this::isNamespaceActive)
-                    .handleError(this::defaultErrorHandler)
-                    .done((_request, _response, _client, _model, _context) -> {
-                        callbackContext.setNamespaceArn(_response.namespace().namespaceArn());
-                        return ProgressEvent.progress(_model, callbackContext);
-                    });
+                        .translateToServiceRequest((model) -> Translator.translateToCreateRequest(model, mergedTags))
+                        .makeServiceCall(this::createNamespace)
+                        .stabilize(this::isNamespaceActive)
+                        .handleError(this::defaultErrorHandler)
+                        .done((_request, _response, _client, _model, _context) -> {
+                            callbackContext.setNamespaceArn(_response.namespace().namespaceArn());
+                            return ProgressEvent.progress(_model, callbackContext);
+                        });
             })
             .then(progress -> {
                 if (progress.getResourceModel().getNamespaceResourcePolicy() != null) {
