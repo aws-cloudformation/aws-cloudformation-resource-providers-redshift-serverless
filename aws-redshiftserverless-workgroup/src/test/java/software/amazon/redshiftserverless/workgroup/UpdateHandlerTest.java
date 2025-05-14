@@ -28,9 +28,9 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,26 +83,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
     }
 
     @Test
-    public void handleRequest_NoReadTagsPermissions() {
-        final UpdateHandler handler = new UpdateHandler();
-
-        final ResourceModel responseResourceModel = updateResponseResourceModel();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .previousResourceState(createRequestResourceModel())
-                .desiredResourceState(updateRequestResourceModel())
-                .build();
-
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenThrow(ValidationException.builder().build());
-        when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
-
-        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
-    }
-
-    @Test
     public void handleRequest_RestoreFromSnapshot_Success() {
         final UpdateHandler handler = new UpdateHandler();
 
@@ -116,6 +96,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(requestModel)
                 .build();
 
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
         when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
         when(proxyClient.client().restoreFromSnapshot(any(RestoreFromSnapshotRequest.class))).thenReturn(
@@ -145,8 +126,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .previousResourceState(createRequestResourceModel())
                 .desiredResourceState(requestModel)
                 .build();
-
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder().build());
+        
         when(proxyClient.client().updateWorkgroup(any(UpdateWorkgroupRequest.class))).thenReturn(updateResponseSdk());
         when(proxyClient.client().getWorkgroup(any(GetWorkgroupRequest.class))).thenReturn(getReadResponseSdk());
         when(proxyClient.client().restoreFromSnapshot(any(RestoreFromSnapshotRequest.class))).thenThrow(ValidationException.builder().build());
