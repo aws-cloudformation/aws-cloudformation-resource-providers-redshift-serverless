@@ -1,0 +1,11 @@
+{
+    "CREATE": {
+        "/OwnerAccount": null,
+        "/VpcSecurityGroupIds": null,
+        "/SubnetIds": null,
+        "/WorkgroupName": null
+    },
+    "UPDATE": {
+        "/VpcSecurityGroupIds": null
+    }
+}
